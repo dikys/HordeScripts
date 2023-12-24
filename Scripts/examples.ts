@@ -308,6 +308,7 @@ function example_unitWorks() {
         logi('Не удалось создать юнита для этого теста!');
         return;
     }
+    logi('Для этого теста выбран:', unit.ToString());
 
     // Здесь хранятся значения переменных юнита
     var unitDTO = HordeUtils.getValue(unit, "Model");
@@ -354,6 +355,37 @@ function example_unitWorks() {
         logi('Команда атаки разрешена');
     }
 
+    // Проверим, может ли юнит дойти до клетки?
+    var cell = createPoint(55, 10);
+    if (unitCheckPathTo(unit, cell)) {
+        logi('Юнит может пройти к', cell.ToString());
+    } else {
+        logi('Юнит НЕ может пройти к', cell.ToString());
+    }
+
+    // Телепортация юнита
+    if (unitTeleport(unit, cell)) {
+        logi('Юнит телепортирован в', cell.ToString());
+    } else {
+        logi('Юнит НЕ может быть телепортирован в', cell.ToString());
+    }
+
+    // Скорость юнита в клетке
+    logi('Скорость юнита в клетке', cell.ToString(), 'согласно реальной карте:', unitSpeedAtCellByRealMap(unit, cell));
+
+    // Скорость юнита в клетке с учетом тумана войны
+    logi('Скорость юнита в клетке', cell.ToString(), 'согласно известной карте:', unitSpeedAtCellByKnownMap(unit, cell));
+
+    // Можно ли разместить юнита с указанным конфигом в этой клетке?
+    // Тут важно, что проверяется без наличия самого юнита
+    var riderCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Raider");
+    var settlement = unit.Owner;
+    logi('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
+         'согласно известной карте:', unitCanBePlacedByKnownMap(riderCfg, settlement, cell.X, cell.Y));
+
+    // Такая же проверка с учетом тумана войны
+    logi('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
+         'согласно реальной карте:', unitCanBePlacedByRealMap(riderCfg, cell.X, cell.Y));
 }
 
 
