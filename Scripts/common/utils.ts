@@ -123,3 +123,12 @@ function inspectFlagEnum(enumType, n=31) {
         logi(i.toString(2).padStart(n, '0'), '-', host.cast(enumType, i).ToString());
     }
 }
+
+/**
+ * вывод всех свойств объекта
+ */
+function printObjectItems(object) {
+    for (var prop in object) {
+        logi(prop, " = ", object[prop]);
+    }
+}

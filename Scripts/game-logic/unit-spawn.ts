@@ -109,7 +109,7 @@ function* generateScenePositionInSpiral(centerX, centerY) {
  * Возвращает список созданных юнитов.
  */
 function spawnUnits(settlement, uCfg, uCount, cell, direction) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters");
+    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
     var spawnParams = HordeUtils.CreateInstance(csType);
     HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
     HordeUtils.setValue(spawnParams, "Cell", cell);
@@ -125,4 +125,20 @@ function spawnUnits(settlement, uCfg, uCount, cell, direction) {
     }
     
     return outSpawnedUnits;
+}
+
+/**
+ * Создание одного юнита в заданной клетке.
+ * 
+ * Возвращает созданного юнита.
+ */
+function spawnUnit(settlement, uCfg, cell, direction) {
+    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    var spawnParams = HordeUtils.CreateInstance(csType);
+    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
+    HordeUtils.setValue(spawnParams, "Cell", cell);
+    HordeUtils.setValue(spawnParams, "Direction", direction);
+
+    var unit = settlement.Units.SpawnUnit(spawnParams);
+    return unit;
 }

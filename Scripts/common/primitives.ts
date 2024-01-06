@@ -1,4 +1,7 @@
 
+// ===================================================
+// --- Простые объекты
+
 var Primitives = primitives.HordeResurrection.Basic.Primitives;
 
 /**
@@ -29,9 +32,27 @@ function createRect(x: number, y: number, w: number, h: number) {
 }
 
 /**
+ * Создаёт объект Box3D
+ */
+function createBox(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number) {
+    return host.newObj(Primitives.Geometry.Box3D, x1, y1, z1, x2, y2, z2);
+}
+
+/**
  * Создаёт объект PreciseFraction
  * Это дробные числа с определенной, не плавающей точностью (сейчас это 3 знака после запятой)
  */
 function createPF(i: number, f: number) {
     return host.newObj(Primitives.PreciseFraction, i, f);
 }
+
+// ===================================================
+// --- Игровые объекты
+
+/**
+ * Создаёт объект ResourcesAmount, в котором задано количество ресурсов.
+ */
+function createResourcesAmount(gold: number, metal: number, lumber: number, people: number) {
+    return host.newObj(ResourcesAmount, gold, metal, lumber, people);
+}
+ResourcesAmount = HCL.HordeClassLibrary.World.Simple.ResourcesAmount;
