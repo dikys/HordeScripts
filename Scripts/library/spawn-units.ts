@@ -31,6 +31,77 @@ function test_spawnUnits() {
     inputPointBasedCommand(oleg, createPoint(50, 50), UnitCommand.Attack);
 }
 
+/**
+ * Генератор позиций вокруг точки по спирале в рамках сцены
+ */
+function* generateScenePositionInSpiral(centerX, centerY) {
+    var scenaWidth  = scena.GetRealScena().Size.Width;
+    var scenaHeight = scena.GetRealScena().Size.Height;
+
+    if (0 <= centerX && centerX < scenaWidth &&
+        0 <= centerY && centerY < scenaHeight) {
+        yield { X: centerX, Y: centerY };
+    } else {
+        return;
+    }
+
+    var x           = 0;
+    var y           = 0;
+    var spawnRadius = 1;
+
+    // флаг, что позиции вышли за сцену
+    var outside = false;
+    while (!outside) {
+        outside = true;
+
+        // верхняя часть
+        y = centerY - spawnRadius;
+        if (y >= 0) {
+            outside = false;
+            var xStart = Math.max(centerX - spawnRadius, 0);
+            var xEnd   = Math.min(centerX + spawnRadius, scenaWidth - 1);
+            for (x = xStart; x <= xEnd; x++) {
+                yield { X: x, Y: y };
+            }
+        }
+
+        // правая часть
+        x = centerX + spawnRadius;
+        if (x < scenaWidth) {
+            outside = false;
+            var yStart = Math.max(centerY - spawnRadius + 1, 0);
+            var yEnd   = Math.min(centerY + spawnRadius - 1, scenaHeight - 1);
+            for (y = yEnd; y >= yStart; y--) {
+                yield { X: x, Y: y };
+            }
+        }
+
+        // нижняя часть
+        y = centerY + spawnRadius;
+        if (y < scenaHeight) {
+            outside = false;
+            var xStart = Math.max(centerX - spawnRadius, 0);
+            var xEnd   = Math.min(centerX + spawnRadius, scenaWidth - 1);
+            for (x = xEnd; x >= xStart; x--) {
+                yield { X: x, Y: y };
+            }
+        }
+
+        // левая часть
+        x = centerX - spawnRadius;
+        if (x >= 0) {
+            outside = false;
+            var yStart = Math.max(centerY - spawnRadius + 1, 0);
+            var yEnd   = Math.min(centerY + spawnRadius - 1, scenaHeight - 1);
+            for (y = yStart; y <= yEnd; y++) {
+                yield { X: x, Y: y };
+            }
+        }
+
+        spawnRadius++;
+    }
+    return;
+}
 
 /**
  * Создание юнитов вокруг заданной клетки по спирали.
@@ -43,89 +114,15 @@ function spawnUnits(settlement, uCfg, uCount, cell, direction) {
     HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
     HordeUtils.setValue(spawnParams, "Cell", cell);
     HordeUtils.setValue(spawnParams, "Direction", direction);
-
-    var spawnedUnits = 0;
-    var spawnRadius  = 0;
-    var scenaWidth   = scena.GetRealScena().Size.Width;
-    var scenaHeight  = scena.GetRealScena().Size.Height;
-    var x            = 0;
-    var y            = 0;
-
-    outSpawnedUnits = [];
-    var trySpawnToCell = (x, y) => {
-        HordeUtils.setValue(spawnParams, "Cell", createPoint(x, y));
-        var unit = settlement.Units.SpawnUnit(spawnParams);
-        if (unit) {
-            spawnedUnits++;
-            outSpawnedUnits.push(unit);
+    
+    outSpawnedUnits  = [];
+    var generatorPos = generateScenePositionInSpiral(cell.X, cell.Y);
+    for (var position = generatorPos.next(); !position.done && outSpawnedUnits.length < uCount; position = generatorPos.next()) {
+        if (unitCanBePlacedByRealMap(uCfg, position.value.X, position.value.Y) {
+            HordeUtils.setValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
+            outSpawnedUnits.push(settlement.Units.SpawnUnit(spawnParams));
         }
-    };
-
-    while (spawnedUnits < uCount) {
-        // флаг, что идет создание юнитов вне сцены!
-        var outside = true;
-
-        // верхняя часть
-        y = cell.Y - spawnRadius;
-        if (y >= 0) {
-            outside    = false;
-            var xStart = Math.max(cell.X - spawnRadius, 0);
-            var xEnd   = Math.min(cell.X + spawnRadius, scenaWidth - 1);
-            for (x = xStart; x <= xEnd; x++) {
-                trySpawnToCell(x, y);
-                if (spawnedUnits == uCount) {
-                    return outSpawnedUnits;
-                }
-            }
-        }
-
-        // правая сторона
-        x = cell.X + spawnRadius;
-        if (x >= 0) {
-            outside    = false;
-            var yStart = Math.max(cell.Y - spawnRadius + 1, 0);
-            var yEnd   = Math.min(cell.Y + spawnRadius - 1, scenaHeight - 1);
-            for (y = yEnd; y >= yStart; y--) {
-                trySpawnToCell(x, y);
-                if (spawnedUnits == uCount) {
-                    return outSpawnedUnits;
-                }
-            }
-        }
-
-        // нижняя часть
-        y = cell.Y + spawnRadius;
-        if (y < scenaHeight) {
-            outside    = false;
-            var xStart = Math.max(cell.X - spawnRadius, 0);
-            var xEnd   = Math.min(cell.X + spawnRadius, scenaWidth - 1);
-            for (x = xEnd; x >= xStart; x--) {
-                trySpawnToCell(x, y);
-                if (spawnedUnits == uCount) {
-                    return outSpawnedUnits;
-                }
-            }
-        }
-
-        // левая сторона
-        x = cell.X - spawnRadius;
-        if (x >= 0) {
-            outside    = false;
-            var yStart = Math.max(cell.Y - spawnRadius + 1, 0);
-            var yEnd   = Math.min(cell.Y + spawnRadius - 1, scenaHeight - 1);
-            for (y = yStart; y <= yEnd; y++) {
-                trySpawnToCell(x, y);
-                if (spawnedUnits == uCount) {
-                    return outSpawnedUnits;
-                }
-            }
-        }
-
-        if (outside) {
-            break;
-        }
-
-        spawnRadius++;
     }
+    
     return outSpawnedUnits;
 }
