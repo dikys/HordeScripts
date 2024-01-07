@@ -125,10 +125,15 @@ function inspectFlagEnum(enumType, n=31) {
 }
 
 /**
- * вывод всех свойств объекта
+ * вывод всех свойств объекта в глубину depth
  */
-function printObjectItems(object) {
-    for (var prop in object) {
-        logi(prop, " = ", object[prop]);
+function printObjectItems(object, depth = 1, shift = "") {
+    if (depth == 0) {
+        return;
+    }
+
+    for (var item in object) {
+        logi(shift, item, " = ", object[item]);
+        printObjectItems(object[item], depth - 1, shift + "\t");
     }
 }

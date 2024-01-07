@@ -133,6 +133,22 @@ function* generateRandomPositionInRect2D(rectX, rectY, rectW, rectH) {
 }
 
 /**
+ * Создание одного юнита в заданной клетке.
+ * 
+ * Возвращает созданного юнита.
+ */
+function spawnUnit(settlement, uCfg, cell, direction) {
+    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    var spawnParams = HordeUtils.CreateInstance(csType);
+    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
+    HordeUtils.setValue(spawnParams, "Cell", cell);
+    HordeUtils.setValue(spawnParams, "Direction", direction);
+
+    var unit = settlement.Units.SpawnUnit(spawnParams);
+    return unit;
+}
+
+/**
  * Создание uCount (может быть создано меньше, поскольку генератор конечный) юнитов согласно переданному generator - генератору позиций
  *
  * Возвращает список созданных юнитов.
