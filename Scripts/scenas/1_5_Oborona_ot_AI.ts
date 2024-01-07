@@ -23,8 +23,11 @@ var mapdefens_spawnPlan;
 var mapdefens_playersMaxCount;
 // количество игроков в игре
 var mapdefens_playersCount;
-// список ид легендарных юнитов, которые будут рандомно спавнится
+
+// список ид легендарных юнитов
 var mapdefens_legendaryUnitsCFGId;
+// слабость легендарных юнитов
+var mapdefens_legendaryUnitsInformation;
 
 // список легендарных рыцарей на карте
 var mapdefens_legendary_swordmen_unitsInfo;
@@ -96,6 +99,7 @@ function mapdefens_onFirstRun() {
     mapdefens_enemyUnitsCfg       = {};
     mapdefens_enemyBulletCfg      = {};
     mapdefens_legendaryUnitsCFGId = [];
+    mapdefens_legendaryUnitsInformation = [];
 
     // (легкая пехота) рыцарь
     mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Barbarian_Swordmen"));
@@ -124,6 +128,7 @@ function mapdefens_onFirstRun() {
 
     // (легендарный) рыцарь
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_swordmen");
+    mapdefens_legendaryUnitsInformation.push("Слабости: давится, горит. Преимущества: очень силен в ближнем бою.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_swordmen"] = HordeContent.CloneConfig(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"]);
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_swordmen"], "Name", "Легендарный рыцарь");
@@ -146,6 +151,7 @@ function mapdefens_onFirstRun() {
 
     // (легендарный) тяжелый рыцарь
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_heavymen");
+    mapdefens_legendaryUnitsInformation.push("Слабости: горит, окружение. Преимущества: ближний бой, броня, много хп.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_heavymen"] = HordeContent.CloneConfig(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Heavymen"]);
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_heavymen"], "Name", "Легендарный тяжелый рыцарь");
@@ -158,6 +164,7 @@ function mapdefens_onFirstRun() {
 
     // (легендарный) лучник
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_archer");
+    mapdefens_legendaryUnitsInformation.push("Слабости: ближний бой, окружение. Преимущества: дальний бой, не горит.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer"] = HordeContent.CloneConfig(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Archer"]);
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer"], "Name", "Легендарный лучник");
@@ -174,9 +181,12 @@ function mapdefens_onFirstRun() {
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer"], "Weight", 12);
     // задаем количество здоровья от числа игроков
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer"], "MaxHealth", Math.floor(200 * Math.sqrt(mapdefens_playersCount)));
+    // делаем имунитет к огню
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer"], "Flags", UnitFlags.FireResistant);
 
     // (легендарный) поджигатель
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_archer_2");
+    mapdefens_legendaryUnitsInformation.push("Слабости: ближний бой, окружение. Преимущества: дальний бой, не горит.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer_2"] = HordeContent.CloneConfig(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Archer_2"]);
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer_2"], "Name", "Легендарный поджигатель");
@@ -193,9 +203,12 @@ function mapdefens_onFirstRun() {
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer_2"], "Weight", 12);
     // задаем количество здоровья от числа игроков
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer_2"], "MaxHealth", Math.floor(200 * Math.sqrt(mapdefens_playersCount)));
+    // делаем имунитет к огню
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_archer_2"], "Flags", UnitFlags.FireResistant);
 
     // (легендарный) всадник
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_Raider");
+    mapdefens_legendaryUnitsInformation.push("Слабости: ближний бой, окружение, горит. Преимущества: скорость, спавн союзников.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"] = HordeContent.CloneConfig(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Raider"]);
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"], "Name", "Легендарный всадник");
@@ -225,13 +238,16 @@ function mapdefens_onFirstRun() {
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], "ProductionTime", 200);
     // (легендарный) крестьянин
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_worker");
+    mapdefens_legendaryUnitsInformation.push("Слабости: ближний бой, окружение, огонь, ранней атаки. Преимущества: строит башни.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Worker1"));
     // назначаем имя
-    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "Name", "Легендарный всадник");
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "Name", "Легендарный рабочий");
     // меняем цвет
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "TintColor", createHordeColor(255, 255, 100, 100));
     // задаем количество здоровья от числа игроков
-    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "MaxHealth", Math.floor(200 * Math.sqrt(mapdefens_playersCount)));
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "MaxHealth", Math.floor(300 * Math.sqrt(mapdefens_playersCount)));
+    // делаем так, чтобы не давили всадники
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "Weight", 12);
     // удаляем команду атаки
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].AllowedCommands.Remove(UnitCommand.Attack);
     // добавляем в список построек легендарную башню
@@ -313,7 +329,9 @@ function mapdefens_onFirstRun() {
     // задаем волны спавна
     ////////////////////////////////////////////////////
 
-    // всадники между волнами убрать
+    var randomItem = (array) => {
+        return array[rnd.RandomNumber(0, array.length - 1)];
+    };
 
     mapdefens_spawnWaveNum = 0;
     mapdefens_spawnPlan = [];
@@ -343,24 +361,30 @@ function mapdefens_onFirstRun() {
         message: "ВОЛНА 4",
         gameTickNum: 8 * 60 * 50,
         units: [
-            { count: 12 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
-            { count: 4 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Heavymen" },
+            { count: 15 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
+            { count: 5 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 2 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer_2" }
         ]
     }, {
-        message: "БОСС ВОЛНА 5 (замечен легендарный противник)",
+        message: "БОСС ВОЛНА 5",
         gameTickNum: 10 * 60 * 50,
         units: [
-            { count: 1,                          cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] },
+            { count: 1,                          cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
             { count: 5 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Raider" }
         ]
     }, {
         message: "ВОЛНА 6",
+        gameTickNum: 13.5 * 60 * 50,
+        units: [
+            { count: 20 * mapdefens_playersCount, cfgId: randomItem(["UnitConfig_Barbarian_Swordmen", "UnitConfig_Barbarian_Heavymen", "UnitConfig_Barbarian_Archer", "UnitConfig_Barbarian_Archer_2" ]) }
+        ]
+    }, {
+        message: "ВОЛНА 7",
         gameTickNum: 15 * 60 * 50,
         units: [
-            { count: 8 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
-            { count: 8 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
+            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
+            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 4 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 6 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Archer_2" }
         ]
@@ -370,13 +394,10 @@ function mapdefens_onFirstRun() {
             { count: 5 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Raider" }
         ]
     }, {
-        message: "ВОЛНА 7",
+        message: "ВОЛНА 8",
         gameTickNum: 18 * 60 * 50,
         units: [
-            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
-            { count: 15 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
-            { count: 5 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
-            { count: 6 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer_2" }
+            { count: 25 * mapdefens_playersCount, cfgId: randomItem(["UnitConfig_Barbarian_Swordmen", "UnitConfig_Barbarian_Heavymen", "UnitConfig_Barbarian_Archer", "UnitConfig_Barbarian_Archer_2" ]) }
         ]
     }, {
         gameTickNum: 18.3 * 60 * 50,
@@ -384,88 +405,96 @@ function mapdefens_onFirstRun() {
             { count: 5 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Raider" }
         ]
     }, {
-        message: "БОСС ВОЛНА 8",
+        message: "БОСС ВОЛНА 9",
         gameTickNum: 20 * 60 * 50,
         units: [
             { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Slavyane_Catapult" },
             { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Slavyane_Balista" }
         ]
     }, {
-        message: "ВОЛНА 9",
+        message: "ВОЛНА 10",
         gameTickNum: 23 * 60 * 50,
         units: [
-            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
-            { count: 14 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
+            { count: 15 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
+            { count: 15 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 5 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 8 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer_2" },
             { count: 2 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Catapult" },
             { count: 2 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Balista" }
         ]
     }, {
-        message: "(замечен легендарный противник)",
         gameTickNum: 23.3 * 60 * 50,
         units: [
-            { count: 6 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Raider" },
-            { count: 1,                          cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] }
+            { count: 6 * mapdefens_playersCount,          cfgId: "UnitConfig_Barbarian_Raider" },
+            { count: 1,                                   cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 3 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 5 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) }
         ]
     }, {
-        message: "ВОЛНА 10",
+        message: "ВОЛНА 11",
         gameTickNum: 26 * 60 * 50,
         units: [
             { count: 20 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
             { count: 16 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
-            { count: 5 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
+            { count: 8 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Archer_2" },
             { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Catapult" },
             { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Balista" }
         ]
     }, {
-        message: "(замечен легендарный противник)",
         gameTickNum: 26.3 * 60 * 50,
         units: [
-            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Raider" },
-            { count: 1,                           cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] }
+            { count: 10 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Raider" },
+            { count: 1,                                   cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 3 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 5 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) }
         ]
     }, {
-        message: "БОСС ВОЛНА 11 (замечен легендарный противник)",
+        message: "БОСС ВОЛНА 12",
         gameTickNum: 30 * 60 * 50,
         units: [
-            { count: 3 * mapdefens_playersCount, cfgId: "UnitConfig_Mage_Mag_2" },
-            { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_Mage_Villur" },
-            { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_Mage_Olga" },
-            { count: 1,                          cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] },
-            { count: 1,                          cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] }
+            { count: 3 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: 1 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Villur" },
+            { count: 1 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Olga" },
+            { count: 1,                                   cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: 1,                                   cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 3 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 5 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) }
         ]
     }, {
-        message: "ВОЛНА 12 (замечен легендарный противник)",
+        message: "ВОЛНА 13",
         gameTickNum: 32 * 60 * 50,
         units: [
-            { count: 20 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
-            { count: 16 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
-            { count: 5 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
-            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Archer_2" },
-            { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Balista" },
-            { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Mage_Mag_2" },
-            { count: 1,                           cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] }
+            { count: 20 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Swordmen" },
+            { count: 20 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Heavymen" },
+            { count: 10 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Archer" },
+            { count: 10 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Archer_2" },
+            { count: 3 * mapdefens_playersCount,          cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: 3 * mapdefens_playersCount,          cfgId: "UnitConfig_Slavyane_Balista" },
+            { count: 3 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: 1,                                   cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 3 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 5 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) }
         ]
     }, {
-        message: "ВОЛНА 13 (замечен легендарный противник)",
+        message: "ВОЛНА 14",
         gameTickNum: 34 * 60 * 50,
         units: [
-            { count: 20 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
-            { count: 16 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
-            { count: 5 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
-            { count: 10 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Archer_2" },
-            { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 3 * mapdefens_playersCount,  cfgId: "UnitConfig_Slavyane_Balista" },
-            { count: 1 * mapdefens_playersCount,  cfgId: "UnitConfig_Mage_Mag_2" },
-            { count: 1 * mapdefens_playersCount,  cfgId: "UnitConfig_Mage_Villur" },
-            { count: 1 * mapdefens_playersCount,  cfgId: "UnitConfig_Mage_Olga" },
-            { count: 1,                           cfgId: mapdefens_legendaryUnitsCFGId[rnd.RandomNumber(0, mapdefens_legendaryUnitsCFGId.length - 1)] }
+            { count: 25 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Swordmen" },
+            { count: 25 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Heavymen" },
+            { count: 12 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Archer" },
+            { count: 12 * mapdefens_playersCount,         cfgId: "UnitConfig_Barbarian_Archer_2" },
+            { count: 3 * mapdefens_playersCount,          cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: 3 * mapdefens_playersCount,          cfgId: "UnitConfig_Slavyane_Balista" },
+            { count: 1 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: 1 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Villur" },
+            { count: 1 * mapdefens_playersCount,          cfgId: "UnitConfig_Mage_Olga" },
+            { count: 1,                                   cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 3 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) },
+            { count: mapdefens_playersCount >= 5 ? 1 : 0, cfgId: randomItem(mapdefens_legendaryUnitsCFGId) }
         ]
     }, {
-        message: "ФИНАЛЬНАЯ ВОЛНА 14 (замечен легендарный противник)",
+        message: "ФИНАЛЬНАЯ ВОЛНА 15",
         gameTickNum: 36 * 60 * 50,
         units: [
             { count: 100 * mapdefens_playersCount, cfgId: "UnitConfig_Barbarian_Swordmen" },
@@ -474,13 +503,15 @@ function mapdefens_onFirstRun() {
             { count: 20 * mapdefens_playersCount,  cfgId: "UnitConfig_Barbarian_Archer_2" },
             { count: 6 * mapdefens_playersCount,   cfgId: "UnitConfig_Slavyane_Catapult" },
             { count: 6 * mapdefens_playersCount,   cfgId: "UnitConfig_Slavyane_Balista" },
-            { count: 2 * mapdefens_playersCount,   cfgId: "UnitConfig_Mage_Mag_2" },
-            { count: 2 * mapdefens_playersCount,   cfgId: "UnitConfig_Mage_Villur" },
+            { count: 1 * mapdefens_playersCount,   cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: 1 * mapdefens_playersCount,   cfgId: "UnitConfig_Mage_Villur" },
             { count: 1 * mapdefens_playersCount,   cfgId: "UnitConfig_Mage_Olga" },
             { count: 1,                            cfgId: "UnitConfig_legendary_swordmen" },
             { count: 1,                            cfgId: "UnitConfig_legendary_heavymen" },
             { count: 1,                            cfgId: "UnitConfig_legendary_archer" },
-            { count: 1,                            cfgId: "UnitConfig_legendary_archer_2" }
+            { count: 1,                            cfgId: "UnitConfig_legendary_archer_2" },
+            { count: 1,                            cfgId: "UnitConfig_legendary_Raider" },
+            { count: 1,                            cfgId: "UnitConfig_legendary_worker" }
         ]
     }
     );
@@ -491,7 +522,7 @@ function mapdefens_onFirstRun() {
     //    message: "ВОЛНА 1",
     //    gameTickNum: 1 * 60 * 50,
     //    units: [
-    //        { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_legendary_worker" }
+    //        { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_legendary_archer" }
     //    ]
     // });
 
@@ -540,14 +571,33 @@ function mapdefens_everyTick(gameTickNum: number) {
 
     if (mapdefens_spawnWaveNum < mapdefens_spawnPlan.length &&
         mapdefens_spawnPlan[mapdefens_spawnWaveNum].gameTickNum <= gameTickNum) {
+        // отправляем сообщение в чат, если оно есть
+        if (mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]) {
+            logi(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]);
+            
+            broadcastMessage(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"], createHordeColor(255, 255, 50, 10));
+        }
+
+        // спавним юнитов
         var generator = generateRandomPositionInRect2D(mapdefens_enemySpawnRectangle.x, mapdefens_enemySpawnRectangle.y, mapdefens_enemySpawnRectangle.w, mapdefens_enemySpawnRectangle.h);
         for (var i = 0; i < mapdefens_spawnPlan[mapdefens_spawnWaveNum].units.length; i++) {
+            if (mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].count <= 0) {
+                continue;
+            }
+
             var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
                 mapdefens_enemyUnitsCfg[mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId],
                 mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].count,
                 UnitDirection.Down,
                 generator);
             
+            // информируем о легендарных противниках и их слабостях
+            var legendaryIndex = mapdefens_legendaryUnitsCFGId.indexOf(mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId);
+            if (legendaryIndex >= 0) {
+                broadcastMessage("Замечен " + mapdefens_enemyUnitsCfg[mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId].Name, createHordeColor(255, 255, 165, 10));
+                broadcastMessage(mapdefens_legendaryUnitsInformation[legendaryIndex], createHordeColor(255, 200, 130, 10));
+            }
+
             // запоминаем некоторых юнитов
             if ("UnitConfig_legendary_swordmen" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
                 for (var spawnedUnit of spawnedUnits) {
@@ -570,13 +620,6 @@ function mapdefens_everyTick(gameTickNum: number) {
                     });
                 }
             }
-        }
-
-        // отправляем сообщение в чат, если оно есть
-        if (mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]) {
-            logi(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]);
-            
-            broadcastMessage(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"], createHordeColor(255, 255, 50, 10));
         }
 
         // переходим к следующему плану
@@ -726,7 +769,6 @@ function mapdefens_everyTick(gameTickNum: number) {
             var currentOrderProducing = ordersMind.ActiveOrder.ProductUnit != undefined;
 
             // проверка, что юнит не строит ничего
-            
             // что юнит, что-то строит
             if ((!ordersMind.IsIdle() && worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) ||
                 currentOrderProducing) {
@@ -818,23 +860,24 @@ function mapdefens_everyTick(gameTickNum: number) {
                 }
                 inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
 
+                // вызывает рассинхрон
                 // 20% юнитов идут в обход
-                var randomNumber = rnd.RandomNumber(1, 100);
-                if (randomNumber <= 10) {
-                    var position2 = { X: goalPosition.value.X - 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
-                    inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                    if (randomNumber <= 5) {
-                        var position3 = { X: goalPosition.value.X - 30, Y: goalPosition.value.Y };
-                        inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                    }
-                } else if (randomNumber <= 20) {
-                    var position2 = { X: goalPosition.value.X + 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
-                    inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                    if (randomNumber <= 15) {
-                        var position3 = { X: goalPosition.value.X + 30, Y: goalPosition.value.Y };
-                        inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                    }
-                }
+                // var randomNumber = rnd.RandomNumber(1, 100);
+                // if (randomNumber <= 10) {
+                //     var position2 = { X: goalPosition.value.X - 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
+                //     inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     if (randomNumber <= 5) {
+                //         var position3 = { X: goalPosition.value.X - 30, Y: goalPosition.value.Y };
+                //         inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     }
+                // } else if (randomNumber <= 20) {
+                //     var position2 = { X: goalPosition.value.X + 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
+                //     inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     if (randomNumber <= 15) {
+                //         var position3 = { X: goalPosition.value.X + 30, Y: goalPosition.value.Y };
+                //         inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     }
+                // }
             }
             
             // в конце отправляем в атаку на цель
