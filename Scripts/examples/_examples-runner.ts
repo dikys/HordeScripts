@@ -21,6 +21,7 @@ function runExamples() {
     // example_spawnUnit();
     // example_spawnBullet();
     // example_spawnBulletsRain();
+    // example_iterateBullets();
     // example_scenaWorks();
     // example_settlementWorks();
     // example_settlementResources();

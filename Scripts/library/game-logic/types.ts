@@ -1,6 +1,11 @@
 
 // ===================================================
-// --- Различные типы
+// --- Снаряды
+
+BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;
+
+// ===================================================
+// --- Различные типы связанные с юнитами
 
 BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatParams;
 DelegateWork = HCL.HordeClassLibrary.UnitComponents.Workers.Interfaces.AUnitWorkerCommon.DelegateWork;
