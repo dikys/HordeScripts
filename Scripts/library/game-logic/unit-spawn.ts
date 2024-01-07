@@ -1,4 +1,46 @@
 
+/**
+ * Создание одного юнита в заданной клетке.
+ * 
+ * Возвращает созданного юнита.
+ */
+function spawnUnit(settlement, uCfg, cell, direction) {
+    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    var spawnParams = HordeUtils.CreateInstance(csType);
+    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
+    HordeUtils.setValue(spawnParams, "Cell", cell);
+    HordeUtils.setValue(spawnParams, "Direction", direction);
+
+    var unit = settlement.Units.SpawnUnit(spawnParams);
+    return unit;
+}
+
+/**
+ * Создание uCount (может быть создано меньше, поскольку генератор конечный) юнитов согласно переданному generator - генератору позиций
+ *
+ * Возвращает список созданных юнитов.
+ */
+function spawnUnits(settlement, uCfg, uCount, direction, generator) {
+    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    var spawnParams = HordeUtils.CreateInstance(csType);
+    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
+    HordeUtils.setValue(spawnParams, "Direction", direction);
+
+    outSpawnedUnits = [];
+    for (var position = generator.next(); !position.done && outSpawnedUnits.length < uCount; position = generator.next()) {
+        if (unitCanBePlacedByRealMap(uCfg, position.value.X, position.value.Y)) {
+            HordeUtils.setValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
+            outSpawnedUnits.push(settlement.Units.SpawnUnit(spawnParams));
+        }
+    }
+
+    return outSpawnedUnits;
+}
+
+
+// ===================================================
+// --- Test
+
 function test_spawnUnits() {
     var realScena = scena.GetRealScena();
     var settlements = realScena.Settlements;
@@ -28,6 +70,10 @@ function test_spawnUnits() {
     //logi("attack by spawn units");
     //inputPointBasedCommand(oleg, createPoint(50, 50), UnitCommand.Attack);
 }
+
+
+// ===================================================
+// --- Internal
 
 /**
  * Генератор позиций вокруг точки по спирале в рамках сцены
@@ -130,42 +176,4 @@ function* generateRandomPositionInRect2D(rectX, rectY, rectW, rectH) {
     }
 
     return;
-}
-
-/**
- * Создание одного юнита в заданной клетке.
- * 
- * Возвращает созданного юнита.
- */
-function spawnUnit(settlement, uCfg, cell, direction) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    var spawnParams = HordeUtils.CreateInstance(csType);
-    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
-    HordeUtils.setValue(spawnParams, "Cell", cell);
-    HordeUtils.setValue(spawnParams, "Direction", direction);
-
-    var unit = settlement.Units.SpawnUnit(spawnParams);
-    return unit;
-}
-
-/**
- * Создание uCount (может быть создано меньше, поскольку генератор конечный) юнитов согласно переданному generator - генератору позиций
- *
- * Возвращает список созданных юнитов.
- */
-function spawnUnits(settlement, uCfg, uCount, direction, generator) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    var spawnParams = HordeUtils.CreateInstance(csType);
-    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
-    HordeUtils.setValue(spawnParams, "Direction", direction);
-
-    outSpawnedUnits = [];
-    for (var position = generator.next(); !position.done && outSpawnedUnits.length < uCount; position = generator.next()) {
-        if (unitCanBePlacedByRealMap(uCfg, position.value.X, position.value.Y) {
-            HordeUtils.setValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
-            outSpawnedUnits.push(settlement.Units.SpawnUnit(spawnParams));
-        }
-    }
-
-    return outSpawnedUnits;
 }

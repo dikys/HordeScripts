@@ -1,5 +1,35 @@
+
 /**
- * тип для сцен
+ * Вызывается при первом запуске скрипта, а так же при hot-reload
+ */
+function scenaScriptsFirstRun() {
+    scenaScripts = new ScenaScripts();
+
+    // регистрируем сцены
+    scenaScripts.registerScena({name: "1-5 - Оборона от ИИ", onFirstRun: mapdefens_onFirstRun, onEveryTick: mapdefens_everyTick});
+
+    // запускаем текущую сцену
+    scenaScripts.onFirstRun();
+}
+
+/**
+ * Вызывается каждый игровой такт
+ */
+function scenaScriptsEveryTick(gameTickNum: number) {
+    scenaScripts.onEveryTick(gameTickNum);
+}
+
+
+// ===================================================
+// --- Internal
+
+/**
+ * Объект для работы со сценами 
+ */
+var scenaScripts : ScenaScripts;
+
+/**
+ * Тип для сцен
  */
 type ScenaScriptsInfo = {
     name: string;
@@ -8,7 +38,7 @@ type ScenaScriptsInfo = {
 };
 
 /**
- * класс для регистрации скриптов сцены
+ * Класс для регистрации скриптов сцены
  */
 class ScenaScripts {
     private _isScenaScriptsRegistered : boolean;
@@ -40,29 +70,4 @@ class ScenaScripts {
             this._currentScenaScripts.onEveryTick(gameTickNum);
         }
     }
-}
-
-/**
- * объект для работы со сценами 
- */
-var scenaScripts : ScenaScripts;
-
-/**
- * Вызывается при первом запуске скрипта, а так же при hot-reload
- */
-function scenaScriptsFirstRun() {
-    scenaScripts = new ScenaScripts();
-
-    // регистрируем сцены
-    scenaScripts.registerScena({name: "1-5 - Оборона от ИИ", onFirstRun: mapdefens_onFirstRun, onEveryTick: mapdefens_everyTick});
-
-    // запускаем текущую сцену
-    scenaScripts.onFirstRun();
-}
-
-/**
- * Вызывается каждый игровой такт
- */
-function scenaScriptsEveryTick(gameTickNum: number) {
-    scenaScripts.onEveryTick(gameTickNum);
 }

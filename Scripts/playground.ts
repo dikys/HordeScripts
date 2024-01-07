@@ -22,7 +22,7 @@ function onFirstRun() {
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runExamples();
 
-    // запускаем скрипты сцены
+    // Запускаем скрипты сцены
     scenaScriptsFirstRun();
 }
 
@@ -45,7 +45,7 @@ function everyTick(gameTickNum: number) {
         // logi(`Now is ${gameTickNum} game tick!`);
     }
 
-    // запускаем скрипты сцены
+    // Запускаем скрипты сцены
     scenaScriptsEveryTick(gameTickNum);
 }
 
