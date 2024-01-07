@@ -154,7 +154,7 @@ function spawnUnit(settlement, uCfg, cell, direction) {
  * Возвращает список созданных юнитов.
  */
 function spawnUnits(settlement, uCfg, uCount, direction, generator) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters");
+    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
     var spawnParams = HordeUtils.CreateInstance(csType);
     HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
     HordeUtils.setValue(spawnParams, "Direction", direction);
