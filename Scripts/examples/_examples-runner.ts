@@ -27,6 +27,7 @@ function runExamples() {
     // example_settlementResources();
     // example_settlementUnitsInfo();
     // example_unitWorks();
+    // example_unitOrders();
     // example_getUnitsInArea_v1();
     // example_getUnitsInArea_v2();
     // example_getUnitsInArea_v3();

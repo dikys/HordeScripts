@@ -46,7 +46,6 @@ class ScenaScripts {
 
     public constructor() {
         this._isScenaScriptsRegistered = false;
-        logi("Запущена сцена: ", scena.GetRealScena().ScenaName);
     }
 
     // зарегистрировать сцену
@@ -55,7 +54,7 @@ class ScenaScripts {
         if (scenaName == scenaScripts.name) {
             this._currentScenaScripts      = scenaScripts;
             this._isScenaScriptsRegistered = true;
-            logi("Скрипты для сцены успешно зарегистрированы!");
+            logi("Скрипты для сцены", "'" + scenaName + "'", "успешно зарегистрированы!");
         }
     }
 
