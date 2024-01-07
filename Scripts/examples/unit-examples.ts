@@ -20,6 +20,10 @@ function example_unitWorks() {
     logi('  Здоровье юнита:', unitDTO.Health);
     logi('  Направление юнита:', unitDTO.PositionModel.Direction.ToString());
 
+    // Устанавливаем направление "Вверх"
+    unitDTO.PositionModel.Direction = UnitDirection.Up;
+    logi('  Направление юнита после изменения:', unitDTO.PositionModel.Direction.ToString());
+
     // Боевой отдел:
     var battleMind = unit.BattleMind;
 
@@ -34,34 +38,7 @@ function example_unitWorks() {
 
     // Отдел приказов
     var ordersMind = unit.OrdersMind;
-
-    // Проверка что юнит бездействует
-    if (ordersMind.IsIdle()) {
-        logi('  Юнит бездействует:', unit.ToString());
-
-        // Устанавливаем направление "Вниз"
-        unitDTO.PositionModel.Direction = UnitDirection.Down;
-    }
-
-    // Проверка что юнит бездействует (другой вариант)
-    if (ordersMind.OrdersCount == 0) {
-        logi('  Юнит бездействует v2:', unit.ToString());
-
-        // Устанавливаем направление "Вверх"
-        unitDTO.PositionModel.Direction = UnitDirection.Down;
-    }
-
-    // Отменить приказы юнита кроме текущего
-    ordersMind.CancelOrders(false);
-
-    // Отменить все приказы юнита
-    ordersMind.CancelOrders(true);
-
-    // Устанавливаем smart-приказ юниту (как при клике правой кнопкой мыши)
-    var deactivateNotificationsTime = 600;  // отмена инстинктов на столько тактов
-    var targetCell = createPoint(unit.Cell.X, unit.Cell.Y + 1);
-    ordersMind.AssignSmartOrder(targetCell, AssignOrderMode.Replace, deactivateNotificationsTime);
-    logi('  Юнит получил smart-приказ в', targetCell.ToString());
+    // Подробнее см. в отдельном примере
 
     // Отдел команд
     var commandsMind = unit.CommandsMind;
@@ -119,4 +96,67 @@ function example_unitWorks() {
     // Такая же проверка с учетом тумана войны
     logi('  Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
          'согласно реальной карте:', unitCanBePlacedByRealMap(riderCfg, cell.X, cell.Y));
+}
+
+
+/**
+ * Пример работы с приказами юнита
+ */
+function example_unitOrders() {
+    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+
+    var unit = getOrCreateTestUnit();
+    if (unit == null) {
+        logi('  Не удалось создать юнита для этого теста!');
+        return;
+    }
+    logi('  Для этого теста выбран:', unit.ToString());
+    var unitDTO = HordeUtils.getValue(unit, "Model");
+
+    // Отдел приказов
+    var ordersMind = unit.OrdersMind;
+
+    // Проверка что юнит бездействует
+    logi('  Юнит бездействует? Вариант 1:', ordersMind.IsIdle());
+    logi('  Юнит бездействует? Вариант 2:', ordersMind.OrdersCount == 0);
+
+    // Текущий приказ юнита (другой вариант)
+    var activeOrder = ordersMind.ActiveOrder;
+    logi('  Текущий приказ юнита:', activeOrder.ToString());
+
+    // Отменить приказы юнита кроме текущего
+    ordersMind.CancelOrders(false);
+
+    // Отменить все приказы юнита
+    ordersMind.CancelOrders(true);
+
+    // Устанавливаем smart-приказ юниту (как при клике правой кнопкой мыши)
+    var deactivateNotificationsTime = 600;  // отмена инстинктов на столько тактов
+    var targetCell = createPoint(unit.Cell.X, unit.Cell.Y + 1);
+    ordersMind.AssignSmartOrder(targetCell, AssignOrderMode.Replace, deactivateNotificationsTime);
+    logi('  Юнит получил smart-приказ в', targetCell.ToString());
+
+    // Создание разных команд для приказов
+    var oneClickCommandArgs = new OneClickCommandArgs(UnitCommand.StepAway, AssignOrderMode.Queue);
+    logi('  Простая команда:', '"' + oneClickCommandArgs.ToString() + '"');
+    var pointCommandArgs = new PointCommandArgs(createPoint(10, 10), UnitCommand.Attack, AssignOrderMode.Queue);
+    logi('  Команда с целью в клетке:', '"' + pointCommandArgs.ToString()) + '"';
+    var produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Fence"), createPoint(2, 4), createPoint(3, 7), 1000);
+    logi('  Команда строительства в клетке:', '"' + produceAtCommandArgs.ToString() + '"');
+    var produceCommandArgs = new ProduceCommandArgs(AssignOrderMode.Queue, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Worker1"), 1);
+    logi('  Команда тренировки:', '"' + produceCommandArgs.ToString() + '"');
+
+    // Выдача приказа согласно команде
+    if (unit.Cfg.GetOrderWorker(unit, oneClickCommandArgs)) {
+        logi('  Добавлен приказ для команды:', '"' + oneClickCommandArgs.ToString() + '"');
+    } else {
+        logi('  Не удалось добавить команду');
+    }
+
+    // Выдача приказа согласно команде
+    if (unit.Cfg.GetOrderWorker(unit, pointCommandArgs)) {
+        logi('  Добавлен приказ для команды:', '"' + pointCommandArgs.ToString() + '"');
+    } else {
+        logi('  Не удалось добавить команду');
+    }
 }
