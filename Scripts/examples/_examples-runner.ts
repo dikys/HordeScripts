@@ -38,5 +38,7 @@ function runExamples() {
 
     // logi("[*] Примеры работы с сообщениями:");
     // example_sendMessageToAll();
-    // example_hookChatMessages();
+    // example_hookSentChatMessages_v1();
+    // example_hookSentChatMessages_v2();
+    // example_hookReceivedChatMessages();
 }
