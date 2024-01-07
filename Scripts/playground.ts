@@ -21,6 +21,9 @@ function onFirstRun() {
     
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runExamples();
+
+    // запускаем скрипты сцены
+    scenaScriptsFirstRun();
 }
 
 
@@ -41,5 +44,8 @@ function everyTick(gameTickNum: number) {
     if (gameTickNum % 100 == 0) {
         // logi(`Now is ${gameTickNum} game tick!`);
     }
+
+    // запускаем скрипты сцены
+    scenaScriptsEveryTick(gameTickNum);
 }
 
