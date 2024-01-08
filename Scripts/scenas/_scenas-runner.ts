@@ -6,7 +6,7 @@ function scenaScriptsFirstRun() {
     scenaScripts = new ScenaScripts();
 
     // регистрируем сцены
-    scenaScripts.registerScena({name: "1-5 - Оборона от ИИ", onFirstRun: mapdefens_onFirstRun, onEveryTick: mapdefens_everyTick});
+    scenaScripts.registerScena({name: "1-5 - Оборона от ИИ", onFirstRun: _1_5_Oborona_ot_AI.mapdefens_onFirstRun, onEveryTick: _1_5_Oborona_ot_AI.mapdefens_everyTick});
 
     // запускаем текущую сцену
     scenaScripts.onFirstRun();

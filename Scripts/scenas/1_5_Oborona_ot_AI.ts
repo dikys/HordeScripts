@@ -1,3 +1,6 @@
+// оборачиваем все в пространство имен
+namespace _1_5_Oborona_ot_AI {
+
 // флаг, что игра закончилась
 var mapdefens_isFinish;
 var mapdefens_timeElapsed;
@@ -12,7 +15,7 @@ var mapdefens_enemyUnitsCfg;
 // конфиги снарядов
 var mapdefens_enemyBulletCfg;
 // игрок врага для управления
-var mapdefens_enemyPlayer;
+//var mapdefens_enemyPlayer;
 // игрок врага для управления
 var mapdefens_enemySettlement;
 // текущая волна
@@ -36,7 +39,7 @@ var mapdefens_legendary_raider_unitsInfo;
 // список легендарных рабочих на карте
 var mapdefens_legendary_worker_unitsInfo;
 
-function mapdefens_onFirstRun() {
+export function mapdefens_onFirstRun() {
     var realScena   = scena.GetRealScena();
     var settlements = realScena.Settlements;
     // Рандомизатор
@@ -63,34 +66,47 @@ function mapdefens_onFirstRun() {
         if (settlement.Uid < mapdefens_playersMaxCount) {
             if (!HordeUtils.getValue(realPlayer, "MasterMind")) {
                 mapdefens_playersCount++;
-                // любому игроку добавляем церковь
-                // если объекта нету, тогда спавним его на карте
-                if (!mapdefens_goalCastle) {
-                    var goalUnitCfg = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Church"));
-                    // увеличиваем хп до 400
-                    HordeUtils.setValue(goalUnitCfg, "MaxHealth", 400);
-                    // убираем починку
-                    goalUnitCfg.ProfessionParams.Remove(UnitProfession.Reparable);
 
-                    mapdefens_goalCastle = spawnUnit(
-                        settlement,
-                        goalUnitCfg,
-                        createPoint(89, 124),
-                        //createPoint(89, 150), // для тестов
-                        UnitDirection.Down
-                    );
+                // позиция цели врагов
+                var position = createPoint(89, 124);
+                //var position = createPoint(89, 150); // для тестов;
+
+                // любому игроку добавляем церковь - цель врагов
+                if (!mapdefens_goalCastle) {
+                    // церкви тут нету - начало карты
+                    if (unitCanBePlacedByRealMap(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Church"), position.X, position.Y)) {
+                        var goalUnitCfg = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Church"));
+                        // увеличиваем хп до 400
+                        HordeUtils.setValue(goalUnitCfg, "MaxHealth", 400);
+                        // убираем починку
+                        goalUnitCfg.ProfessionParams.Remove(UnitProfession.Reparable);
+
+                        mapdefens_goalCastle = spawnUnit(
+                            settlement,
+                            goalUnitCfg,
+                            position,
+                            UnitDirection.Down
+                        );
+                    }
+                    // что-то мешает, скорее всего это горячая загрузка скриптов
+                    else {
+                        mapdefens_goalCastle = realScena.UnitsMap.GetUpperUnit(position);
+                    }
                 }
                 logi("Поселение ", settlement.Uid, " is player");
             }
         }
         // враг
-        else if (settlement.Uid == mapdefens_playersMaxCount) {
-            mapdefens_enemyPlayer     = realPlayer;
-            mapdefens_enemySettlement = settlement;
-            logi("Поселение ", settlement.Uid, " is enemy");
-        }
+        //else if (settlement.Uid == mapdefens_playersMaxCount) {
+            //mapdefens_enemyPlayer     = realPlayer;
+            //mapdefens_enemySettlement = settlement;
+           // logi("Поселение ", settlement.Uid, " is enemy");
+        //}
     }
     logi("Игроков: ", mapdefens_playersCount);
+
+    // ссылка на поселение врага
+    mapdefens_enemySettlement = settlements.Item.get('5');;
 
     ////////////////////////////
     // задаем конфиги врагов
@@ -215,7 +231,7 @@ function mapdefens_onFirstRun() {
     // меняем цвет
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"], "TintColor", createHordeColor(255, 255, 100, 100));
     // задаем количество здоровья от числа игроков
-    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"], "MaxHealth", Math.floor(120 * Math.sqrt(mapdefens_playersCount)));
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"], "MaxHealth", Math.floor(200 * Math.sqrt(mapdefens_playersCount)));
     // удаляем команду атаки
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"].AllowedCommands.Remove(UnitCommand.Attack);
 
@@ -236,10 +252,13 @@ function mapdefens_onFirstRun() {
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].TechConfig.Requirements.Clear();
     // ускоряем время постройки
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], "ProductionTime", 200);
+    // убираем возможность захвата
+    mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].ProfessionParams.Remove(UnitProfession.Capturable);
+    
     // (легендарный) крестьянин
     mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_worker");
     mapdefens_legendaryUnitsInformation.push("Слабости: ближний бой, окружение, огонь, ранней атаки. Преимущества: строит башни.");
-    mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Worker1"));
+    mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Barbarian_Worker1"));
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "Name", "Легендарный рабочий");
     // меняем цвет
@@ -254,28 +273,9 @@ function mapdefens_onFirstRun() {
     {
         var producerParams = mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
         var produceList    = producerParams.CanProduceList;
+        produceList.Clear();
         produceList.Add(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"]);
     }
-
-    // (легендарная) башня
-    // mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_Tower");
-    // mapdefens_enemyUnitsCfg["UnitConfig_legendary_Tower"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Tower"));
-    // // назначаем имя
-    // HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Tower"], "Name", "Легендарный передвижная башня");
-    // // меняем цвет
-    // HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Tower"], "TintColor", createHordeColor(255, 255, 100, 100));
-    // // задаем количество здоровья от числа игроков
-    // HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Tower"], "MaxHealth", Math.floor(150 * Math.sqrt(mapdefens_playersCount)));
-    // // добавляем команду движения
-    // {
-    //     var cmdConfig = HCL.HordeClassLibrary.HordeContent.AllContent.UnitCommands.GetConfig("#UnitCommandConfig_MoveToPoint");
-    //     mapdefens_enemyUnitsCfg["UnitConfig_legendary_Tower"].AllowedCommands.Add(UnitCommand.MoveToPoint, cmdConfig);
-    // }
-    // итог она не двигается))
-
-    // printObjectItems(UnitCommand);
-    // logi("--------------------------------");
-    // printObjectItems(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Tower"].AllowedCommands);
 
     // (легендарная) баллиста
     /*mapdefens_legendaryUnitsCFGId.push("UnitConfig_legendary_Balista");
@@ -302,7 +302,6 @@ function mapdefens_onFirstRun() {
         //HordeUtils.setValue(mapdefens_enemyBulletCfg["BulletConfig_legendary_BallistaArrow_0"].SpecialParams.FragmentCombatParams, "AdditiveBulletSpeed", createPF(5, 5));
         //printObjectItems(mapdefens_enemyBulletCfg["BulletConfig_legendary_BallistaArrow_0"].SpecialParams, 2);
     }
-    
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_Balista"] = HordeContent.CloneConfig(mapdefens_enemyUnitsCfg["UnitConfig_Slavyane_Balista"]);
     // назначаем имя
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Balista"], "Name", "Легендарная баллиста");
@@ -522,7 +521,7 @@ function mapdefens_onFirstRun() {
     //    message: "ВОЛНА 1",
     //    gameTickNum: 1 * 60 * 50,
     //    units: [
-    //        { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_legendary_archer" }
+    //        { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_legendary_Raider" }
     //    ]
     // });
 
@@ -540,7 +539,7 @@ function mapdefens_onFirstRun() {
     }
 }
 
-function mapdefens_everyTick(gameTickNum: number) {
+export function mapdefens_everyTick(gameTickNum: number) {
     var realScena   = scena.GetRealScena();
     // Рандомизатор
     var rnd         = realScena.Context.Randomizer;
@@ -549,9 +548,15 @@ function mapdefens_everyTick(gameTickNum: number) {
     if (mapdefens_isFinish) {
         return;
     }
-
+    
     // целевой объект разрушили - игроки проиграли
     if ((!mapdefens_goalCastle || mapdefens_goalCastle.IsDead) && !mapdefens_isFinish) {
+        if (!mapdefens_goalCastle)
+            logi(1);
+        else if (mapdefens_goalCastle.IsDead)
+            logi(2);
+        else if (!mapdefens_isFinish)
+            logi(3);
         mapdefens_isFinish = true;
         broadcastMessage("ИГРОКИ ПРОИГРАЛИ", createHordeColor(255, 255, 50, 10));
         for (var i = 0; i < mapdefens_playersMaxCount; i++) {
@@ -598,7 +603,7 @@ function mapdefens_everyTick(gameTickNum: number) {
                 broadcastMessage(mapdefens_legendaryUnitsInformation[legendaryIndex], createHordeColor(255, 200, 130, 10));
             }
 
-            // запоминаем некоторых юнитов
+            // запоминаем некоторых легендарных юнитов в список
             if ("UnitConfig_legendary_swordmen" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
                 for (var spawnedUnit of spawnedUnits) {
                     mapdefens_legendary_swordmen_unitsInfo.push({
@@ -757,10 +762,14 @@ function mapdefens_everyTick(gameTickNum: number) {
             // юнит бездействует и у него фулл хп, то отправляем его на базу врага
             if (ordersMind.IsIdle() && worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) {
                 // выделяем данного юнита
-                inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
+                //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
 
                 // в конце отправляем в атаку на цель
-                inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint);
+                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint);
+                var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                worker.Cfg.GetOrderWorker(worker, pointCommandArgs);
+
+                logi("Рабочий бездействует, отправляем к врагу");
 
                 continue;
             }
@@ -768,23 +777,33 @@ function mapdefens_everyTick(gameTickNum: number) {
             // проверка, что рабочий что-то строит
             var currentOrderProducing = ordersMind.ActiveOrder.ProductUnit != undefined;
 
-            // проверка, что юнит не строит ничего
-            // что юнит, что-то строит
-            if ((!ordersMind.IsIdle() && worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) ||
+            // проверка, что юнит готов строить башню
+            if (worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth ||
                 currentOrderProducing) {
                 continue;
             }
 
             // выделяем данного юнита
-            inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
+            //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
+
+            // Отменить все приказы юнита
+            ordersMind.CancelOrders(true);
 
             // ищем ближайшее место куда можно построить башню
             var generator = generatePositionInSpiral(worker.Cell.X, worker.Cell.Y);
             for (var position = generator.next(); !position.done; position = generator.next()) {
                 if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], position.value.X, position.value.Y)) {
-                    inputProduceBuildingCommand(mapdefens_enemyPlayer, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].Uid, createPoint(position.value.X, position.value.Y), null);
+                    //inputProduceBuildingCommand(mapdefens_enemyPlayer, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].Uid, createPoint(position.value.X, position.value.Y), null);
+
+                    // делаем так, чтобы рабочий не отвлекался, когда строит башню (убираем реакцию на инстинкты)
+                    ordersMind.AssignSmartOrder(worker.Cell, AssignOrderMode.Replace, 100000);
+
+                    var produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], createPoint(position.value.X, position.value.Y));
+                    worker.Cfg.GetOrderWorker(worker, produceAtCommandArgs);
+
+                    // уменьшаем количество создаваемых башен на 1
                     mapdefens_legendary_worker_unitsInfo[i].towersBuild--;
-                    // если рабочий больше не строит, то удаляем его из списка
+                    // если рабочий достиг лимита воздвигаемых башен, то удаляем его из списка
                     if (mapdefens_legendary_worker_unitsInfo[i].towersBuild == 0) {
                         mapdefens_legendary_worker_unitsInfo.splice(i--, 1);
                     }
@@ -802,24 +821,57 @@ function mapdefens_everyTick(gameTickNum: number) {
             // отдел приказов
             var ordersMind   = raider.OrdersMind;
 
-            // проверка, что у юнита менее 3 приказов
             // или юнит только что заспавнился и пока у него нету ид
-            if (raider.Id == 0 || ordersMind.OrdersCount > 2) {
+            if (raider.Id == 0 || ordersMind.OrdersCount > 5) {
                 continue;
             }
 
             // выделяем данного юнита
-            inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
+            //inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
 
             // генерируем 5 рандомных достижимых точек вокруг цели
             var generator = generateRandomPositionInRect2D(mapdefens_goalCastle.Cell.X - 20, mapdefens_goalCastle.Cell.Y - 20, 40, 40);
-            for (var position = generator.next(), newOrders = 0; !position.done && newOrders < 5; position = generator.next()) {
+            for (var position = generator.next(); !position.done; position = generator.next()) {
                 if (unitCheckPathTo(raider, createPoint(position.value.X, position.value.Y))) {
-                    newOrders++;
-                    inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                    //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                    //var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                    //raider.Cfg.GetOrderWorker(raider, pointCommandArgs);
+
+                    ordersMind.AssignSmartOrder(createPoint(position.value.X, position.value.Y), AssignOrderMode.Queue, 100000);
+
+                    break;
                 }
             }
         }
+
+        // for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
+        //     var raider = mapdefens_legendary_raider_unitsInfo[i].unit;
+        //     // отдел приказов
+        //     var ordersMind   = raider.OrdersMind;
+
+        //     // проверка, что у юнита менее 3 приказов
+        //     // или юнит только что заспавнился и пока у него нету ид
+        //     if (raider.Id == 0 || ordersMind.OrdersCount > 2) {
+        //         continue;
+        //     }
+
+        //     // выделяем данного юнита
+        //     //inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
+
+        //     // делаем так, чтобы всадник не отвлекался и бегал
+        //     ordersMind.AssignSmartOrder(raider.Cell, AssignOrderMode.Queue, 100000);
+
+        //     // генерируем 5 рандомных достижимых точек вокруг цели
+        //     var generator = generateRandomPositionInRect2D(mapdefens_goalCastle.Cell.X - 20, mapdefens_goalCastle.Cell.Y - 20, 40, 40);
+        //     for (var position = generator.next(), newOrders = 0; !position.done && newOrders < 5; position = generator.next()) {
+        //         if (unitCheckPathTo(raider, createPoint(position.value.X, position.value.Y))) {
+        //             newOrders++;
+        //             //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+        //             var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+        //             raider.Cfg.GetOrderWorker(raider, pointCommandArgs);
+        //         }
+        //     }
+        // }
 
         //////////////////////////////////////////
         // логика поведения почти всех юнитов
@@ -840,7 +892,7 @@ function mapdefens_everyTick(gameTickNum: number) {
             }
 
             // выделяем данного юнита
-            inputSelectUnitsById(mapdefens_enemyPlayer, [unit.Id]);
+            //inputSelectUnitsById(mapdefens_enemyPlayer, [unit.Id]);
             
             // если Y < 80, то оправляем сначала в центр
             if (unit.Cell.Y < 80) {
@@ -858,7 +910,9 @@ function mapdefens_everyTick(gameTickNum: number) {
                         generator = generateRandomPositionInRect2D(centerRect.x, centerRect.y, centerRect.w, centerRect.h);
                     }
                 }
-                inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
+                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
+                var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
 
                 // вызывает рассинхрон
                 // 20% юнитов идут в обход
@@ -881,8 +935,12 @@ function mapdefens_everyTick(gameTickNum: number) {
             }
             
             // в конце отправляем в атаку на цель
-            inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+            //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+            var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+            unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
         }
         enemyUnitsEnumerator.Dispose();
     }
 }
+
+} // namespace
