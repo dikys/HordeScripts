@@ -1,1 +1,4 @@
 # Nothing yet
+tsconfig.json
+.gitignore
+/out/

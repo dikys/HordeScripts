@@ -1,0 +1,31 @@
+@startuml controller states
+
+state EXPLOIT {
+    state Develop: Build-up economy
+    state Defend #pink: Defend against attacks
+    state GatherUp: Build an army that\ncounters enemy strategy
+
+    [*] --> Develop
+    Develop -[#Red]-> Defend: Attacked
+    Defend -[#Red]-> Develop: Attack countered
+    GatherUp -[#Red]-> Defend: Attacked
+    
+    Develop --> GatherUp: Economy functioning
+    GatherUp --> [*]: Army gathered
+} 
+
+state EXPAND #pink: Choosing and securing expansion sites
+
+state EXTERMINATE: Attack the enemy
+
+EXPLOIT --> EXTERMINATE: Army gathered
+EXTERMINATE --> [*]: Enemy defeated
+
+[*] --> EXPLOIT: Initial state
+
+legend
+Pink and red colors mean that this 
+state/transition is not implemented yet
+endlegend
+
+@enduml
