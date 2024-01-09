@@ -44,3 +44,14 @@ function runExamples() {
     // example_hookSentChatMessages_v2();
     // example_hookReceivedChatMessages();
 }
+
+
+/**
+ * Запуск примеров каждый игровой такт.
+ * Нужно раскомментировать вызовы функций с примерами, которые следует запустить.
+ */
+function runEveryTickExamples() {
+
+    // // В этом примере выполняется перечисление событий произошедших с тестовым юнитом
+    // example_unitEnumerateEvents();
+}

@@ -45,6 +45,9 @@ function everyTick(gameTickNum: number) {
         // logi(`Now is ${gameTickNum} game tick!`);
     }
 
+    // Примеры. Нужно настроить, см. файл "examples.ts"
+    runEveryTickExamples();
+
     // Запускаем скрипты сцены
     scenaScriptsEveryTick(gameTickNum);
 }
