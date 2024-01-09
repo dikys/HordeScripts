@@ -5,23 +5,32 @@ state EXPLOIT {
     state Defend #pink: Defend against attacks
     state GatherUp: Build an army that\ncounters enemy strategy
 
-    [*] --> Develop
+    state Exploit_Entry <<inputPin>>
+    Exploit_Entry --> Develop
     Develop -[#Red]-> Defend: Attacked
     Defend -[#Red]-> Develop: Attack countered
     GatherUp -[#Red]-> Defend: Attacked
     
     Develop --> GatherUp: Economy functioning
-    GatherUp --> [*]: Army gathered
-} 
+    GatherUp -down-> Exploit_ArmyGathered <<outputPin>>: Army gathered
+}
+
+note left of EXPLOIT
+Building up economy,
+gathering resources 
+and training an army
+end note
 
 state EXPAND #pink: Choosing and securing expansion sites
+state Exterminate: Attack the enemy
 
-state EXTERMINATE: Attack the enemy
+[*] -down-> Exploit_Entry: Initial state
 
-EXPLOIT --> EXTERMINATE: Army gathered
-EXTERMINATE --> [*]: Enemy defeated
+Exploit_ArmyGathered -right-> Exterminate: Army gathered
 
-[*] --> EXPLOIT: Initial state
+Exterminate --> [*]: Enemy defeated
+Exterminate --> Exploit_Entry: Army slain
+
 
 legend
 Pink and red colors mean that this 

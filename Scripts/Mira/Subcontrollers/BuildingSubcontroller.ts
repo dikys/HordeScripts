@@ -1,8 +1,9 @@
 
 //TODO: implement proper removing of a building from a target list
+//TODO: probably reorganize build list to a queue
 
 class BuildingSubcontroller extends MiraSubcontroller {
-    private targetBuildingList: Array<string>;
+    private buildList: Array<string>;
 
     constructor (parent: MiraSettlementController) {
         super(parent);
@@ -12,7 +13,7 @@ class BuildingSubcontroller extends MiraSubcontroller {
         var mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
         var producedBuildings:Array<string> = []
 
-        for (var buildingConfig of this.targetBuildingList) {
+        for (var buildingConfig of this.buildList) {
             var freeWorker = this.GetFreeWorker();
             
             //!! most probably doesn't work as expected since worker is always free on this tick
@@ -31,10 +32,10 @@ class BuildingSubcontroller extends MiraSubcontroller {
         }
 
         for (var cfg of producedBuildings) {
-            const index = this.targetBuildingList.indexOf(cfg);
+            const index = this.buildList.indexOf(cfg);
 
             if (index > -1) {
-                this.targetBuildingList.splice(index, 1);
+                this.buildList.splice(index, 1);
                 this.parentController.Log(MiraLogLevel.Debug, "Removed " + index.toString() + " from target production list");
             }
         }
@@ -49,13 +50,13 @@ class BuildingSubcontroller extends MiraSubcontroller {
         }
     }
 
-    AddToTargetList(buildingConfig: string): void {
-        this.targetBuildingList.push(buildingConfig);
+    AddToBuildList(buildingConfig: string): void {
+        this.buildList.push(buildingConfig);
         this.parentController.Log(MiraLogLevel.Debug, "Added " + buildingConfig + " to target production list");
     }
 
-    ClearTargetList(): void {
-        this.targetBuildingList = [];
+    ClearBuildList(): void {
+        this.buildList = [];
         this.parentController.Log(MiraLogLevel.Debug, "Cleared target production list");
     }
 }

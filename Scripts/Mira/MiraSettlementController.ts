@@ -10,6 +10,7 @@ class MiraSettlementController {
     private playerID: string;
     private miningController: MiningSubcontroller;
     private buildingController: BuildingSubcontroller;
+    private trainingController: TrainingSubcontroller;
     private subcontrollers: Array<MiraSubcontroller>;
 
     constructor (controlledSettlement, settlementMM, controlledPlayerId: string) {
@@ -22,6 +23,9 @@ class MiraSettlementController {
 
         this.buildingController = new BuildingSubcontroller(this);
         this.subcontrollers.push(this.buildingController);
+
+        this.trainingController = new TrainingSubcontroller(this);
+        this.subcontrollers.push(this.trainingController);
     }
     
     Tick(tickNumber: number): void {
