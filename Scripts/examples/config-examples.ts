@@ -14,7 +14,7 @@ function example_configWorks() {
 
     // Здесь можно убрать if-false, чтобы отобразить поля конфига
     // Здесь не следует копать более чем на 1 уровень в глубину, т.к. получается слишком много данных
-    if (false) inspect(catapultCfg, "Конфиг катапульты:");
+    if (false) inspect(catapultCfg, 1, "Конфиг катапульты:");
     
     // Получаем значения из конфига
     logi("  Текущее количество камней при выстреле:", catapultCfg.MainArmament.EmitBulletsCountMin);

@@ -19,9 +19,9 @@ function example_introspection() {
     logi('> Запущен пример', '"' + arguments.callee.name + '"');
 
     // Remove false-condition to reveal the Horde API structure
-    if (false) inspect(HordeAPI, "Horde API structure (в разработке)");
-    if (false) inspect(HCL, "HordeClassLibrary (полный доступ)", 5);
-    if (false) inspect(players["0"].GetRealPlayer().GetRealSettlement().Units, ".Net объект с юнитами игрока", 1);
+    if (false) inspect(HordeAPI, 1, "Horde API structure (в разработке)");
+    if (false) inspect(HCL, 5, "HordeClassLibrary (полный доступ)");
+    if (false) inspect(players["0"].GetRealPlayer().GetRealSettlement().Units, 1, ".Net объект с юнитами игрока");
 
     // Пример получения содержимого в enum-типах
     if (false) inspectEnum(UnitAnimState);

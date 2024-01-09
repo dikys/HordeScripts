@@ -99,9 +99,9 @@ function inspectToStr(object, maxDepth, result) {
 /**
  * Выводит в лог результат интроспекции.
  */
-function inspect(object, msg, maxDepth) {
+function inspect(object, maxDepth, msg) {
     msg = msg ?? 'Object introspection result:';
-    logi(msg, '\nType:', typeof object, '\n' + inspectToStr(object, maxDepth));
+    logi(msg, '\nType:', typeof object, '-', object.constructor.name, '\n' + inspectToStr(object, maxDepth));
 }
 
 /**
