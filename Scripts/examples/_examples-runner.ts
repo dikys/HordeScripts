@@ -21,7 +21,6 @@ function runExamples() {
     // example_spawnUnit();
     // example_spawnBullet();
     // example_spawnBulletsRain();
-    // example_iterateBullets();
     // example_scenaWorks();
     // example_settlementWorks();
     // example_settlementResources();
@@ -54,4 +53,7 @@ function runEveryTickExamples() {
 
     // // В этом примере выполняется перечисление событий произошедших с тестовым юнитом
     // example_unitEnumerateEvents();
+
+    // // В этом примере выполняется перечисление новых снарядов на сцене
+    // example_iterateBullets();
 }

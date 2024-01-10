@@ -8,6 +8,7 @@ BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleContr
 // ===================================================
 // --- Снаряды
 
+BaseBullet = HCL.HordeClassLibrary.World.Objects.Bullets.BaseBullet;
 BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;
 
 
