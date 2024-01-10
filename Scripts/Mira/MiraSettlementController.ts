@@ -4,38 +4,76 @@
 */
 
 class MiraSettlementController {
-    Settlement;
-    MasterMind;
+    public Settlement: any;
+    public MasterMind: any;
 
-    private playerID: string;
-    private miningController: MiningSubcontroller;
-    private buildingController: BuildingSubcontroller;
-    private trainingController: TrainingSubcontroller;
+    public PlayerID: string;
+    public MiningController: MiningSubcontroller;
+    public BuildingController: BuildingSubcontroller;
+    public TrainingController: TrainingSubcontroller;
+    public StrategyController: StrategySubcontroller;
+    
     private subcontrollers: Array<MiraSubcontroller>;
+    private state: MiraSettlementControllerState;
 
     constructor (controlledSettlement, settlementMM, controlledPlayerId: string) {
         this.Settlement = controlledSettlement;
-        this.playerID = controlledPlayerId;
+        this.PlayerID = controlledPlayerId;
         this.MasterMind = settlementMM;
 
-        this.miningController = new MiningSubcontroller(this);
-        this.subcontrollers.push(this.miningController);
+        this.MiningController = new MiningSubcontroller(this);
+        this.subcontrollers.push(this.MiningController);
 
-        this.buildingController = new BuildingSubcontroller(this);
-        this.subcontrollers.push(this.buildingController);
+        this.BuildingController = new BuildingSubcontroller(this);
+        this.subcontrollers.push(this.BuildingController);
 
-        this.trainingController = new TrainingSubcontroller(this);
-        this.subcontrollers.push(this.trainingController);
+        this.TrainingController = new TrainingSubcontroller(this);
+        this.subcontrollers.push(this.TrainingController);
+
+        this.StrategyController = new StrategySubcontroller(this);
+        this.subcontrollers.push(this.StrategyController);
+
+        this.State = new DevelopingState(this);
+    }
+
+    public get State(): MiraSettlementControllerState {
+        return this.State;
+    }
+    
+    public set State(value: MiraSettlementControllerState) {
+        if (this.state) {
+            this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.toString())
+            this.state.OnExit();
+        }
+        
+        this.Log(MiraLogLevel.Debug, "Entering state " + this.state.toString())
+        this.state = value;
+        this.state.OnEntry();
     }
     
     Tick(tickNumber: number): void {
+        this.state.Tick(tickNumber);
+
         for (var subcontroller of this.subcontrollers) {
             subcontroller.Tick(tickNumber);
         }
     }
 
     Log(level: MiraLogLevel, message: string): void {
-        var logMessage = "[Settlement #" + this.playerID + "] " + message;
+        var logMessage = "[Settlement #" + this.PlayerID + "] " + message;
         Mira.Log(level, logMessage);
+    }
+
+    GetCurrentEconomyComposition(): Map<string, number> {
+        var currentComposition: Map<string, number>;
+        
+        var units = enumerate(this.Settlement.Units);
+        var unit;
+        
+        while ((unit = eNext(units)) !== undefined) {
+            currentComposition[unit.Cfg.Uid]++;
+        }
+
+        return currentComposition;
     }
 }
