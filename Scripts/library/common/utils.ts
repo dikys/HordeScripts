@@ -1,25 +1,5 @@
 
 // ===================================================
-// --- ANY
-
-/**
- * Делает IEnumerable перечислимым в JS.
- */
-function* enumerate(enumerable) {
-    var enumerator = enumerable.GetEnumerator();
-    while (enumerator.MoveNext()) {
-        yield enumerator.Current;
-    }
-    enumerator.Dispose();
-}
-function eNext(enumerated) {
-    var next = enumerated.next();
-    if (next.done)
-        return undefined;
-    return next.value;
-}
-
-// ===================================================
 // --- JSON
 
 /**
