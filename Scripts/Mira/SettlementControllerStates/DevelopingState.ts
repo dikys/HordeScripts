@@ -27,7 +27,7 @@ class DevelopingState extends MiraSettlementControllerState {
         var composition = this.settlementController.GetCurrentEconomyComposition();
 
         if (MiraUtils.MapContains(composition, this.targetUnitsComposition)) {
-            //goto BuildUp state
+            this.settlementController.State = new BuildingUpState(this.settlementController);
         }
     }
 }
