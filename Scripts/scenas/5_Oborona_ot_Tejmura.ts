@@ -7,7 +7,6 @@ namespace _5_Oborona_ot_Tejmura {
 
 // флаг, что игра закончилась
 var mapdefens_isFinish;
-var mapdefens_timeElapsed;
 // 40 минут с 50 кадрами в секунду
 var mapdefens_timeEnd;
 // ссылка на замок, который должны уничтожить враги
@@ -50,7 +49,6 @@ export function mapdefens_onFirstRun() {
     var rnd         = realScena.Context.Randomizer;
     
     mapdefens_isFinish    = false;
-    mapdefens_timeElapsed = 0;
     mapdefens_timeEnd     = (40 * 60) * 50;
     mapdefens_enemySpawnRectangle = {
         x: 0,
@@ -374,6 +372,8 @@ export function mapdefens_onFirstRun() {
 }
 
 export function mapdefens_everyTick(gameTickNum: number) {
+    var FPS = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController.GameTimer.CurrentFpsLimit;
+
     var realScena   = scena.GetRealScena();
     // Рандомизатор
     var rnd         = realScena.Context.Randomizer;
@@ -382,6 +382,21 @@ export function mapdefens_everyTick(gameTickNum: number) {
     if (mapdefens_isFinish) {
         return;
     }
+
+    //////////////////////////////////////////
+    // оповещаем сколько осталось до конца
+    //////////////////////////////////////////
+    if (gameTickNum % (30 * FPS) == 0) {
+        var secondsLeft = Math.round(mapdefens_timeEnd - gameTickNum) / FPS;
+        var minutesLeft = Math.floor(secondsLeft / 60);
+        secondsLeft -= minutesLeft * 60;
+
+        broadcastMessage("Осталось продержаться " + (minutesLeft > 0 ? minutesLeft + " минут " : "") + secondsLeft + " секунд", createHordeColor(255, 100, 100, 100));
+    }
+
+    //////////////////////////////////////////
+    // регистрируем конец игры
+    //////////////////////////////////////////
     
     // целевой объект разрушили - игроки проиграли
     if ((!mapdefens_goalCastle || mapdefens_goalCastle.IsDead) && !mapdefens_isFinish) {
