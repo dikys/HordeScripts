@@ -1,5 +1,9 @@
 // оборачиваем все в пространство имен
-namespace _1_5_Oborona_ot_AI {
+namespace _5_Oborona_ot_Tejmura {
+
+// \todo
+// сделать у Богдана шатер вместо замка
+// и когда игроки побеждают, то пусть шатер уничтожается
 
 // флаг, что игра закончилась
 var mapdefens_isFinish;
@@ -25,7 +29,7 @@ var mapdefens_spawnPlan;
 // максимальное количество игроков в игре
 var mapdefens_playersMaxCount;
 // количество игроков в игре
-var mapdefens_playersCount;
+var mapdefens_playersCount : number;
 
 // список ид легендарных юнитов
 var mapdefens_legendaryUnitsCFGId;
@@ -36,7 +40,7 @@ var mapdefens_legendaryUnitsInformation;
 var mapdefens_legendary_swordmen_unitsInfo;
 // список легендарных всадников на карте
 var mapdefens_legendary_raider_unitsInfo;
-// список легендарных рабочих на карте
+// список легендарных инженер на карте
 var mapdefens_legendary_worker_unitsInfo;
 
 export function mapdefens_onFirstRun() {
@@ -96,17 +100,11 @@ export function mapdefens_onFirstRun() {
                 logi("Поселение ", settlement.Uid, " is player");
             }
         }
-        // враг
-        //else if (settlement.Uid == mapdefens_playersMaxCount) {
-            //mapdefens_enemyPlayer     = realPlayer;
-            //mapdefens_enemySettlement = settlement;
-           // logi("Поселение ", settlement.Uid, " is enemy");
-        //}
     }
     logi("Игроков: ", mapdefens_playersCount);
 
     // ссылка на поселение врага
-    mapdefens_enemySettlement = settlements.Item.get('5');;
+    mapdefens_enemySettlement = settlements.Item.get('5');
 
     ////////////////////////////
     // задаем конфиги врагов
@@ -232,8 +230,8 @@ export function mapdefens_onFirstRun() {
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"], "TintColor", createHordeColor(255, 255, 100, 100));
     // задаем количество здоровья от числа игроков
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"], "MaxHealth", Math.floor(200 * Math.sqrt(mapdefens_playersCount)));
-    // удаляем команду атаки
-    mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"].AllowedCommands.Remove(UnitCommand.Attack);
+    // делаем урон = 0
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_Raider"].MainArmament.BulletCombatParams, "Damage", 0);
 
     // (легендарная) башня к крестьянину
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Tower"));
@@ -260,7 +258,7 @@ export function mapdefens_onFirstRun() {
     mapdefens_legendaryUnitsInformation.push("Слабости: ближний бой, окружение, огонь, ранней атаки. Преимущества: строит башни.");
     mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"] = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Barbarian_Worker1"));
     // назначаем имя
-    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "Name", "Легендарный рабочий");
+    HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "Name", "Легендарный инженер");
     // меняем цвет
     HordeUtils.setValue(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"], "TintColor", createHordeColor(255, 255, 100, 100));
     // задаем количество здоровья от числа игроков
@@ -328,11 +326,428 @@ export function mapdefens_onFirstRun() {
     // задаем волны спавна
     ////////////////////////////////////////////////////
 
-    var randomItem = (array) => {
-        return array[rnd.RandomNumber(0, array.length - 1)];
-    };
-
     mapdefens_spawnWaveNum = 0;
+    var planNum = rnd.RandomNumber(1, 2);
+    if (planNum == 1) {
+        initWavePlan_1();
+    } else if (planNum == 2) {
+        initWavePlan_2();
+    }
+
+    // тест
+    // mapdefens_spawnPlan = [];
+    // mapdefens_spawnPlan.push({
+    //    message: "ВОЛНА 1",
+    //    gameTickNum: 1 * 60 * 50,
+    //    units: [
+    //        { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_legendary_Raider" }
+    //    ]
+    // });
+
+    // считает сколько будет врагов
+    var unitsTotalCount = {};
+    for (var plan of mapdefens_spawnPlan) {
+        for (var unitInfo of plan.units) {
+            if (unitsTotalCount[unitInfo.cfgId] == undefined) {
+                unitsTotalCount[unitInfo.cfgId] = 0;
+            }
+            unitsTotalCount[unitInfo.cfgId] += unitInfo.count;
+        }
+    }
+    for (var unitCfg in unitsTotalCount) {
+        logi(unitCfg, " ", unitsTotalCount[unitCfg]);
+    }
+
+    ////////////////////////////////////////////////////
+    // списки легендарных юнитов на карте
+    ////////////////////////////////////////////////////
+
+    if (!mapdefens_legendary_swordmen_unitsInfo) {
+        mapdefens_legendary_swordmen_unitsInfo = [];
+    }
+    if (!mapdefens_legendary_raider_unitsInfo) {
+        mapdefens_legendary_raider_unitsInfo = [];
+    }
+    if (!mapdefens_legendary_worker_unitsInfo) {
+        mapdefens_legendary_worker_unitsInfo = [];
+    }
+}
+
+export function mapdefens_everyTick(gameTickNum: number) {
+    var realScena   = scena.GetRealScena();
+    // Рандомизатор
+    var rnd         = realScena.Context.Randomizer;
+
+    // конец игры
+    if (mapdefens_isFinish) {
+        return;
+    }
+    
+    // целевой объект разрушили - игроки проиграли
+    if ((!mapdefens_goalCastle || mapdefens_goalCastle.IsDead) && !mapdefens_isFinish) {
+        mapdefens_isFinish = true;
+        broadcastMessage("ИГРОКИ ПРОИГРАЛИ", createHordeColor(255, 255, 50, 10));
+        for (var i = 0; i < mapdefens_playersMaxCount; i++) {
+            scena.GetRealScena().Settlements.Item.get("" + i).Existence.ForceDefeat();
+        }
+    }
+    // прошло gameEnd тиков - игроки победили
+    if (gameTickNum >= mapdefens_timeEnd) {
+        mapdefens_isFinish = true;
+        broadcastMessage("ИГРОКИ ПОБЕДИЛИ", createHordeColor(255, 255, 50, 10));
+        scena.GetRealScena().Settlements.Item.get("" + mapdefens_playersMaxCount).Existence.ForceDefeat();
+    }
+
+    //////////////////////////////////////////
+    // обработка волн
+    //////////////////////////////////////////
+
+    while (mapdefens_spawnWaveNum < mapdefens_spawnPlan.length && mapdefens_spawnPlan[mapdefens_spawnWaveNum].gameTickNum <= gameTickNum) {
+        // отправляем сообщение в чат, если оно есть
+        if (mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]) {
+            logi(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]);
+            
+            broadcastMessage(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"], createHordeColor(255, 255, 50, 10));
+        }
+
+        // спавним юнитов
+        var generator = generateRandomPositionInRect2D(mapdefens_enemySpawnRectangle.x, mapdefens_enemySpawnRectangle.y, mapdefens_enemySpawnRectangle.w, mapdefens_enemySpawnRectangle.h);
+        for (var i = 0; i < mapdefens_spawnPlan[mapdefens_spawnWaveNum].units.length; i++) {
+            if (mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].count <= 0) {
+                continue;
+            }
+
+            var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
+                mapdefens_enemyUnitsCfg[mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId],
+                mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].count,
+                UnitDirection.Down,
+                generator);
+            
+            // информируем о легендарных противниках и их слабостях
+            var legendaryIndex = mapdefens_legendaryUnitsCFGId.indexOf(mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId);
+            if (legendaryIndex >= 0) {
+                broadcastMessage("Замечен " + mapdefens_enemyUnitsCfg[mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId].Name, createHordeColor(255, 255, 165, 10));
+                broadcastMessage(mapdefens_legendaryUnitsInformation[legendaryIndex], createHordeColor(255, 200, 130, 10));
+            }
+
+            // запоминаем некоторых легендарных юнитов в список
+            if ("UnitConfig_legendary_swordmen" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
+                for (var spawnedUnit of spawnedUnits) {
+                    mapdefens_legendary_swordmen_unitsInfo.push({
+                        unit:       spawnedUnit,
+                        cloneDepth: 0
+                    });
+                }
+            } else if ("UnitConfig_legendary_Raider" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
+                for (var spawnedUnit of spawnedUnits) {
+                    mapdefens_legendary_raider_unitsInfo.push({
+                        unit: spawnedUnit
+                    });
+                }
+            } else if ("UnitConfig_legendary_worker" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
+                for (var spawnedUnit of spawnedUnits) {
+                    mapdefens_legendary_worker_unitsInfo.push({
+                        unit: spawnedUnit,
+                        towersBuild: 2 + mapdefens_playersCount
+                    });
+                }
+            }
+        }
+
+        // переходим к следующему плану
+        mapdefens_spawnWaveNum++;
+    }
+
+    //////////////////////////////////////////
+    // обработка легендарных рыцарей
+    //////////////////////////////////////////
+
+    // регистрируем смерть легендарных рыцарей для клонирования
+    for (var i = 0; i < mapdefens_legendary_swordmen_unitsInfo.length; i++) {
+        // если рыцарь умер
+        if (mapdefens_legendary_swordmen_unitsInfo[i].unit.IsDead) {
+            // если существует конфиг для следующего уровня клонов, то спавним 2-ух клонов и увеличиваем уровень клонов на 1
+            var cloneCfg = mapdefens_enemyUnitsCfg["UnitConfig_legendary_swordmen_" + mapdefens_legendary_swordmen_unitsInfo[i].cloneDepth];
+            if (cloneCfg) {
+                // создаем генератор по спирали вокруг умершего рыцаря
+                var generator = generatePositionInSpiral(mapdefens_legendary_swordmen_unitsInfo[i].unit.Cell.X, mapdefens_legendary_swordmen_unitsInfo[i].unit.Cell.Y);
+                // спавним 2-ух рыцарей
+                var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
+                    cloneCfg,
+                    2,
+                    UnitDirection.Down,
+                    generator);
+                for (var spawnedUnit of spawnedUnits) {
+                    mapdefens_legendary_swordmen_unitsInfo.push({
+                        unit: spawnedUnit,
+                        cloneDepth: (mapdefens_legendary_swordmen_unitsInfo[i].cloneDepth + 1)
+                    });
+                }
+            }
+            
+            // удаляем из массива умершего рыцаря
+            mapdefens_legendary_swordmen_unitsInfo.splice(i--, 1);
+        }
+    }
+
+    //////////////////////////////////////////
+    // обработка легендарных всадников
+    //////////////////////////////////////////
+
+    // регистрируем смерть легендарных всадников
+    for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
+        // если всадник умер, то исключаем его из списка
+        if (mapdefens_legendary_raider_unitsInfo[i].unit.IsDead) {
+            mapdefens_legendary_raider_unitsInfo.splice(i--, 1);
+        }
+    }
+    // каждые 5 секунд спавним юнитов вокруг всадника
+    if (gameTickNum % 300 == 0) {
+        for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
+            var raider = mapdefens_legendary_raider_unitsInfo[i].unit;
+            var spawnUnitId;
+            var randomNumber = rnd.RandomNumber(1, 4);
+            if (randomNumber == 1) {
+                spawnUnitId = "UnitConfig_Barbarian_Swordmen";
+            } else if (randomNumber == 2) {
+                spawnUnitId = "UnitConfig_Barbarian_Archer";
+            } else if (randomNumber == 3) {
+                spawnUnitId = "UnitConfig_Barbarian_Archer_2";
+            } else {
+                spawnUnitId = "UnitConfig_Barbarian_Heavymen";
+            }
+
+            var generator    = generatePositionInSpiral(raider.Cell.X, raider.Cell.Y);
+            var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
+                mapdefens_enemyUnitsCfg[spawnUnitId],
+                Math.min(mapdefens_playersCount, 3),
+                UnitDirection.Down,
+                generator);
+        }
+    }
+
+    //////////////////////////////////////////
+    // обработка легендарных инженеров
+    //////////////////////////////////////////
+
+    for (var i = 0; i < mapdefens_legendary_worker_unitsInfo.length; i++) {
+        // если всадник умер, то исключаем его из списка
+        if (mapdefens_legendary_worker_unitsInfo[i].unit.IsDead) {
+            mapdefens_legendary_worker_unitsInfo.splice(i--, 1);
+        }
+    }
+
+    //////////////////////////////////////////
+    // логика поведения юнитов
+    //////////////////////////////////////////
+
+    // приказываем врагам атаковать из места спавна
+    //if (gameTickNum % 180 == 0) {
+    //    // выделяем юнитов в точке спавна
+    //    inputSelectUnits(mapdefens_enemyPlayer,
+    //        createPoint(mapdefens_enemySpawnRectangle.x, mapdefens_enemySpawnRectangle.y),
+    //        createPoint(mapdefens_enemySpawnRectangle.x + mapdefens_enemySpawnRectangle.w, mapdefens_enemySpawnRectangle.y + mapdefens_enemySpawnRectangle.h));
+
+    //    // отправляем их в бой в ближайшую пустую точку к замку
+    //    var generator = generatePositionInSpiral(mapdefens_goalCastle.Cell.X, mapdefens_goalCastle.Cell.Y);
+    //    for (var position = generator.next(); !position.done; position = generator.next()) {
+    //        if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], position.value.X, position.value.Y)) {
+    //            inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
+    //            break;
+    //        }
+    //    }
+    //}
+
+    // приказываем бездействующим юнитам врага атаковать
+    if (gameTickNum % 180 == 0) {
+        // позиция для атаки цели
+        var goalPosition;
+        {
+            var generator = generatePositionInSpiral(mapdefens_goalCastle.Cell.X, mapdefens_goalCastle.Cell.Y);
+            for (goalPosition = generator.next(); !goalPosition.done; goalPosition = generator.next()) {
+                if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], goalPosition.value.X, goalPosition.value.Y)) {
+                    break;
+                }
+            }
+        }
+
+        //////////////////////////////////////////
+        // логика поведения легендарных инженеров
+        //////////////////////////////////////////
+        
+        for (var i = 0; i < mapdefens_legendary_worker_unitsInfo.length; i++) {
+            var worker = mapdefens_legendary_worker_unitsInfo[i].unit;
+
+            // юнит только что заспавнился и пока у него нету ид
+            if (worker.Id == 0) {
+                continue;
+            }
+
+            // отдел приказов
+            var ordersMind   = worker.OrdersMind;
+
+            // юнит бездействует и у него фулл хп, то отправляем его на базу врага
+            if (ordersMind.IsIdle() && worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) {
+                // выделяем данного юнита
+                //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
+
+                // в конце отправляем в атаку на цель
+                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint);
+                var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                worker.Cfg.GetOrderWorker(worker, pointCommandArgs);
+
+                continue;
+            }
+
+            // проверка, что инженер что-то строит
+            var currentOrderProducing = ordersMind.ActiveOrder.ProductUnit != undefined;
+
+            // проверка, что юнит готов строить башню
+            if (worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth ||
+                currentOrderProducing) {
+                continue;
+            }
+
+            // выделяем данного юнита
+            //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
+
+            // Отменить все приказы юнита
+            ordersMind.CancelOrders(true);
+
+            // ищем ближайшее место куда можно построить башню
+            var generator = generatePositionInSpiral(worker.Cell.X, worker.Cell.Y);
+            for (var position = generator.next(); !position.done; position = generator.next()) {
+                if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], position.value.X, position.value.Y)) {
+                    //inputProduceBuildingCommand(mapdefens_enemyPlayer, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].Uid, createPoint(position.value.X, position.value.Y), null);
+
+                    // делаем так, чтобы инженер не отвлекался, когда строит башню (убираем реакцию на инстинкты)
+                    ordersMind.AssignSmartOrder(worker.Cell, AssignOrderMode.Replace, 100000);
+
+                    var produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], createPoint(position.value.X, position.value.Y));
+                    worker.Cfg.GetOrderWorker(worker, produceAtCommandArgs);
+
+                    // уменьшаем количество создаваемых башен на 1
+                    mapdefens_legendary_worker_unitsInfo[i].towersBuild--;
+                    // если инженер достиг лимита воздвигаемых башен, то удаляем его из списка
+                    if (mapdefens_legendary_worker_unitsInfo[i].towersBuild == 0) {
+                        mapdefens_legendary_worker_unitsInfo.splice(i--, 1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        //////////////////////////////////////////
+        // логика поведения легендарных всадников
+        //////////////////////////////////////////
+        
+        for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
+            var raider = mapdefens_legendary_raider_unitsInfo[i].unit;
+            // отдел приказов
+            var ordersMind   = raider.OrdersMind;
+
+            // или юнит только что заспавнился и пока у него нету ид
+            if (raider.Id == 0 || ordersMind.OrdersCount > 5) {
+                continue;
+            }
+
+            // выделяем данного юнита
+            //inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
+
+            // генерируем 5 рандомных достижимых точек вокруг цели
+            var generator = generateRandomPositionInRect2D(mapdefens_goalCastle.Cell.X - 20, mapdefens_goalCastle.Cell.Y - 20, 40, 40);
+            for (var position = generator.next(); !position.done; position = generator.next()) {
+                if (unitCheckPathTo(raider, createPoint(position.value.X, position.value.Y))) {
+                    //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                    //var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
+                    //raider.Cfg.GetOrderWorker(raider, pointCommandArgs);
+
+                    ordersMind.AssignSmartOrder(createPoint(position.value.X, position.value.Y), AssignOrderMode.Queue, 100000);
+
+                    break;
+                }
+            }
+        }
+
+        //////////////////////////////////////////
+        // логика поведения почти всех юнитов
+        //////////////////////////////////////////
+
+        var enemyUnitsEnumerator = mapdefens_enemySettlement.Units.GetEnumerator();
+        var centerRect = { x: 72, y: 78, w: 110 - 72, h: 83 - 78 };
+
+        var generator  = generateRandomPositionInRect2D(centerRect.x, centerRect.y, centerRect.w, centerRect.h);
+        while (enemyUnitsEnumerator.MoveNext()) {
+            var unit         = enemyUnitsEnumerator.Current;
+            // отдел приказов
+            var ordersMind   = unit.OrdersMind;
+            
+            // Проверка что юнит бездействует
+            // или юнит только что заспавнился и пока у него нету ид
+            if (!ordersMind.IsIdle() || unit.Id == 0) {
+                continue;
+            }
+
+            // выделяем данного юнита
+            //inputSelectUnitsById(mapdefens_enemyPlayer, [unit.Id]);
+            
+            // если Y < 80, то оправляем сначала в центр
+            if (unit.Cell.Y < 80) {
+                var positionFound = false;
+                var position;
+                while (!positionFound) {
+                    for (position = generator.next(); !position.done; position = generator.next()) {
+                        if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], position.value.X, position.value.Y)) {
+                            positionFound = true;
+                            break;
+                        }
+                    }
+                    // генератор закончился, делаем новый
+                    if (!positionFound) {
+                        generator = generateRandomPositionInRect2D(centerRect.x, centerRect.y, centerRect.w, centerRect.h);
+                    }
+                }
+                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
+                var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
+
+                // вызывает рассинхрон
+                // 20% юнитов идут в обход
+                // var randomNumber = rnd.RandomNumber(1, 100);
+                // if (randomNumber <= 10) {
+                //     var position2 = { X: goalPosition.value.X - 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
+                //     inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     if (randomNumber <= 5) {
+                //         var position3 = { X: goalPosition.value.X - 30, Y: goalPosition.value.Y };
+                //         inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     }
+                // } else if (randomNumber <= 20) {
+                //     var position2 = { X: goalPosition.value.X + 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
+                //     inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     if (randomNumber <= 15) {
+                //         var position3 = { X: goalPosition.value.X + 30, Y: goalPosition.value.Y };
+                //         inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+                //     }
+                // }
+            }
+            
+            // в конце отправляем в атаку на цель
+            //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+            var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
+            unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
+        }
+        enemyUnitsEnumerator.Dispose();
+    }
+}
+
+function randomItem (array) {
+    var rnd = scena.GetRealScena().Context.Randomizer;
+    return array[rnd.RandomNumber(0, array.length - 1)];
+};
+
+function initWavePlan_1() {
+    broadcastMessage("волны пойдут по плану 1 (1 минута до первой волны)", createHordeColor(255, 255, 50, 10));
+
     mapdefens_spawnPlan = [];
     mapdefens_spawnPlan.push({
         message: "ВОЛНА 1",
@@ -514,433 +929,139 @@ export function mapdefens_onFirstRun() {
         ]
     }
     );
-
-    // тест
-    // mapdefens_spawnPlan = [];
-    // mapdefens_spawnPlan.push({
-    //    message: "ВОЛНА 1",
-    //    gameTickNum: 1 * 60 * 50,
-    //    units: [
-    //        { count: 1 * mapdefens_playersCount, cfgId: "UnitConfig_legendary_Raider" }
-    //    ]
-    // });
-
-    // прочее
-
-    // для корректной работы делаем пустой массив
-    if (!mapdefens_legendary_swordmen_unitsInfo) {
-        mapdefens_legendary_swordmen_unitsInfo = [];
-    }
-    if (!mapdefens_legendary_raider_unitsInfo) {
-        mapdefens_legendary_raider_unitsInfo = [];
-    }
-    if (!mapdefens_legendary_worker_unitsInfo) {
-        mapdefens_legendary_worker_unitsInfo = [];
-    }
 }
 
-export function mapdefens_everyTick(gameTickNum: number) {
-    var realScena   = scena.GetRealScena();
-    // Рандомизатор
-    var rnd         = realScena.Context.Randomizer;
-
-    // конец игры
-    if (mapdefens_isFinish) {
-        return;
-    }
+function initWavePlan_2() {
+    broadcastMessage("волны пойдут по плану 2 (5 минут до первой волны)", createHordeColor(255, 255, 50, 10));
     
-    // целевой объект разрушили - игроки проиграли
-    if ((!mapdefens_goalCastle || mapdefens_goalCastle.IsDead) && !mapdefens_isFinish) {
-        if (!mapdefens_goalCastle)
-            logi(1);
-        else if (mapdefens_goalCastle.IsDead)
-            logi(2);
-        else if (!mapdefens_isFinish)
-            logi(3);
-        mapdefens_isFinish = true;
-        broadcastMessage("ИГРОКИ ПРОИГРАЛИ", createHordeColor(255, 255, 50, 10));
-        for (var i = 0; i < mapdefens_playersMaxCount; i++) {
-            scena.GetRealScena().Settlements.Item.get("" + i).Existence.ForceDefeat();
-        }
-    }
-    // прошло gameEnd тиков - игроки победили
-    if (gameTickNum >= mapdefens_timeEnd) {
-        mapdefens_isFinish = true;
-        broadcastMessage("ИГРОКИ ПОБЕДИЛИ", createHordeColor(255, 255, 50, 10));
-        scena.GetRealScena().Settlements.Item.get("" + mapdefens_playersMaxCount).Existence.ForceDefeat();
+    mapdefens_spawnPlan = [];
+    var gameStartTick;
+
+    gameStartTick = 5 * 60 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 5 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Barbarian_Swordmen"
+            }]
+        });
     }
 
-    //////////////////////////////////////////
-    // обработка волн
-    //////////////////////////////////////////
-
-    if (mapdefens_spawnWaveNum < mapdefens_spawnPlan.length &&
-        mapdefens_spawnPlan[mapdefens_spawnWaveNum].gameTickNum <= gameTickNum) {
-        // отправляем сообщение в чат, если оно есть
-        if (mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]) {
-            logi(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"]);
-            
-            broadcastMessage(mapdefens_spawnPlan[mapdefens_spawnWaveNum]["message"], createHordeColor(255, 255, 50, 10));
-        }
-
-        // спавним юнитов
-        var generator = generateRandomPositionInRect2D(mapdefens_enemySpawnRectangle.x, mapdefens_enemySpawnRectangle.y, mapdefens_enemySpawnRectangle.w, mapdefens_enemySpawnRectangle.h);
-        for (var i = 0; i < mapdefens_spawnPlan[mapdefens_spawnWaveNum].units.length; i++) {
-            if (mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].count <= 0) {
-                continue;
-            }
-
-            var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
-                mapdefens_enemyUnitsCfg[mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId],
-                mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].count,
-                UnitDirection.Down,
-                generator);
-            
-            // информируем о легендарных противниках и их слабостях
-            var legendaryIndex = mapdefens_legendaryUnitsCFGId.indexOf(mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId);
-            if (legendaryIndex >= 0) {
-                broadcastMessage("Замечен " + mapdefens_enemyUnitsCfg[mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId].Name, createHordeColor(255, 255, 165, 10));
-                broadcastMessage(mapdefens_legendaryUnitsInformation[legendaryIndex], createHordeColor(255, 200, 130, 10));
-            }
-
-            // запоминаем некоторых легендарных юнитов в список
-            if ("UnitConfig_legendary_swordmen" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
-                for (var spawnedUnit of spawnedUnits) {
-                    mapdefens_legendary_swordmen_unitsInfo.push({
-                        unit:       spawnedUnit,
-                        cloneDepth: 0
-                    });
-                }
-            } else if ("UnitConfig_legendary_Raider" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
-                for (var spawnedUnit of spawnedUnits) {
-                    mapdefens_legendary_raider_unitsInfo.push({
-                        unit: spawnedUnit
-                    });
-                }
-            } else if ("UnitConfig_legendary_worker" == mapdefens_spawnPlan[mapdefens_spawnWaveNum].units[i].cfgId) {
-                for (var spawnedUnit of spawnedUnits) {
-                    mapdefens_legendary_worker_unitsInfo.push({
-                        unit: spawnedUnit,
-                        towersBuild: 2 + mapdefens_playersCount
-                    });
-                }
-            }
-        }
-
-        // переходим к следующему плану
-        mapdefens_spawnWaveNum++;
+    gameStartTick = 7 * 60 * 50 + 10 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Barbarian_Archer"
+            }]
+        });
     }
 
-    //////////////////////////////////////////
-    // обработка легендарных рыцарей
-    //////////////////////////////////////////
-
-    // регистрируем смерть легендарных рыцарей для клонирования
-    for (var i = 0; i < mapdefens_legendary_swordmen_unitsInfo.length; i++) {
-        // если рыцарь умер
-        if (mapdefens_legendary_swordmen_unitsInfo[i].unit.IsDead) {
-            // если существует конфиг для следующего уровня клонов, то спавним 2-ух клонов и увеличиваем уровень клонов на 1
-            var cloneCfg = mapdefens_enemyUnitsCfg["UnitConfig_legendary_swordmen_" + mapdefens_legendary_swordmen_unitsInfo[i].cloneDepth];
-            if (cloneCfg) {
-                // создаем генератор по спирали вокруг умершего рыцаря
-                var generator = generatePositionInSpiral(mapdefens_legendary_swordmen_unitsInfo[i].unit.Cell.X, mapdefens_legendary_swordmen_unitsInfo[i].unit.Cell.Y);
-                // спавним 2-ух рыцарей
-                var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
-                    cloneCfg,
-                    2,
-                    UnitDirection.Down,
-                    generator);
-                for (var spawnedUnit of spawnedUnits) {
-                    mapdefens_legendary_swordmen_unitsInfo.push({
-                        unit: spawnedUnit,
-                        cloneDepth: (mapdefens_legendary_swordmen_unitsInfo[i].cloneDepth + 1)
-                    });
-                }
-            }
-            
-            // удаляем из массива умершего рыцаря
-            mapdefens_legendary_swordmen_unitsInfo.splice(i--, 1);
-        }
+    gameStartTick = 10 * 60 * 50 + 20 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 3 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Barbarian_Heavymen"
+            }]
+        });
     }
 
-    //////////////////////////////////////////
-    // обработка легендарных всадников
-    //////////////////////////////////////////
-
-    // регистрируем смерть легендарных всадников
-    for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
-        // если всадник умер, то исключаем его из списка
-        if (mapdefens_legendary_raider_unitsInfo[i].unit.IsDead) {
-            mapdefens_legendary_raider_unitsInfo.splice(i--, 1);
-        }
+    gameStartTick = 14 * 60 * 50 + 55 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Barbarian_Archer_2"
+            }]
+        });
     }
-    // каждые 5 секунд спавним юнитов вокруг всадника
-    if (gameTickNum % 300 == 0) {
-        for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
-            var raider = mapdefens_legendary_raider_unitsInfo[i].unit;
-            var spawnUnitId;
-            var randomNumber = rnd.RandomNumber(1, 4);
-            if (randomNumber == 1) {
-                spawnUnitId = "UnitConfig_Barbarian_Swordmen";
-            } else if (randomNumber == 2) {
-                spawnUnitId = "UnitConfig_Barbarian_Archer";
-            } else if (randomNumber == 3) {
-                spawnUnitId = "UnitConfig_Barbarian_Archer_2";
-            } else {
-                spawnUnitId = "UnitConfig_Barbarian_Heavymen";
-            }
 
-            var generator    = generatePositionInSpiral(raider.Cell.X, raider.Cell.Y);
-            var spawnedUnits = spawnUnits(mapdefens_enemySettlement,
-                mapdefens_enemyUnitsCfg[spawnUnitId],
-                Math.min(mapdefens_playersCount, 3),
-                UnitDirection.Down,
-                generator);
+    gameStartTick = 16 * 60 * 50 + 20 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 45 * 50) {
+        var spawnCount = mapdefens_playersCount;
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Barbarian_Raider"
+            }]
+        });
+    }
+
+    gameStartTick = 18 * 60 * 50 + 35 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 45 * 50) {
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Slavyane_Catapult"
+            }]
+        });
+    }
+
+    gameStartTick = 19 * 60 * 50 + 5 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 45 * 50) {
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Slavyane_Balista"
+            }]
+        });
+    }
+
+    gameStartTick = 25 * 60 * 50 + 15 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 50 * 50) {
+        var spawnCount = mapdefens_playersCount;
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Mage_Mag_2"
+            }]
+        });
+    }
+
+    gameStartTick = 30 * 60 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 60 * 50) {
+        var spawnCount = mapdefens_playersCount;
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Mage_Villur"
+            }]
+        });
+    }
+
+    gameStartTick = 35 * 60 * 50 + 30 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 120 * 50) {
+        var spawnCount = mapdefens_playersCount;
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: spawnCount, cfgId: "UnitConfig_Mage_Olga"
+            }]
+        });
+    }
+
+    gameStartTick = 36 * 60 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 120 * 50) {
+        var spawnCount = Math.min(3, mapdefens_playersCount);
+
+        mapdefens_spawnPlan.push({
+            gameTickNum: gameTick,
+            units: []
+        });
+        for (var i = 0; i < spawnCount; i++) {
+            mapdefens_spawnPlan[mapdefens_spawnPlan.length - 1].units.push({count: 1, cfgId: randomItem(mapdefens_legendaryUnitsCFGId)});
         }
     }
 
-    //////////////////////////////////////////
-    // обработка легендарных рабочих
-    //////////////////////////////////////////
-
-    for (var i = 0; i < mapdefens_legendary_worker_unitsInfo.length; i++) {
-        // если всадник умер, то исключаем его из списка
-        if (mapdefens_legendary_worker_unitsInfo[i].unit.IsDead) {
-            mapdefens_legendary_worker_unitsInfo.splice(i--, 1);
-        }
-    }
-
-    //////////////////////////////////////////
-    // логика поведения юнитов
-    //////////////////////////////////////////
-
-    // приказываем врагам атаковать из места спавна
-    //if (gameTickNum % 180 == 0) {
-    //    // выделяем юнитов в точке спавна
-    //    inputSelectUnits(mapdefens_enemyPlayer,
-    //        createPoint(mapdefens_enemySpawnRectangle.x, mapdefens_enemySpawnRectangle.y),
-    //        createPoint(mapdefens_enemySpawnRectangle.x + mapdefens_enemySpawnRectangle.w, mapdefens_enemySpawnRectangle.y + mapdefens_enemySpawnRectangle.h));
-
-    //    // отправляем их в бой в ближайшую пустую точку к замку
-    //    var generator = generatePositionInSpiral(mapdefens_goalCastle.Cell.X, mapdefens_goalCastle.Cell.Y);
-    //    for (var position = generator.next(); !position.done; position = generator.next()) {
-    //        if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], position.value.X, position.value.Y)) {
-    //            inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
-    //            break;
-    //        }
-    //    }
-    //}
-
-    // приказываем бездействующим юнитам врага атаковать
-    if (gameTickNum % 180 == 0) {
-        // позиция для атаки цели
-        var goalPosition;
-        {
-            var generator = generatePositionInSpiral(mapdefens_goalCastle.Cell.X, mapdefens_goalCastle.Cell.Y);
-            for (goalPosition = generator.next(); !goalPosition.done; goalPosition = generator.next()) {
-                if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], goalPosition.value.X, goalPosition.value.Y)) {
-                    break;
-                }
-            }
-        }
-
-        //////////////////////////////////////////
-        // логика поведения легендарных рабочих
-        //////////////////////////////////////////
-        
-        for (var i = 0; i < mapdefens_legendary_worker_unitsInfo.length; i++) {
-            var worker = mapdefens_legendary_worker_unitsInfo[i].unit;
-
-            // юнит только что заспавнился и пока у него нету ид
-            if (worker.Id == 0) {
-                continue;
-            }
-
-            // отдел приказов
-            var ordersMind   = worker.OrdersMind;
-
-            // юнит бездействует и у него фулл хп, то отправляем его на базу врага
-            if (ordersMind.IsIdle() && worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) {
-                // выделяем данного юнита
-                //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
-
-                // в конце отправляем в атаку на цель
-                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint);
-                var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-                worker.Cfg.GetOrderWorker(worker, pointCommandArgs);
-
-                logi("Рабочий бездействует, отправляем к врагу");
-
-                continue;
-            }
-
-            // проверка, что рабочий что-то строит
-            var currentOrderProducing = ordersMind.ActiveOrder.ProductUnit != undefined;
-
-            // проверка, что юнит готов строить башню
-            if (worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth ||
-                currentOrderProducing) {
-                continue;
-            }
-
-            // выделяем данного юнита
-            //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
-
-            // Отменить все приказы юнита
-            ordersMind.CancelOrders(true);
-
-            // ищем ближайшее место куда можно построить башню
-            var generator = generatePositionInSpiral(worker.Cell.X, worker.Cell.Y);
-            for (var position = generator.next(); !position.done; position = generator.next()) {
-                if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], position.value.X, position.value.Y)) {
-                    //inputProduceBuildingCommand(mapdefens_enemyPlayer, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].Uid, createPoint(position.value.X, position.value.Y), null);
-
-                    // делаем так, чтобы рабочий не отвлекался, когда строит башню (убираем реакцию на инстинкты)
-                    ordersMind.AssignSmartOrder(worker.Cell, AssignOrderMode.Replace, 100000);
-
-                    var produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], createPoint(position.value.X, position.value.Y));
-                    worker.Cfg.GetOrderWorker(worker, produceAtCommandArgs);
-
-                    // уменьшаем количество создаваемых башен на 1
-                    mapdefens_legendary_worker_unitsInfo[i].towersBuild--;
-                    // если рабочий достиг лимита воздвигаемых башен, то удаляем его из списка
-                    if (mapdefens_legendary_worker_unitsInfo[i].towersBuild == 0) {
-                        mapdefens_legendary_worker_unitsInfo.splice(i--, 1);
-                    }
-                    break;
-                }
-            }
-        }
-
-        //////////////////////////////////////////
-        // логика поведения легендарных всадников
-        //////////////////////////////////////////
-        
-        for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
-            var raider = mapdefens_legendary_raider_unitsInfo[i].unit;
-            // отдел приказов
-            var ordersMind   = raider.OrdersMind;
-
-            // или юнит только что заспавнился и пока у него нету ид
-            if (raider.Id == 0 || ordersMind.OrdersCount > 5) {
-                continue;
-            }
-
-            // выделяем данного юнита
-            //inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
-
-            // генерируем 5 рандомных достижимых точек вокруг цели
-            var generator = generateRandomPositionInRect2D(mapdefens_goalCastle.Cell.X - 20, mapdefens_goalCastle.Cell.Y - 20, 40, 40);
-            for (var position = generator.next(); !position.done; position = generator.next()) {
-                if (unitCheckPathTo(raider, createPoint(position.value.X, position.value.Y))) {
-                    //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-                    //var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-                    //raider.Cfg.GetOrderWorker(raider, pointCommandArgs);
-
-                    ordersMind.AssignSmartOrder(createPoint(position.value.X, position.value.Y), AssignOrderMode.Queue, 100000);
-
-                    break;
-                }
-            }
-        }
-
-        // for (var i = 0; i < mapdefens_legendary_raider_unitsInfo.length; i++) {
-        //     var raider = mapdefens_legendary_raider_unitsInfo[i].unit;
-        //     // отдел приказов
-        //     var ordersMind   = raider.OrdersMind;
-
-        //     // проверка, что у юнита менее 3 приказов
-        //     // или юнит только что заспавнился и пока у него нету ид
-        //     if (raider.Id == 0 || ordersMind.OrdersCount > 2) {
-        //         continue;
-        //     }
-
-        //     // выделяем данного юнита
-        //     //inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
-
-        //     // делаем так, чтобы всадник не отвлекался и бегал
-        //     ordersMind.AssignSmartOrder(raider.Cell, AssignOrderMode.Queue, 100000);
-
-        //     // генерируем 5 рандомных достижимых точек вокруг цели
-        //     var generator = generateRandomPositionInRect2D(mapdefens_goalCastle.Cell.X - 20, mapdefens_goalCastle.Cell.Y - 20, 40, 40);
-        //     for (var position = generator.next(), newOrders = 0; !position.done && newOrders < 5; position = generator.next()) {
-        //         if (unitCheckPathTo(raider, createPoint(position.value.X, position.value.Y))) {
-        //             newOrders++;
-        //             //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-        //             var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-        //             raider.Cfg.GetOrderWorker(raider, pointCommandArgs);
-        //         }
-        //     }
-        // }
-
-        //////////////////////////////////////////
-        // логика поведения почти всех юнитов
-        //////////////////////////////////////////
-        var enemyUnitsEnumerator = mapdefens_enemySettlement.Units.GetEnumerator();
-        var centerRect = { x: 72, y: 78, w: 110 - 72, h: 83 - 78 };
-
-        var generator  = generateRandomPositionInRect2D(centerRect.x, centerRect.y, centerRect.w, centerRect.h);
-        while (enemyUnitsEnumerator.MoveNext()) {
-            var unit         = enemyUnitsEnumerator.Current;
-            // отдел приказов
-            var ordersMind   = unit.OrdersMind;
-            
-            // Проверка что юнит бездействует
-            // или юнит только что заспавнился и пока у него нету ид
-            if (!ordersMind.IsIdle() || unit.Id == 0) {
-                continue;
-            }
-
-            // выделяем данного юнита
-            //inputSelectUnitsById(mapdefens_enemyPlayer, [unit.Id]);
-            
-            // если Y < 80, то оправляем сначала в центр
-            if (unit.Cell.Y < 80) {
-                var positionFound = false;
-                var position;
-                while (!positionFound) {
-                    for (position = generator.next(); !position.done; position = generator.next()) {
-                        if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], position.value.X, position.value.Y)) {
-                            positionFound = true;
-                            break;
-                        }
-                    }
-                    // генератор закончился, делаем новый
-                    if (!positionFound) {
-                        generator = generateRandomPositionInRect2D(centerRect.x, centerRect.y, centerRect.w, centerRect.h);
-                    }
-                }
-                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
-                var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
-
-                // вызывает рассинхрон
-                // 20% юнитов идут в обход
-                // var randomNumber = rnd.RandomNumber(1, 100);
-                // if (randomNumber <= 10) {
-                //     var position2 = { X: goalPosition.value.X - 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
-                //     inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                //     if (randomNumber <= 5) {
-                //         var position3 = { X: goalPosition.value.X - 30, Y: goalPosition.value.Y };
-                //         inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                //     }
-                // } else if (randomNumber <= 20) {
-                //     var position2 = { X: goalPosition.value.X + 30, Y: Math.floor((goalPosition.value.Y + position.value.Y) * 0.5) };
-                //     inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position2.X, position2.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                //     if (randomNumber <= 15) {
-                //         var position3 = { X: goalPosition.value.X + 30, Y: goalPosition.value.Y };
-                //         inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position3.X, position3.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                //     }
-                // }
-            }
-            
-            // в конце отправляем в атаку на цель
-            //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-            var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-            unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
-        }
-        enemyUnitsEnumerator.Dispose();
-    }
+    // сортируем в порядке тиков
+    mapdefens_spawnPlan.sort((a, b) => a.gameTickNum > b.gameTickNum ? 1 : -1);
 }
 
 } // namespace
