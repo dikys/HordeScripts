@@ -22,4 +22,32 @@ class MiraUtils {
 
         return true;
     }
+
+    static GetAllSettlements(): Array<any> {
+        var result: Array<any>;
+        var playersEnum = enumerate(players);
+        var player;
+        
+        while ((player = eNext(playersEnum)) !== undefined) {
+            result.push(player.GetRealPlayer().GetRealSettlement());
+        }
+
+        return result;
+    }
+
+    // ищет свободную клетку, ближайшую заданной
+    static FindFreeCell(point): any {
+        var unitsMap = scena.GetRealScena().UnitsMap;
+        
+        var generator = generatePositionInSpiral(point.X, point.Y);
+        var cell: any;
+        for (cell = generator.next(); !cell.done; cell = generator.next()) {
+            var unit = unitsMap.GetUpperUnit(cell.value.X, cell.value.Y);
+            if (!unit) {
+                return {X: cell.value.X, Y: cell.value.Y};
+            }
+        }
+
+        return null;
+    }
 }

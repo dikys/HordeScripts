@@ -4,6 +4,12 @@ class BuildingUpState extends MiraSettlementControllerState {
     
     OnEntry(): void {
         this.targetUnitsComposition = this.settlementController.StrategyController.GetArmyComposition();
+
+        for (var compositionItem of this.targetUnitsComposition) {
+            for (var i = 0; i < compositionItem.Count; i++) {
+                this.settlementController.TrainingController.AddToTrainingList(compositionItem.ConfigId);
+            }
+        }
     }
 
     OnExit(): void {
@@ -18,7 +24,7 @@ class BuildingUpState extends MiraSettlementControllerState {
         var composition = this.settlementController.GetCurrentEconomyComposition();
 
         if (MiraUtils.MapContains(composition, this.targetUnitsComposition)) {
-            //goto BuildUp state
+            this.settlementController.State = new ExterminatingState(this.settlementController);
         }
     }
 }

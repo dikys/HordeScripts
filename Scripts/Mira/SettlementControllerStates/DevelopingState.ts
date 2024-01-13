@@ -6,13 +6,26 @@ class DevelopingState extends MiraSettlementControllerState {
     //TODO:     while doing so maybe redo all cfg references to their ids instead of uids for performance sake
     //TODO: add different opening strategies (maybe through strategy controller)
     OnEntry(): void {
+        //TODO: rework this crap to something decent
         this.targetUnitsComposition.push(new MiraUnitCompositionItem("UnitConfig_Slavyane_Farm", 5));
         this.targetUnitsComposition.push(new MiraUnitCompositionItem("UnitConfig_Slavyane_Barrack", 1));
         this.targetUnitsComposition.push(new MiraUnitCompositionItem("UnitConfig_Slavyane_Sawmill", 1));
 
         this.targetUnitsComposition.push(new MiraUnitCompositionItem("UnitConfig_Slavyane_Worker1", 5));
 
-        //TODO: add units composition to the production list
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Farm");
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Farm");
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Farm");
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Farm");
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Farm");
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Barrack");
+        this.settlementController.BuildingController.AddToBuildList("UnitConfig_Slavyane_Sawmill");
+
+        this.settlementController.TrainingController.AddToTrainingList("UnitConfig_Slavyane_Worker1");
+        this.settlementController.TrainingController.AddToTrainingList("UnitConfig_Slavyane_Worker1");
+        this.settlementController.TrainingController.AddToTrainingList("UnitConfig_Slavyane_Worker1");
+        this.settlementController.TrainingController.AddToTrainingList("UnitConfig_Slavyane_Worker1");
+        this.settlementController.TrainingController.AddToTrainingList("UnitConfig_Slavyane_Worker1");
     }
 
     OnExit(): void {
