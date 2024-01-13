@@ -51,4 +51,8 @@ class TrainingSubcontroller extends MiraSubcontroller {
         this.trainingList = [];
         this.parentController.Log(MiraLogLevel.Debug, "Cleared target training list");
     }
+
+    public get TrainingList(): Array<string> {
+        return this.trainingList;
+    }
 }

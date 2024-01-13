@@ -84,7 +84,7 @@ class MiraSettlementController {
         var unit;
         
         while ((unit = eNext(units)) !== undefined) {
-            currentComposition[unit.Cfg.Uid] = currentComposition[unit.Cfg.Uid] ? currentComposition[unit.Cfg.Uid] + 1 : 1;
+            MiraUtils.IncrementMapItem(currentComposition, unit.Cfg.Uid);
         }
 
         return currentComposition;

@@ -41,6 +41,10 @@ class BuildingSubcontroller extends MiraSubcontroller {
         }
     }
 
+    public get BuildList(): Array<string> {
+        return this.buildList;
+    }
+
     GetFreeWorker() {
         //TODO: implement engagement of workers that are busy gathering resources
         var freeWorker = this.parentController.Settlement.Units.Professions.FreeWorkers.First();

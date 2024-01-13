@@ -22,6 +22,34 @@ class MiraSettlementData {
 }
 
 class MiraUtils {
+    static IncrementMapItem(map: any, key: string): void {
+        map[key] = map[key] ? map[key] + 1 : 1;
+    }
+
+    //TODO: get rid of different data types when working with unit compositions
+    static SubstractCompositionLists(
+        minuend: Array<MiraUnitCompositionItem>, 
+        subtrahend: any
+    ): Array<MiraUnitCompositionItem> {
+        
+        var newList: Array<MiraUnitCompositionItem> = [];
+
+        for (var minuendItem of minuend) {
+            if (subtrahend[minuendItem.ConfigId]) {
+                var newListItem = new MiraUnitCompositionItem(minuendItem.ConfigId, minuendItem.Count - subtrahend[minuendItem.ConfigId]);
+                
+                if (newListItem.Count > 0) {
+                    newList.push(newListItem);
+                }
+            }
+            else {
+                newList.push(minuendItem);
+            }
+        }
+
+        return newList;
+    }
+    
     static MapContains(map: any, subset: Array<MiraUnitCompositionItem>): boolean {
         for (var item of subset) {
             if ( !map[item.ConfigId] ) {
