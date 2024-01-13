@@ -14,20 +14,31 @@ enum MiraLogLevel {
 
 class Mira {
     static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
-    private static controllers: Array<MiraSettlementController>;
+    private static Controllers: Array<MiraSettlementController>;
     
     static Tick(tickNumber: number): void {
-        for (var controller of this.controllers) {
+        for (var controller of this.Controllers) {
             controller.Tick(tickNumber);
         }
     };
 
     static FirstRun(): void {
-
+        Mira.Controllers.length = 0;
+        Mira.AttachToPlayer("0");
     };
 
-    static AttachToPlayer(playerId: number): void {
-        
+    static AttachToPlayer(playerId: string): void {
+        var settlementData = MiraUtils.GetSettlementData(playerId);
+
+        if (!settlementData) {
+            return;
+        }
+
+        var controller = new MiraSettlementController(settlementData.Settlement, settlementData.MasterMind, playerId);
+        Mira.Controllers.push(controller);
+        controller.State = new DevelopingState(controller);
+
+        Mira.Info("Attached to player " + playerId);
     };
 
     //#region logging helpers

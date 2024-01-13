@@ -9,6 +9,16 @@ class MiraUnitCompositionItem {
     }
 }
 
+class MiraSettlementData {
+    public Settlement: any;
+    public MasterMind: any;
+
+    constructor(settlement, masterMind) {
+        this.Settlement = settlement;
+        this.MasterMind = masterMind;
+    }
+}
+
 class MiraUtils {
     static MapContains(map: Map<string, number>, subset: Array<MiraUnitCompositionItem>): boolean {
         for (var item of subset) {
@@ -35,7 +45,19 @@ class MiraUtils {
         return result;
     }
 
-    // ищет свободную клетку, ближайшую заданной
+    static GetSettlementData(playerId: string): MiraSettlementData {
+        var realPlayer = players[playerId].GetRealPlayer()
+        if (!realPlayer) {
+            return null;
+        }
+
+        var settlement = realPlayer.GetRealSettlement();
+        var masterMind = HordeUtils.getValue(realPlayer, "MasterMind");
+
+        return new MiraSettlementData(settlement, masterMind);
+    }
+
+    // finds a free cell nearest to given
     static FindFreeCell(point): any {
         var unitsMap = scena.GetRealScena().UnitsMap;
         
@@ -49,5 +71,9 @@ class MiraUtils {
         }
 
         return null;
+    }
+
+    static IssueAttackCommand(unit, player, location) {
+        
     }
 }

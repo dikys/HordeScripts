@@ -6,8 +6,8 @@
 class MiraSettlementController {
     public Settlement: any;
     public MasterMind: any;
+    public Player: any;
 
-    public PlayerID: string;
     public MiningController: MiningSubcontroller;
     public BuildingController: BuildingSubcontroller;
     public TrainingController: TrainingSubcontroller;
@@ -16,9 +16,9 @@ class MiraSettlementController {
     private subcontrollers: Array<MiraSubcontroller>;
     private state: MiraSettlementControllerState;
 
-    constructor (controlledSettlement, settlementMM, controlledPlayerId: string) {
+    constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
-        this.PlayerID = controlledPlayerId;
+        this.Player = controlledPlayer;
         this.MasterMind = settlementMM;
 
         this.MiningController = new MiningSubcontroller(this);
@@ -60,7 +60,7 @@ class MiraSettlementController {
     }
 
     Log(level: MiraLogLevel, message: string): void {
-        var logMessage = "[Settlement #" + this.PlayerID + "] " + message;
+        var logMessage = "[Settlement '" + this.Player.Nickname + "'] " + message;
         Mira.Log(level, logMessage);
     }
 

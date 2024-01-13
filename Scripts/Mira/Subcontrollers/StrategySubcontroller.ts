@@ -11,6 +11,10 @@ class StrategySubcontroller extends MiraSubcontroller {
         super(parent);
         this.buildEnemyList();
     }
+
+    public get Player(): any {
+        return this.parentController.Player;
+    }
     
     Tick(tickNumber: number): void {
         if (tickNumber % 10 !== 0) {
@@ -113,7 +117,7 @@ class StrategySubcontroller extends MiraSubcontroller {
     private composeSquads(): void {
         this.squads.length = 0;
         //TODO: compose more than one squad
-        var squad = new MiraSquad();
+        var squad = new MiraSquad(this);
         this.squads.push(squad);
 
         var units = enumerate(this.parentController.Settlement.Units);
@@ -151,12 +155,23 @@ class StrategySubcontroller extends MiraSubcontroller {
 
 class MiraSquad {
     Units: Array<any>; //but actually Unit
+    private controller: StrategySubcontroller;
+    
+    public get Controller(): StrategySubcontroller {
+        return this.controller;
+    }
+
+    constructor(controller: StrategySubcontroller){
+        this.controller = controller;
+    }
 
     Cleanup(): void {
         this.Units = this.Units.filter((unit) => {return !unit.IsAlive});
     }
 
     Attack(targetLocation: any): void {
-
+        for (var unit of this.Units) {
+            MiraUtils.IssueAttackCommand(unit, this.controller.Player, targetLocation);
+        }
     }
 }

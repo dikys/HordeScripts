@@ -12,6 +12,10 @@ class ExterminatingState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
+        if (tickNumber % 10 > 0) {
+            return;
+        }
+        
         var enemy = this.settlementController.StrategyController.CurrentEnemy;
         
         if (!enemy) {
