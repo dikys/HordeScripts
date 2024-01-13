@@ -3,6 +3,9 @@ class BuildingUpState extends MiraSettlementControllerState {
     private targetUnitsComposition: Array<MiraUnitCompositionItem>;
     
     OnEntry(): void {
+        this.settlementController.BuildingController.ClearBuildList();
+        this.settlementController.TrainingController.ClearTrainingList();
+        
         this.targetUnitsComposition = this.settlementController.StrategyController.GetArmyComposition();
 
         for (var compositionItem of this.targetUnitsComposition) {

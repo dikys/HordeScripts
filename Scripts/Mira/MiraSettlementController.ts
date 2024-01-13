@@ -13,13 +13,20 @@ class MiraSettlementController {
     public TrainingController: TrainingSubcontroller;
     public StrategyController: StrategySubcontroller;
     
-    private subcontrollers: Array<MiraSubcontroller>;
+    private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;
 
     constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
         this.Player = controlledPlayer;
         this.MasterMind = settlementMM;
+
+        if (!this.MasterMind.IsWorkMode) {
+            this.Log(MiraLogLevel.Debug, "engaging MasterMind");
+            this.MasterMind.IsWorkMode = true;
+        }
+
+        this.subcontrollers = [];
 
         this.MiningController = new MiningSubcontroller(this);
         this.subcontrollers.push(this.MiningController);
@@ -42,36 +49,36 @@ class MiraSettlementController {
     
     public set State(value: MiraSettlementControllerState) {
         if (this.state) {
-            this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.toString())
+            this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.constructor.name);
             this.state.OnExit();
         }
         
-        this.Log(MiraLogLevel.Debug, "Entering state " + this.state.toString())
         this.state = value;
+        this.Log(MiraLogLevel.Debug, "Entering state " + this.state.constructor.name);
         this.state.OnEntry();
     }
     
     Tick(tickNumber: number): void {
-        this.state.Tick(tickNumber);
-
         for (var subcontroller of this.subcontrollers) {
             subcontroller.Tick(tickNumber);
         }
+
+        this.state.Tick(tickNumber);
     }
 
     Log(level: MiraLogLevel, message: string): void {
-        var logMessage = "[Settlement '" + this.Player.Nickname + "'] " + message;
+        var logMessage = `[${this.Player.Nickname}] ${message}`;
         Mira.Log(level, logMessage);
     }
 
-    GetCurrentEconomyComposition(): Map<string, number> {
-        var currentComposition: Map<string, number>;
+    GetCurrentEconomyComposition(): any {
+        var currentComposition = {};
         
         var units = enumerate(this.Settlement.Units);
         var unit;
         
         while ((unit = eNext(units)) !== undefined) {
-            currentComposition[unit.Cfg.Uid]++;
+            currentComposition[unit.Cfg.Uid] = currentComposition[unit.Cfg.Uid] ? currentComposition[unit.Cfg.Uid] + 1 : 1;
         }
 
         return currentComposition;

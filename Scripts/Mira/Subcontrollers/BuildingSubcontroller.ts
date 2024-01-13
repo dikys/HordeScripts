@@ -3,7 +3,7 @@
 //TODO: probably reorganize build list to a queue
 
 class BuildingSubcontroller extends MiraSubcontroller {
-    private buildList: Array<string>;
+    private buildList: Array<string> = [];
 
     constructor (parent: MiraSettlementController) {
         super(parent);
@@ -18,12 +18,9 @@ class BuildingSubcontroller extends MiraSubcontroller {
             
             //!! most probably doesn't work as expected since worker is always free on this tick
             if (freeWorker) {
-                if (mmProductionDepartament.AddRequestToProduce(buildingConfig, 1)) {
+                if (MiraUtils.RequestMasterMindProduction(buildingConfig, mmProductionDepartament)) {
                     this.parentController.Log(MiraLogLevel.Debug, "Added " + buildingConfig + " to the production list");
                     producedBuildings.push(buildingConfig);
-                }
-                else {
-                    this.parentController.Log(MiraLogLevel.Debug, "Unable to add " + buildingConfig + " to the production list");
                 }
             }
             else {
@@ -31,12 +28,15 @@ class BuildingSubcontroller extends MiraSubcontroller {
             }
         }
 
-        for (var cfg of producedBuildings) {
-            const index = this.buildList.indexOf(cfg);
+        if (producedBuildings.length > 0) {
+            this.parentController.Log(MiraLogLevel.Debug, `Removed ${producedBuildings.length} from target building list`);
 
-            if (index > -1) {
-                this.buildList.splice(index, 1);
-                this.parentController.Log(MiraLogLevel.Debug, "Removed " + index.toString() + " from target production list");
+            for (var cfg of producedBuildings) {
+                const index = this.buildList.indexOf(cfg);
+
+                if (index > -1) {
+                    this.buildList.splice(index, 1);
+                }
             }
         }
     }

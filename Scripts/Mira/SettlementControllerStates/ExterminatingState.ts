@@ -1,6 +1,9 @@
 
 class ExterminatingState extends MiraSettlementControllerState {
     OnEntry(): void {
+        this.settlementController.BuildingController.ClearBuildList();
+        this.settlementController.TrainingController.ClearTrainingList();
+        
         if (!this.selectAndAttackEnemy()) {
             this.settlementController.State = new IdleState(this.settlementController);
             return;
@@ -34,12 +37,12 @@ class ExterminatingState extends MiraSettlementControllerState {
         }
         
         if (enemy) {
-            this.settlementController.Log(MiraLogLevel.Debug, "selected " + enemy.toString() + " as an enemy. proceeding to attack")
+            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. proceeding to attack`)
             this.settlementController.StrategyController.AttackEnemy();
             return true;
         }
         else {
-            this.settlementController.Log(MiraLogLevel.Info, "no enemies left. we are victorious!")
+            this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
             return false;
         }
     }

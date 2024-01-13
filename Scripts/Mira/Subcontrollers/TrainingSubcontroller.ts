@@ -4,32 +4,40 @@
 //TODO? probably reorganize code to an abstract producer...
 
 class TrainingSubcontroller extends MiraSubcontroller {
-    private trainingList: Array<string>;
+    private trainingList: Array<string> = [];
     
     constructor (parent: MiraSettlementController) {
         super(parent);
     }
 
     Tick(tickNumber: number): void {
+        if (tickNumber % 10 !== 0) {
+            return;
+        }
+
+        if (this.trainingList.length === 0) {
+            return;
+        }
+        
         var mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
         var producedUnits:Array<string> = []
         
         for (var traineeConfig of this.trainingList) {
-            if (mmProductionDepartament.AddRequestToProduce(traineeConfig, 1)) {
+            if (MiraUtils.RequestMasterMindProduction(traineeConfig, mmProductionDepartament)) {
                 this.parentController.Log(MiraLogLevel.Debug, "Added " + traineeConfig + " to the production list");
                 producedUnits.push(traineeConfig);
             }
-            else {
-                this.parentController.Log(MiraLogLevel.Debug, "Unable to add " + traineeConfig + " to the production list");
-            }            
         }
 
-        for (var cfg of producedUnits) {
-            const index = this.trainingList.indexOf(cfg);
+        if (producedUnits.length > 0) {
+            this.parentController.Log(MiraLogLevel.Debug, `Removed ${producedUnits.length} items from target training list`);
+            
+            for (var cfg of producedUnits) {
+                const index = this.trainingList.indexOf(cfg);
 
-            if (index > -1) {
-                this.trainingList.splice(index, 1);
-                this.parentController.Log(MiraLogLevel.Debug, "Removed " + index.toString() + " from target training list");
+                if (index > -1) {
+                    this.trainingList.splice(index, 1);
+                }
             }
         }
     }

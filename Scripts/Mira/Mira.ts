@@ -14,31 +14,42 @@ enum MiraLogLevel {
 
 class Mira {
     static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
-    private static Controllers: Array<MiraSettlementController>;
+    private static controllers: Array<MiraSettlementController> = [];
     
     static Tick(tickNumber: number): void {
-        for (var controller of this.Controllers) {
+        for (var controller of this.controllers) {
             controller.Tick(tickNumber);
         }
     };
 
     static FirstRun(): void {
-        Mira.Controllers.length = 0;
-        Mira.AttachToPlayer("0");
+        Mira.controllers.length = 0;
+        Mira.AttachToPlayer("1");
     };
 
     static AttachToPlayer(playerId: string): void {
+        Mira.Debug(`Begin attach to player ${playerId}`);
         var settlementData = MiraUtils.GetSettlementData(playerId);
 
         if (!settlementData) {
             return;
         }
 
-        var controller = new MiraSettlementController(settlementData.Settlement, settlementData.MasterMind, playerId);
-        Mira.Controllers.push(controller);
+        if (!settlementData.MasterMind) {
+            Mira.Error(`Unable to attach to player ${playerId}: player is not controlled by MasterMind`);
+            return;
+        }
+
+        var controller = new MiraSettlementController(
+            settlementData.Settlement, 
+            settlementData.MasterMind, 
+            settlementData.Player
+        );
+        
+        Mira.controllers.push(controller);
         controller.State = new DevelopingState(controller);
 
-        Mira.Info("Attached to player " + playerId);
+        Mira.Info(`Successfully attached to player ${playerId}`);
     };
 
     //#region logging helpers

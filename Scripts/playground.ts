@@ -24,6 +24,9 @@ function onFirstRun() {
 
     // Запускаем скрипты сцены
     scenaScriptsFirstRun();
+
+    // Инициализируем бота Mira
+    Mira.FirstRun();
 }
 
 
@@ -47,5 +50,8 @@ function everyTick(gameTickNum: number) {
 
     // Запускаем скрипты сцены
     scenaScriptsEveryTick(gameTickNum);
+    
+    // Обработчик такта в Mira
+    Mira.Tick(gameTickNum);
 }
 

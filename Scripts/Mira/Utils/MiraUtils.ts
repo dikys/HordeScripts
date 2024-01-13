@@ -1,4 +1,4 @@
-
+ 
 class MiraUnitCompositionItem {
     ConfigId: string;
     Count: number;
@@ -12,20 +12,22 @@ class MiraUnitCompositionItem {
 class MiraSettlementData {
     public Settlement: any;
     public MasterMind: any;
+    public Player: any;
 
-    constructor(settlement, masterMind) {
+    constructor(settlement, masterMind, player) {
         this.Settlement = settlement;
         this.MasterMind = masterMind;
+        this.Player = player;
     }
 }
 
 class MiraUtils {
-    static MapContains(map: Map<string, number>, subset: Array<MiraUnitCompositionItem>): boolean {
+    static MapContains(map: any, subset: Array<MiraUnitCompositionItem>): boolean {
         for (var item of subset) {
-            if ( !map.has(item.ConfigId) ) {
+            if ( !map[item.ConfigId] ) {
                 return false;
             }
-            else if (map[item.ConfigId] !== item.Count) {
+            else if (map[item.ConfigId] < item.Count) {
                 return false;
             }
         }
@@ -34,19 +36,17 @@ class MiraUtils {
     }
 
     static GetAllSettlements(): Array<any> {
-        var result: Array<any>;
-        var playersEnum = enumerate(players);
-        var player;
-        
-        while ((player = eNext(playersEnum)) !== undefined) {
+        var result: Array<any> = [];
+
+        for (var player of players) {
             result.push(player.GetRealPlayer().GetRealSettlement());
         }
-
+        
         return result;
     }
 
     static GetSettlementData(playerId: string): MiraSettlementData {
-        var realPlayer = players[playerId].GetRealPlayer()
+        var realPlayer = players[playerId].GetRealPlayer();
         if (!realPlayer) {
             return null;
         }
@@ -54,7 +54,7 @@ class MiraUtils {
         var settlement = realPlayer.GetRealSettlement();
         var masterMind = HordeUtils.getValue(realPlayer, "MasterMind");
 
-        return new MiraSettlementData(settlement, masterMind);
+        return new MiraSettlementData(settlement, masterMind, realPlayer);
     }
 
     // finds a free cell nearest to given
@@ -74,6 +74,13 @@ class MiraUtils {
     }
 
     static IssueAttackCommand(unit, player, location) {
+        inputSelectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
+        inputPointBasedCommand(player, createPoint(location.X, location.Y), UnitCommand.Attack, AssignOrderMode.Replace);
+    }
+
+    static RequestMasterMindProduction(unitConfig: string, productionDepartment: any) {
+        var cfg = HordeContent.GetUnitConfig(unitConfig);
         
+        return productionDepartment.AddRequestToProduce(cfg, 1);
     }
 }
