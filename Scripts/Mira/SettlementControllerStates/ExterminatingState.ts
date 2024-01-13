@@ -1,10 +1,13 @@
 
 class ExterminatingState extends MiraSettlementControllerState {
+    private readonly COMBATIVITY_THRESHOLD = 0.5;
+    
     OnEntry(): void {
         this.settlementController.BuildingController.ClearBuildList();
         this.settlementController.TrainingController.ClearTrainingList();
         
         if (!this.selectAndAttackEnemy()) {
+            this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
             this.settlementController.State = new IdleState(this.settlementController);
             return;
         }
@@ -18,14 +21,22 @@ class ExterminatingState extends MiraSettlementControllerState {
         if (tickNumber % 10 > 0) {
             return;
         }
-        
-        var enemy = this.settlementController.StrategyController.CurrentEnemy;
-        
-        if (!enemy) {
-            if (!this.selectAndAttackEnemy()) {
-                this.settlementController.State = new IdleState(this.settlementController);
-                return;
+
+        var combativityIndex = this.settlementController.StrategyController.CurrentCombativityIndex;
+
+        if (combativityIndex >= this.COMBATIVITY_THRESHOLD) {   
+            var enemy = this.settlementController.StrategyController.CurrentEnemy;
+            
+            if (!enemy) {
+                if (!this.selectAndAttackEnemy()) {
+                    this.settlementController.State = new IdleState(this.settlementController);
+                    return;
+                }
             }
+        }
+        else {
+            this.settlementController.StrategyController.Pullback();
+            this.settlementController.State = new DevelopingState(this.settlementController);
         }
     }
 

@@ -74,8 +74,16 @@ class MiraUtils {
     }
 
     static IssueAttackCommand(unit, player, location) {
+        MiraUtils.issueCommand(unit, player, location, UnitCommand.Attack);
+    }
+
+    static IssueMoveCommand(unit, player, location) {
+        MiraUtils.issueCommand(unit, player, location, UnitCommand.Move);
+    }
+
+    private static issueCommand(unit, player, location, command) {
         inputSelectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
-        inputPointBasedCommand(player, createPoint(location.X, location.Y), UnitCommand.Attack, AssignOrderMode.Replace);
+        inputPointBasedCommand(player, createPoint(location.X, location.Y), command, AssignOrderMode.Replace);
     }
 
     static RequestMasterMindProduction(unitConfig: string, productionDepartment: any) {

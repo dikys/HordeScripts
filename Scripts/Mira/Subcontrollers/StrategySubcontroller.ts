@@ -1,10 +1,11 @@
 //TODO: add unit types analysis and listing from game configs
 
 class StrategySubcontroller extends MiraSubcontroller {
-    CurrentEnemy: any; //but actually Settlement
-
+    private readonly SQUAD_COMBATIVITY_THRESHOLD = 0.25;
+    private currentEnemy: any; //but actually Settlement
     private enemySettlements: Array<any> = []; //but actually settlement
     private squads: Array<MiraSquad> = [];
+    private initialSquadCount: number;
     private currentTarget: any; //but actually Unit
     
     constructor (parent: MiraSettlementController) {
@@ -15,6 +16,20 @@ class StrategySubcontroller extends MiraSubcontroller {
     public get Player(): any {
         return this.parentController.Player;
     }
+
+    public get CurrentCombativityIndex(): number {
+        var combativityIndex = 0;
+
+        for (var squad of this.squads) {
+            combativityIndex += squad.CombativityIndex / this.initialSquadCount;
+        }
+
+        return combativityIndex;
+    }
+
+    public get CurrentEnemy(): any {
+        return this.currentEnemy;
+    }
     
     Tick(tickNumber: number): void {
         if (tickNumber % 10 !== 0) {
@@ -22,29 +37,37 @@ class StrategySubcontroller extends MiraSubcontroller {
         }
 
         this.updateSquads();
+        
+        var pullbackLocation = this.getPullbackCell();
 
-        if (!this.CurrentEnemy) {
+        if (pullbackLocation) {
+            for (var squad of this.squads) {
+                if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
+                    squad.Pullback(pullbackLocation);
+                }
+            }
+        }
+
+        if (!this.currentEnemy) {
             return;
         }
 
-        if (this.CurrentEnemy.TotalDefeat) {
+        if (this.currentEnemy.TotalDefeat) {
             this.parentController.Log(MiraLogLevel.Debug, "Enemy defeated");
             return;
         }
         
         if (!this.currentTarget?.IsAlive) {
-            this.currentTarget = this.getTarget(this.CurrentEnemy);
+            this.currentTarget = this.getTarget(this.currentEnemy);
 
             if (this.currentTarget) {
                 this.issueAttackCommand();
             }
             else {
                 this.parentController.Log(MiraLogLevel.Debug, "No valid targets left to attack");
-                this.CurrentEnemy = null;
+                this.currentEnemy = null;
             }
         }
-
-        //TODO: detect squad losses and report it
     }
 
     GetArmyComposition(): Array<MiraUnitCompositionItem> {
@@ -61,35 +84,55 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     SelectEnemy(): any { //but actually Settlement
-        this.CurrentEnemy = null;
+        this.currentEnemy = null;
         
         for (var enemy of this.enemySettlements) {
             if (!enemy.Existence.TotalDefeat) {
-                this.CurrentEnemy = enemy;
+                this.currentEnemy = enemy;
                 break;
             }
         }
 
-        return this.CurrentEnemy;
+        return this.currentEnemy;
     }
 
-    ResetEnemy() {
-        this.CurrentEnemy = null;
+    ResetEnemy(): void {
+        this.currentEnemy = null;
     }
 
     AttackEnemy(): void {
-        if (!this.CurrentEnemy) {
+        if (!this.currentEnemy) {
             this.parentController.Log(MiraLogLevel.Warning, "Unable to attack enemy: enemy not selected");
             return;
         }
 
         if (!this.currentTarget) {
-            this.currentTarget = this.getTarget(this.CurrentEnemy);
+            this.currentTarget = this.getTarget(this.currentEnemy);
             this.parentController.Log(MiraLogLevel.Debug, `Selected '${this.currentTarget.Name}' as attack target`);
         }
 
         this.composeSquads();
         this.issueAttackCommand();
+    }
+
+    Pullback(): void {
+        var pullbackLocation = this.getPullbackCell();
+
+        if (pullbackLocation) {
+            for (var squad of this.squads) {
+                squad.Pullback(pullbackLocation);
+            }
+        }
+    }
+
+    private getPullbackCell(): any {
+        var castle = this.parentController.Settlement.Units.Professions.MainBuildings.First();
+
+        if (castle) {
+            return castle.Cell;
+        }
+
+        return null;
     }
 
     private issueAttackCommand(): void {
@@ -120,6 +163,8 @@ class StrategySubcontroller extends MiraSubcontroller {
         for (var squad of this.squads) {
             squad.Cleanup();
         }
+
+        this.squads = this.squads.filter((squad) => {return squad.Units.length === 0});
     }
 
     private composeSquads(): void {
@@ -139,10 +184,11 @@ class StrategySubcontroller extends MiraSubcontroller {
             }
         }
 
-        var squad = new MiraSquad(this);
+        var squad = new MiraSquad(combatUnits, this);
         this.squads.push(squad);
+        this.initialSquadCount = this.squads.length;
 
-        this.parentController.Log(MiraLogLevel.Debug, `Squads composed`);
+        this.parentController.Log(MiraLogLevel.Debug, `${this.initialSquadCount} squads composed`);
     }
 
     //TODO: use more generic approach to detecting whether unit is combat or not
@@ -152,7 +198,7 @@ class StrategySubcontroller extends MiraSubcontroller {
 
     // Returns one of enemy's production buildings
     //TODO: rework target selection based on current map rules
-    getTarget(
+    private getTarget(
         enemySettlement: any //but actually Settlement
     ): any { //but actually Point2D
         if (!enemySettlement.Existence.TotalDefeat) {
