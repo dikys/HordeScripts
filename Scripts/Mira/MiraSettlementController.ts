@@ -15,6 +15,7 @@ class MiraSettlementController {
     
     private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;
+    private nextState: MiraSettlementControllerState;
 
     constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
@@ -48,17 +49,22 @@ class MiraSettlementController {
     }
     
     public set State(value: MiraSettlementControllerState) {
-        if (this.state) {
-            this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.constructor.name);
-            this.state.OnExit();
-        }
-        
-        this.state = value;
-        this.Log(MiraLogLevel.Debug, "Entering state " + this.state.constructor.name);
-        this.state.OnEntry();
+        this.nextState = value;
     }
     
     Tick(tickNumber: number): void {
+        if (this.nextState) {
+            if (this.state) {
+                this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.constructor.name);
+                this.state.OnExit();
+            }
+            
+            this.state = this.nextState;
+            this.nextState = null;
+            this.Log(MiraLogLevel.Debug, "Entering state " + this.state.constructor.name);
+            this.state.OnEntry();
+        }
+        
         for (var subcontroller of this.subcontrollers) {
             subcontroller.Tick(tickNumber);
         }
