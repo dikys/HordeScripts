@@ -1,3 +1,3 @@
 # HordeScripts
 
-См. примеры в `Scripts/examples.ts`
+См. примеры в `Scripts/examples/`
