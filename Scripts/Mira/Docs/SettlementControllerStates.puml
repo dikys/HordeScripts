@@ -6,6 +6,7 @@ state EXPLOIT {
     state GatherUp: Build an army that\ncounters enemy strategy
 
     state Exploit_Entry <<inputPin>>
+
     Exploit_Entry --> Develop
     Develop -[#Red]-> Defend: Attacked
     Defend -[#Red]-> Develop: Attack countered
@@ -30,6 +31,7 @@ Exploit_ArmyGathered -right-> Exterminate: Army gathered
 
 Exterminate --> [*]: Enemy defeated
 Exterminate --> Exploit_Entry: Army slain
+Exterminate -[#Red]-> Defend: Main or expand attacked
 
 
 legend
