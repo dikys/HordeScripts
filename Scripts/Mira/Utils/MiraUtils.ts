@@ -31,7 +31,6 @@ class MiraUtils {
         minuend: Array<MiraUnitCompositionItem>, 
         subtrahend: any
     ): Array<MiraUnitCompositionItem> {
-        
         var newList: Array<MiraUnitCompositionItem> = [];
 
         for (var minuendItem of minuend) {
@@ -106,7 +105,7 @@ class MiraUtils {
     }
 
     static IssueMoveCommand(unit, player, location) {
-        MiraUtils.issueCommand(unit, player, location, UnitCommand.Move);
+        MiraUtils.issueCommand(unit, player, location, UnitCommand.MoveToPoint);
     }
 
     private static issueCommand(unit, player, location, command) {

@@ -164,7 +164,7 @@ class StrategySubcontroller extends MiraSubcontroller {
             squad.Cleanup();
         }
 
-        this.squads = this.squads.filter((squad) => {return squad.Units.length === 0});
+        this.squads = this.squads.filter((squad) => {return squad.Units.length > 0});
     }
 
     private composeSquads(): void {

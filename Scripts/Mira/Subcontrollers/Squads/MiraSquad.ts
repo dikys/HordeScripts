@@ -1,7 +1,7 @@
 class MiraSquad {
     Units: Array<any>; //but actually Unit
     private controller: StrategySubcontroller;
-    private initialUnitCount:number;
+    private initialUnitCount: number;
     
     public get Controller(): StrategySubcontroller {
         return this.controller;
@@ -18,7 +18,7 @@ class MiraSquad {
     }
 
     Cleanup(): void {
-        this.Units = this.Units.filter((unit) => {return !unit.IsAlive});
+        this.Units = this.Units.filter((unit) => {return unit.IsAlive});
     }
 
     Attack(targetLocation: any): void {

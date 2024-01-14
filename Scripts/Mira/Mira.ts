@@ -13,13 +13,21 @@ enum MiraLogLevel {
 */
 
 class Mira {
-    static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
+    static LogLevel: MiraLogLevel = MiraLogLevel.Info;
+    
     private static controllers: Array<MiraSettlementController> = [];
     
     static Tick(tickNumber: number): void {
         for (var controller of this.controllers) {
-            controller.Tick(tickNumber);
+            if (!controller.Settlement.Existence.TotalDefeat) {
+                controller.Tick(tickNumber);
+            }
+            else {
+                Mira.Log(MiraLogLevel.Info, `Controller '${controller.Player.Nickname}' lost the battle, but not the war!`);
+            }
         }
+
+        this.controllers = this.controllers.filter((controller) => {return !controller.Settlement.Existence.TotalDefeat});
     };
 
     static FirstRun(): void {

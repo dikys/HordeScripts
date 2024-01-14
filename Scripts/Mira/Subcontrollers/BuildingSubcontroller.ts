@@ -10,6 +10,10 @@ class BuildingSubcontroller extends MiraSubcontroller {
     }
     
     Tick(tickNumber: number): void {
+        if (tickNumber % 10 > 0) {
+            return;
+        }
+        
         var mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
         var producedBuildings:Array<string> = []
 

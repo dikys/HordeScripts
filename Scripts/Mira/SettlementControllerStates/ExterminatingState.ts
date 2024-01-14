@@ -35,6 +35,7 @@ class ExterminatingState extends MiraSettlementControllerState {
             }
         }
         else {
+            this.settlementController.Log(MiraLogLevel.Debug, `Current combativity index '${combativityIndex}' is too low. Retreating...`);
             this.settlementController.StrategyController.Pullback();
             this.settlementController.State = new DevelopingState(this.settlementController);
         }
@@ -48,7 +49,7 @@ class ExterminatingState extends MiraSettlementControllerState {
         }
         
         if (enemy) {
-            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. proceeding to attack`)
+            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. Proceeding to attack`)
             this.settlementController.StrategyController.AttackEnemy();
             return true;
         }

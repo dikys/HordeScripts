@@ -27,7 +27,7 @@ class DevelopingState extends MiraSettlementControllerState {
         //do nothing
     }
 
-    //TODO: GetCurrentEconomyComposition() is called 3 times in a tick. do something about it
+    //TODO: GetCurrentEconomyComposition() is called 3 times per tick. do something about it
     Tick(tickNumber: number): void {
         if (tickNumber % 5 != 0) {
             return;
@@ -37,7 +37,10 @@ class DevelopingState extends MiraSettlementControllerState {
 
         var composition = this.settlementController.GetCurrentEconomyComposition();
 
-        if (MiraUtils.MapContains(composition, this.targetUnitsComposition)) {
+        if (
+            MiraUtils.MapContains(composition, this.targetUnitsComposition) &&
+            MiraUtils.MapContains(composition, this.targetBuildingComposition)
+        ) {
             this.settlementController.State = new BuildingUpState(this.settlementController);
         }
     }
