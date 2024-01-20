@@ -3,6 +3,7 @@
 // --- Глобальные переменные
 
 BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
+AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
 
 
 // ===================================================
