@@ -23,13 +23,24 @@ function makeFlags(flagsType, flagsArray) {
 
 /**
  * Делает IEnumerable перечислимым в JS.
+ * 
+ * Пример:
+ * ```
+ * var settlements = enumerate(scena.GetRealScena().Settlements);
+ * while ((settlement = eNext(settlements)) !== undefined) {
+ *     // do somthing with settlement
+ * }
+ * ```
  */
 function* enumerate(enumerable) {
-    var enumerator = enumerable.GetEnumerator();
+    var IEnumeratorT = xHost.type('System.Collections.IEnumerator');
+    var enumerator = xHost.cast(IEnumeratorT, enumerable.GetEnumerator());
     while (enumerator.MoveNext()) {
         yield enumerator.Current;
     }
-    enumerator.Dispose();
+    
+    var IDisposableT = xHost.type('System.IDisposable');
+    xHost.cast(IDisposableT, enumerator).Dispose();
 }
 function eNext(enumerated) {
     var next = enumerated.next();
