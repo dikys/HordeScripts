@@ -16,6 +16,7 @@ class MiraSettlementController {
     private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;
     private nextState: MiraSettlementControllerState;
+    private currentUnitComposition: Map<string, number>;
 
     constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
@@ -53,6 +54,8 @@ class MiraSettlementController {
     }
     
     Tick(tickNumber: number): void {
+        this.currentUnitComposition = undefined;
+        
         if (this.nextState) {
             if (this.state) {
                 this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.constructor.name);
@@ -78,15 +81,17 @@ class MiraSettlementController {
     }
 
     GetCurrentEconomyComposition(): Map<string, number> {
-        var currentComposition = new Map<string, number>();
+        if (!this.currentUnitComposition) {
+            this.currentUnitComposition = new Map<string, number>();
         
-        var units = enumerate(this.Settlement.Units);
-        var unit;
-        
-        while ((unit = eNext(units)) !== undefined) {
-            MiraUtils.IncrementMapItem(currentComposition, unit.Cfg.Uid);
+            var units = enumerate(this.Settlement.Units);
+            var unit;
+            
+            while ((unit = eNext(units)) !== undefined) {
+                MiraUtils.IncrementMapItem(this.currentUnitComposition, unit.Cfg.Uid);
+            }
         }
 
-        return currentComposition;
+        return new Map(this.currentUnitComposition);
     }
 }

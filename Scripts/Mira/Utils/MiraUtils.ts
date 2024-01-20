@@ -12,6 +12,14 @@ class MiraSettlementData {
 }
 
 class MiraUtils {
+    static PrintMap(map: Map<string, number>) {
+        map.forEach(
+            (value, key, m) => {
+                Mira.Log(MiraLogLevel.Debug, `${key}: ${value}`);
+            }
+        )
+    }
+    
     static IncrementMapItem(map: Map<string, number>, key: string): void {
         if (map.has(key)) {
             map.set(key, map.get(key) + 1);

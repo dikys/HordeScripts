@@ -23,7 +23,6 @@ class DevelopingState extends MiraSettlementControllerState {
         //do nothing
     }
 
-    //TODO: GetCurrentEconomyComposition() is called 3 times per tick. do something about it
     Tick(tickNumber: number): void {
         if (tickNumber % 5 != 0) {
             return;
