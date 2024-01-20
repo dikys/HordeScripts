@@ -952,9 +952,9 @@ function initWavePlan_2() {
     mapdefens_spawnPlan = [];
     var gameStartTick;
 
-    gameStartTick = 5 * 60 * 50;
+    gameStartTick = 3 * 60 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
-        var spawnCount = Math.round(mapdefens_playersCount * (1 + 5 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        var spawnCount = Math.round(mapdefens_playersCount * 12 * (mapdefens_timeEnd - gameTick) / (mapdefens_timeEnd - gameStartTick));
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -965,7 +965,7 @@ function initWavePlan_2() {
 
     gameStartTick = 7 * 60 * 50 + 10 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
-        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        var spawnCount = Math.round(mapdefens_playersCount * (2 + 6 * (mapdefens_timeEnd - gameTick) / (mapdefens_timeEnd - gameStartTick)));
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -976,7 +976,7 @@ function initWavePlan_2() {
 
     gameStartTick = 10 * 60 * 50 + 20 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
-        var spawnCount = Math.round(mapdefens_playersCount * (1 + 3 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        var spawnCount = Math.round(mapdefens_playersCount * (3 + 10 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -987,7 +987,7 @@ function initWavePlan_2() {
 
     gameStartTick = 14 * 60 * 50 + 55 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 30 * 50) {
-        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        var spawnCount = Math.round(mapdefens_playersCount * (2 + 5 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1009,7 +1009,7 @@ function initWavePlan_2() {
 
     gameStartTick = 18 * 60 * 50 + 35 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 45 * 50) {
-        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 1 * (mapdefens_timeEnd - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1020,7 +1020,7 @@ function initWavePlan_2() {
 
     gameStartTick = 19 * 60 * 50 + 5 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 45 * 50) {
-        var spawnCount = Math.round(mapdefens_playersCount * (1 + 2 * (gameTick - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
+        var spawnCount = Math.round(mapdefens_playersCount * (1 + 1 * (mapdefens_timeEnd - gameStartTick) / (mapdefens_timeEnd - gameStartTick)));
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1031,7 +1031,13 @@ function initWavePlan_2() {
 
     gameStartTick = 25 * 60 * 50 + 15 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 50 * 50) {
-        var spawnCount = mapdefens_playersCount;
+        var spawnCount = 1;
+        if (mapdefens_playersCount >= 5) {
+            spawnCount = 3;
+        } else if (mapdefens_playersCount >= 3) {
+            spawnCount = 2;
+        }
+
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1042,7 +1048,10 @@ function initWavePlan_2() {
 
     gameStartTick = 30 * 60 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 60 * 50) {
-        var spawnCount = mapdefens_playersCount;
+        var spawnCount = 0;
+        if (mapdefens_playersCount >= 3) {
+            spawnCount = 1;
+        }
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1053,7 +1062,10 @@ function initWavePlan_2() {
 
     gameStartTick = 35 * 60 * 50 + 30 * 50;
     for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 120 * 50) {
-        var spawnCount = mapdefens_playersCount;
+        var spawnCount = 1;
+        if (mapdefens_playersCount >= 4) {
+            spawnCount = 2;
+        }
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1062,9 +1074,14 @@ function initWavePlan_2() {
         });
     }
 
-    gameStartTick = 36 * 60 * 50;
-    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 120 * 50) {
-        var spawnCount = Math.min(3, mapdefens_playersCount);
+    gameStartTick = 14 * 60 * 50;
+    for (var gameTick = gameStartTick; gameTick < mapdefens_timeEnd; gameTick += 150 * 50) {
+        var spawnCount = 1;
+        if (mapdefens_playersCount >= 5) {
+            spawnCount = 3;
+        } else if (mapdefens_playersCount >= 3) {
+            spawnCount = 2;
+        }
 
         mapdefens_spawnPlan.push({
             gameTickNum: gameTick,
