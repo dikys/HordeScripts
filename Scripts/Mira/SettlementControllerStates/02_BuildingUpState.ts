@@ -1,6 +1,6 @@
 
 class BuildingUpState extends MiraSettlementControllerState {
-    private targetUnitsComposition: Array<MiraUnitCompositionItem>;
+    private targetUnitsComposition: Map<string, number> = new Map<string, number>();
     
     OnEntry(): void {
         this.settlementController.BuildingController.ClearBuildList();
@@ -8,7 +8,7 @@ class BuildingUpState extends MiraSettlementControllerState {
         
         this.targetUnitsComposition = this.settlementController.StrategyController.GetArmyComposition();
 
-        this.refreshBuildLists();
+        this.refreshTargetBuildLists();
     }
 
     OnExit(): void {
@@ -20,16 +20,16 @@ class BuildingUpState extends MiraSettlementControllerState {
             return;
         }
 
-        this.refreshBuildLists();
+        this.refreshTargetBuildLists();
 
         var composition = this.settlementController.GetCurrentEconomyComposition();
 
-        if (MiraUtils.MapContains(composition, this.targetUnitsComposition)) {
+        if (MiraUtils.SetContains(composition, this.targetUnitsComposition)) {
             this.settlementController.State = new ExterminatingState(this.settlementController);
         }
     }
 
-    private getTrainingList(): Array<MiraUnitCompositionItem> {
+    private getRemainingTrainingList(): Map<string, number> {
         var currentEconomy = this.settlementController.GetCurrentEconomyComposition();
         
         for (var trainingListItem of this.settlementController.TrainingController.TrainingList) {
@@ -39,13 +39,15 @@ class BuildingUpState extends MiraSettlementControllerState {
         return MiraUtils.SubstractCompositionLists(this.targetUnitsComposition, currentEconomy);
     }
 
-    private refreshBuildLists(): void {
-        var trainingList = this.getTrainingList();
+    private refreshTargetBuildLists(): void {
+        var trainingList = this.getRemainingTrainingList();
         
-        for (var trainingItem of trainingList) {
-            for (var i = 0; i < trainingItem.Count; i++) {
-                this.settlementController.TrainingController.AddToTrainingList(trainingItem.ConfigId);
+        trainingList.forEach(
+            (val, key, map) => {
+                for (let i = 0; i < val; i++) {
+                    this.settlementController.TrainingController.AddToTrainingList(key);
+                }
             }
-        }
+        );
     }
 }

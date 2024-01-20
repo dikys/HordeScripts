@@ -13,7 +13,7 @@ enum MiraLogLevel {
 */
 
 class Mira {
-    static LogLevel: MiraLogLevel = MiraLogLevel.Info;
+    static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
     
     private static controllers: Array<MiraSettlementController> = [];
     

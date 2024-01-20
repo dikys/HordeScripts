@@ -1,13 +1,3 @@
- 
-class MiraUnitCompositionItem {
-    ConfigId: string;
-    Count: number;
-
-    constructor(configId, count) {
-        this.ConfigId = configId;
-        this.Count = count;
-    }
-}
 
 class MiraSettlementData {
     public Settlement: any;
@@ -22,44 +12,58 @@ class MiraSettlementData {
 }
 
 class MiraUtils {
-    static IncrementMapItem(map: any, key: string): void {
-        map[key] = map[key] ? map[key] + 1 : 1;
+    static IncrementMapItem(map: Map<string, number>, key: string): void {
+        if (map.has(key)) {
+            map.set(key, map.get(key) + 1);
+        }
+        else {
+            map.set(key, 1);
+        }
     }
 
     //TODO: get rid of different data types when working with unit compositions
     static SubstractCompositionLists(
-        minuend: Array<MiraUnitCompositionItem>, 
-        subtrahend: any
-    ): Array<MiraUnitCompositionItem> {
-        var newList: Array<MiraUnitCompositionItem> = [];
+        minuend: Map<string, number>, 
+        subtrahend: Map<string, number>
+    ): Map<string, number> {
+        var newList = new Map<string, number>();
 
-        for (var minuendItem of minuend) {
-            if (subtrahend[minuendItem.ConfigId]) {
-                var newListItem = new MiraUnitCompositionItem(minuendItem.ConfigId, minuendItem.Count - subtrahend[minuendItem.ConfigId]);
-                
-                if (newListItem.Count > 0) {
-                    newList.push(newListItem);
+        minuend.forEach(
+            (value, key, map) => {
+                if (subtrahend.has(key)) {
+                    var newCount = value - subtrahend.get(key);
+                    
+                    if (newCount > 0) {
+                        newList.set(key, newCount);
+                    }
+                }
+                else {
+                    newList.set(key, value);
                 }
             }
-            else {
-                newList.push(minuendItem);
-            }
-        }
+        );
 
         return newList;
     }
     
-    static MapContains(map: any, subset: Array<MiraUnitCompositionItem>): boolean {
-        for (var item of subset) {
-            if ( !map[item.ConfigId] ) {
-                return false;
-            }
-            else if (map[item.ConfigId] < item.Count) {
-                return false;
-            }
-        }
+    static SetContains(
+        set: Map<string, number>, 
+        subset: Map<string, number>
+    ): boolean {
+        var isContain = true;
 
-        return true;
+        subset.forEach( //using forEach here because keys(), values() or entries() return empty iterators for some reason
+            (val, key, m) => {
+                if ( !set.has(key) ) {
+                    isContain = false;
+                }
+                else if (set.get(key) < val) {
+                    isContain = false;
+                }    
+            }
+        )
+
+        return isContain;
     }
 
     static GetAllSettlements(): Array<any> {

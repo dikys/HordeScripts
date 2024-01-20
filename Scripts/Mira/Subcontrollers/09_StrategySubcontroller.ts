@@ -70,12 +70,12 @@ class StrategySubcontroller extends MiraSubcontroller {
         }
     }
 
-    GetArmyComposition(): Array<MiraUnitCompositionItem> {
+    GetArmyComposition(): Map<string, number> {
         //TODO: calculate army composition properly based on (discovered) enemy forces
-        var unitList: Array<MiraUnitCompositionItem> = [];
+        var unitList: Map<string, number> = new Map<string, number>();
 
-        unitList.push(new MiraUnitCompositionItem("#UnitConfig_Slavyane_Swordmen", 5));
-        unitList.push(new MiraUnitCompositionItem("#UnitConfig_Slavyane_Archer", 5));
+        unitList.set("#UnitConfig_Slavyane_Swordmen", 5);
+        unitList.set("#UnitConfig_Slavyane_Archer", 5);
 
         //!!DEBUG
         //unitList.push(new MiraUnitCompositionItem("#UnitConfig_Slavyane_Swordmen", 1));

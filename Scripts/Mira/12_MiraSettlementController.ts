@@ -77,8 +77,8 @@ class MiraSettlementController {
         Mira.Log(level, logMessage);
     }
 
-    GetCurrentEconomyComposition(): any {
-        var currentComposition = {};
+    GetCurrentEconomyComposition(): Map<string, number> {
+        var currentComposition = new Map<string, number>();
         
         var units = enumerate(this.Settlement.Units);
         var unit;
