@@ -21,7 +21,6 @@ class MiraUtils {
         }
     }
 
-    //TODO: get rid of different data types when working with unit compositions
     static SubstractCompositionLists(
         minuend: Map<string, number>, 
         subtrahend: Map<string, number>
