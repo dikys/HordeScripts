@@ -16,7 +16,7 @@ class MiraSettlementController {
     private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;
     private nextState: MiraSettlementControllerState;
-    private currentUnitComposition: Map<string, number>;
+    private currentUnitComposition: UnitComposition;
 
     constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
@@ -80,7 +80,7 @@ class MiraSettlementController {
         Mira.Log(level, logMessage);
     }
 
-    GetCurrentEconomyComposition(): Map<string, number> {
+    GetCurrentEconomyComposition(): UnitComposition {
         if (!this.currentUnitComposition) {
             this.currentUnitComposition = new Map<string, number>();
         

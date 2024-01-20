@@ -1,7 +1,7 @@
 
 class DevelopingState extends MiraSettlementControllerState {
-    private targetUnitsComposition: Map<string, number> = new Map<string, number>();
-    private targetBuildingComposition: Map<string, number> = new Map<string, number>();
+    private targetUnitsComposition: UnitComposition = new Map<string, number>();
+    private targetBuildingComposition: UnitComposition = new Map<string, number>();
     
     //TODO: use more generalized approach to initial economy composition
     //TODO:     while doing so maybe redo all cfg references to their ids instead of uids for performance sake
@@ -40,7 +40,7 @@ class DevelopingState extends MiraSettlementControllerState {
         }
     }
 
-    private getRemainingBuildList(): Map<string, number> {
+    private getRemainingBuildList(): UnitComposition {
         var currentEconomy = this.settlementController.GetCurrentEconomyComposition();
         
         for (var buildListItem of this.settlementController.BuildingController.BuildList) {
@@ -50,7 +50,7 @@ class DevelopingState extends MiraSettlementControllerState {
         return MiraUtils.SubstractCompositionLists(this.targetBuildingComposition, currentEconomy);
     }
 
-    private getRemainingTrainingList(): Map<string, number> {
+    private getRemainingTrainingList(): UnitComposition {
         var currentEconomy = this.settlementController.GetCurrentEconomyComposition();
         
         for (var trainingListItem of this.settlementController.TrainingController.TrainingList) {

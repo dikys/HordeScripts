@@ -1,6 +1,6 @@
 
 class BuildingUpState extends MiraSettlementControllerState {
-    private targetUnitsComposition: Map<string, number> = new Map<string, number>();
+    private targetUnitsComposition: UnitComposition = new Map<string, number>();
     
     OnEntry(): void {
         this.settlementController.BuildingController.ClearBuildList();
@@ -29,7 +29,7 @@ class BuildingUpState extends MiraSettlementControllerState {
         }
     }
 
-    private getRemainingTrainingList(): Map<string, number> {
+    private getRemainingTrainingList(): UnitComposition {
         var currentEconomy = this.settlementController.GetCurrentEconomyComposition();
         
         for (var trainingListItem of this.settlementController.TrainingController.TrainingList) {

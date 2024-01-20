@@ -11,8 +11,10 @@ class MiraSettlementData {
     }
 }
 
+type UnitComposition = Map<string, number>;
+
 class MiraUtils {
-    static PrintMap(map: Map<string, number>) {
+    static PrintMap(map: UnitComposition) {
         map.forEach(
             (value, key, m) => {
                 Mira.Log(MiraLogLevel.Debug, `${key}: ${value}`);
@@ -20,7 +22,7 @@ class MiraUtils {
         )
     }
     
-    static IncrementMapItem(map: Map<string, number>, key: string): void {
+    static IncrementMapItem(map: UnitComposition, key: string): void {
         if (map.has(key)) {
             map.set(key, map.get(key) + 1);
         }
@@ -30,9 +32,9 @@ class MiraUtils {
     }
 
     static SubstractCompositionLists(
-        minuend: Map<string, number>, 
-        subtrahend: Map<string, number>
-    ): Map<string, number> {
+        minuend: UnitComposition, 
+        subtrahend: UnitComposition
+    ): UnitComposition {
         var newList = new Map<string, number>();
 
         minuend.forEach(
@@ -54,8 +56,8 @@ class MiraUtils {
     }
     
     static SetContains(
-        set: Map<string, number>, 
-        subset: Map<string, number>
+        set: UnitComposition, 
+        subset: UnitComposition
     ): boolean {
         var isContain = true;
 
