@@ -1,14 +1,14 @@
 
-class BuildingUpState extends MiraSettlementControllerState {
+abstract class ProductionState extends MiraSettlementControllerState {
     private targetUnitsComposition: UnitComposition = new Map<string, number>();
+
+    protected abstract getTargetUnitsComposition(): UnitComposition;
+    protected abstract onTargetCompositionReached(): void;
     
     OnEntry(): void {
-        this.settlementController.BuildingController.ClearBuildList();
-        this.settlementController.TrainingController.ClearTrainingList();
-        
-        this.targetUnitsComposition = this.settlementController.StrategyController.GetArmyComposition();
-
-        this.refreshTargetBuildLists();
+        this.settlementController.ProductionController.CancelAllProduction();
+        this.targetUnitsComposition = this.getTargetUnitsComposition();
+        this.refreshTargetProductionLists();
     }
 
     OnExit(): void {
@@ -20,32 +20,32 @@ class BuildingUpState extends MiraSettlementControllerState {
             return;
         }
 
-        this.refreshTargetBuildLists();
+        this.refreshTargetProductionLists();
 
         var composition = this.settlementController.GetCurrentEconomyComposition();
 
         if (MiraUtils.SetContains(composition, this.targetUnitsComposition)) {
-            this.settlementController.State = new ExterminatingState(this.settlementController);
+            this.onTargetCompositionReached();
         }
     }
 
-    private getRemainingTrainingList(): UnitComposition {
+    private getRemainingProductionList(): UnitComposition {
         var currentEconomy = this.settlementController.GetCurrentEconomyComposition();
         
-        for (var trainingListItem of this.settlementController.TrainingController.TrainingList) {
+        for (var trainingListItem of this.settlementController.ProductionController.ProductionList) {
             MiraUtils.IncrementMapItem(currentEconomy, trainingListItem);
         }
 
         return MiraUtils.SubstractCompositionLists(this.targetUnitsComposition, currentEconomy);
     }
 
-    private refreshTargetBuildLists(): void {
-        var trainingList = this.getRemainingTrainingList();
+    private refreshTargetProductionLists(): void {
+        var trainingList = this.getRemainingProductionList();
         
         trainingList.forEach(
             (val, key, map) => {
                 for (let i = 0; i < val; i++) {
-                    this.settlementController.TrainingController.AddToTrainingList(key);
+                    this.settlementController.ProductionController.RequestProduction(key);
                 }
             }
         );

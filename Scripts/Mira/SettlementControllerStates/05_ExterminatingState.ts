@@ -3,8 +3,7 @@ class ExterminatingState extends MiraSettlementControllerState {
     private readonly COMBATIVITY_THRESHOLD = 0.5;
     
     OnEntry(): void {
-        this.settlementController.BuildingController.ClearBuildList();
-        this.settlementController.TrainingController.ClearTrainingList();
+        this.settlementController.ProductionController.CancelAllProduction();
         
         if (!this.selectAndAttackEnemy()) {
             this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")

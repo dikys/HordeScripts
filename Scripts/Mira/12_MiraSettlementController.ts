@@ -9,8 +9,7 @@ class MiraSettlementController {
     public Player: any;
 
     public MiningController: MiningSubcontroller;
-    public BuildingController: BuildingSubcontroller;
-    public TrainingController: TrainingSubcontroller;
+    public ProductionController: ProductionSubcontroller;
     public StrategyController: StrategySubcontroller;
     
     private subcontrollers: Array<MiraSubcontroller> = [];
@@ -33,11 +32,8 @@ class MiraSettlementController {
         this.MiningController = new MiningSubcontroller(this);
         this.subcontrollers.push(this.MiningController);
 
-        this.BuildingController = new BuildingSubcontroller(this);
-        this.subcontrollers.push(this.BuildingController);
-
-        this.TrainingController = new TrainingSubcontroller(this);
-        this.subcontrollers.push(this.TrainingController);
+        this.ProductionController = new ProductionSubcontroller(this);
+        this.subcontrollers.push(this.ProductionController);
 
         this.StrategyController = new StrategySubcontroller(this);
         this.subcontrollers.push(this.StrategyController);

@@ -131,4 +131,15 @@ class MiraUtils {
         
         return productionDepartment.AddRequestToProduce(cfg, 1);
     }
+
+    static GetProduceList(unit: any) {
+        var producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+        var produceList = enumerate(producerParams.CanProduceList);
+        var produceListItem;
+        var result = [];
+
+        while ((produceListItem = eNext(produceList)) !== undefined) {
+            result.push(produceListItem.Uid);
+        }
+    }
 }
