@@ -43,7 +43,7 @@ class StrategySubcontroller extends MiraSubcontroller {
         if (pullbackLocation) {
             for (var squad of this.squads) {
                 if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                    squad.Pullback(pullbackLocation);
+                    squad.Move(pullbackLocation);
                 }
             }
         }
@@ -120,7 +120,7 @@ class StrategySubcontroller extends MiraSubcontroller {
 
         if (pullbackLocation) {
             for (var squad of this.squads) {
-                squad.Pullback(pullbackLocation);
+                squad.Move(pullbackLocation);
             }
         }
     }

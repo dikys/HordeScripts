@@ -27,7 +27,7 @@ class MiraSquad {
         }
     }
 
-    Pullback(location: any): void {
+    Move(location: any): void {
         for (var unit of this.Units) {
             MiraUtils.IssueMoveCommand(unit, this.controller.Player, location);
         }
