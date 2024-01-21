@@ -37,7 +37,6 @@ class StrategySubcontroller extends MiraSubcontroller {
         }
 
         this.updateSquads();
-        
         var pullbackLocation = this.getPullbackCell();
 
         if (pullbackLocation) {
@@ -46,6 +45,10 @@ class StrategySubcontroller extends MiraSubcontroller {
                     squad.Move(pullbackLocation);
                 }
             }
+        }
+
+        for (let squad of this.squads) {
+            squad.Tick(tickNumber);
         }
 
         if (!this.currentEnemy) {
@@ -160,10 +163,6 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     private updateSquads(): void {
-        for (var squad of this.squads) {
-            squad.Cleanup();
-        }
-
         this.squads = this.squads.filter((squad) => {return squad.Units.length > 0});
     }
 

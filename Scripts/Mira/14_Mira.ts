@@ -17,6 +17,10 @@ class Mira {
     
     private static controllers: Array<MiraSettlementController> = [];
     
+    public static get Controllers(): Array<MiraSettlementController> {
+        return Mira.controllers;
+    }
+    
     static Tick(tickNumber: number): void {
         for (var controller of this.controllers) {
             if (!controller.Settlement.Existence.TotalDefeat) {

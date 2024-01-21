@@ -1,4 +1,3 @@
-
 class MiraSettlementData {
     public Settlement: any;
     public MasterMind: any;
@@ -141,5 +140,12 @@ class MiraUtils {
         while ((produceListItem = eNext(produceList)) !== undefined) {
             result.push(produceListItem.Uid);
         }
+    }
+
+    static ChebyshevDistance(cell1: any, cell2: any): number {
+        const xDiff = Math.abs(cell1.X - cell2.X);
+        const yDiff = Math.abs(cell1.Y - cell2.Y);
+
+        return Math.max(xDiff, yDiff);
     }
 }
