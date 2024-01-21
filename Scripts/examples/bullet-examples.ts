@@ -7,47 +7,47 @@
  * Тут жесткая рефлексия, т.к. идет работа с обобщенными типами, наследованием и private-полями.
  */
 function example_iterateBullets() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
-
-    // Магия для рефлексии
-    var BindingFlags = xHost.type("System.Reflection.BindingFlags");
-    var Int32 = xHost.type("System.Int32");
-    var bindingFlags = xHost.cast(BindingFlags,
-        xHost.cast(Int32, BindingFlags.Instance) +
-        xHost.cast(Int32, BindingFlags.Public) +
-        xHost.cast(Int32, BindingFlags.NonPublic));
-    logi('  Флаги для рефлексии:', bindingFlags.ToString());
+    if (example_iterateBullets_RunFlag === undefined) {
+        logi('> Запущен пример', '"' + arguments.callee.name + '"');
+    } else if (example_iterateBullets_RunFlag == false) {
+        return;
+    }
+    example_iterateBullets_RunFlag = true;
 
     // Реестр снарядов на сцене
     var realScena = scena.GetRealScena();
     var bulletsRegistry = realScena.Bullets;
-    logi('  Реестр снарядов:', bulletsRegistry.ToString());
+    
+    if (!example_bulletsIdProvider) {
+        logi('  Реестр снарядов:', bulletsRegistry.ToString());
 
-    // Магия рефлексии для получения доступа к IdProvider
-    var BaseBullet = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Bullets.BaseBullet, HordeClassLibrary");
-    var ScenaObjectsRegistry = HordeUtils.GetTypeByName("HordeClassLibrary.World.ScenaComponents.Intrinsics.ScenaObjectsRegistry`1").MakeGenericType(BaseBullet);
-    var propIdProvider = ScenaObjectsRegistry.GetProperty("IdProvider", bindingFlags);
-    var bulletsIdProvider = propIdProvider.GetValue(bulletsRegistry);
-    logi('  Bullets IdProvider:', bulletsIdProvider.ToString());
-
-    // Следующий ID снаряда
-    var nextId = HordeUtils.getValue(bulletsIdProvider, "TotalIds");
-    logi('  ID для следующего снаряда', nextId);
-
-    if (nextId == 0) {
-        logi('  Снаряды ещё не были созданы на этой сцене');
-        return;
+        // Магия рефлексии для получения доступа к IdProvider 
+        var BaseBulletT = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Bullets.BaseBullet, HordeClassLibrary");
+        var ScenaObjectsRegistryT = HordeUtils.GetTypeByName("HordeClassLibrary.World.ScenaComponents.Intrinsics.ScenaObjectsRegistry`1").MakeGenericType(BaseBulletT);
+        var propIdProvider = ScenaObjectsRegistryT.GetProperty("IdProvider", makeBindingFlags([BindingFlags.Instance, BindingFlags.Public, BindingFlags.NonPublic]));
+        example_bulletsIdProvider = propIdProvider.GetValue(bulletsRegistry);
+        logi('  Bullets IdProvider:', example_bulletsIdProvider.ToString());
     }
 
-    // Итерируем последние 5 снарядов на сцене
-    var bullVar = host.newVar(xHost.type(BaseBullet));
-    for (var i = Math.max(0, nextId - 5); i < nextId; i++) {
+    // Следующий ID снаряда
+    var currentNextId = HordeUtils.getValue(example_bulletsIdProvider, "TotalIds");
+
+    // Итерируем новые снаряды на сцене
+    var bullVar = host.newVar(BaseBullet);
+    for (var i = example_lastNextBulletId; i < currentNextId; i++) {
         if(!bulletsRegistry.TryGet(i, bullVar.out))
             continue;
         var bull = bullVar.value;
-        logi('  -', '[' + bull.State.ToString() + ']', bull.ToString());
+        logi('  - Новый снаряд:', '[' + bull.State.ToString() + ']', bull.ToString());
 
         // Внимание! Здесь будут только те снаряды, которые имеются на сцене в данный момент.
         // Т.е. здесь не найти снаряды, которые уже завершили своё движение.
     }
+
+    // Запоминаем на каком снаряде остановились в этот раз
+    example_lastNextBulletId = currentNextId;
 }
+var example_bulletsIdProvider;
+var example_lastNextBulletId = 0;
+var example_iterateBullets_RunFlag;  // Флаг для отключения повторяющихся логов
+example_iterateBullets_RunFlag = undefined;

@@ -9,20 +9,35 @@ function example_configWorks() {
 
     logi("  Слепок контента:", HordeContent.ContentStamp);
 
+    // Перечисление всех доступных конфигов юнитов
+    logi("  Конфиги рыцарей:");
+    var unitConfigs = enumerate(AllContent.UnitConfigs.Configs);
+    while ((kv = eNext(unitConfigs)) !== undefined) {
+        var uid = kv.Key;
+        var uCfg = kv.Value;
+        if (uid.includes('men')) {
+            logi('  -', '"' + uid + '"', '-', uCfg.ToString());
+        }
+    }
+
     // Получаем конфиг катапульты
     var catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
 
     // Здесь можно убрать if-false, чтобы отобразить поля конфига
     // Здесь не следует копать более чем на 1 уровень в глубину, т.к. получается слишком много данных
-    if (false) inspect(catapultCfg, "Конфиг катапульты:");
+    if (false) inspect(catapultCfg, 1, "Конфиг катапульты:");
     
     // Получаем значения из конфига
-    logi("  Текущее количество камней при выстреле:", catapultCfg.MainArmament.EmitBulletsCountMin);
+    var rocks = catapultCfg.MainArmament.EmitBulletsCountMin;
+    logi("  Текущее количество камней при выстреле:", rocks);
 
     // Устанавливаем значения в private-члены конфига
     logi("  Делаем магию..");
-    HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMin", 10);
-    HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMax", 10);
+    rocks += 1;
+    if (rocks > 10)
+        rocks = 1;
+    HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMin", rocks);
+    HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMax", rocks);
     
     // Результат можно проверить в игре
     logi("  Теперь катапульты кидают", catapultCfg.MainArmament.EmitBulletsCountMin, "камней за выстрел!");

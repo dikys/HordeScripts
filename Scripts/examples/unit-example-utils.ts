@@ -23,7 +23,7 @@ function createUnitForTest() {
         return null;
     }
 
-    logi('Создан новый юнит для теста!', unitForExample.ToString());
+    logi('  Создан новый юнит для теста!', unitForExample.ToString());
     return unitForExample;
 }
 var unitForExample;

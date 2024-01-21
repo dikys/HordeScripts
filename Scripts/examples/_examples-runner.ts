@@ -21,7 +21,6 @@ function runExamples() {
     // example_spawnUnit();
     // example_spawnBullet();
     // example_spawnBulletsRain();
-    // example_iterateBullets();
     // example_scenaWorks();
     // example_settlementWorks();
     // example_settlementResources();
@@ -43,4 +42,18 @@ function runExamples() {
     // example_hookSentChatMessages_v1();
     // example_hookSentChatMessages_v2();
     // example_hookReceivedChatMessages();
+}
+
+
+/**
+ * Запуск примеров каждый игровой такт.
+ * Нужно раскомментировать вызовы функций с примерами, которые следует запустить.
+ */
+function runEveryTickExamples() {
+
+    // // В этом примере выполняется перечисление событий произошедших с тестовым юнитом
+    // example_unitEnumerateEvents();
+
+    // // В этом примере выполняется перечисление новых снарядов на сцене
+    // example_iterateBullets();
 }

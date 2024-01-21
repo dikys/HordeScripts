@@ -7,10 +7,10 @@ function example_unitWorks() {
 
     var unit = getOrCreateTestUnit();
     if (unit == null) {
-        logi('  Не удалось создать юнита для этого теста!');
+        logi('  Не удалось создать юнита для этого примера!');
         return;
     }
-    logi('  Для этого теста выбран:', unit.ToString());
+    logi('  Для этого примера выбран:', unit.ToString());
 
     // В юните много разных методов (убрать false, чтобы отобразить названия)
     if (false) inspect(unit);
@@ -107,10 +107,10 @@ function example_unitOrders() {
 
     var unit = getOrCreateTestUnit();
     if (unit == null) {
-        logi('  Не удалось создать юнита для этого теста!');
+        logi('  Не удалось создать юнита для этого примера!');
         return;
     }
-    logi('  Для этого теста выбран:', unit.ToString());
+    logi('  Для этого примера выбран:', unit.ToString());
     var unitDTO = HordeUtils.getValue(unit, "Model");
 
     // Отдел приказов
@@ -160,3 +160,60 @@ function example_unitOrders() {
         logi('  Не удалось добавить команду');
     }
 }
+
+
+/**
+ * Пример работы с собятиями юнита
+ * 
+ * Здесь не те события, которые обрабатываются колбеками, а просто данные о том, что что-то случилось.
+ */
+function example_unitEnumerateEvents() {
+    if (example_unitEnumerateEvents_RunFlag === undefined) {
+        logi('> Запущен пример', '"' + arguments.callee.name + '"');
+    } else if (example_unitEnumerateEvents_RunFlag == false) {
+        return;
+    }
+
+    var unit = getOrCreateTestUnit();
+    if (unit == null) {
+        logi('  Не удалось создать юнита для этого примера!');
+        logi('  Пример', '"' + arguments.callee.name + '"', 'отключен!');
+        example_unitEnumerateEvents_RunFlag = false;
+        return;
+    } else if (example_unitEnumerateEvents_RunFlag === undefined) {
+        logi('  Для этого примера выбран:', unit.ToString());
+        example_unitEnumerateEvents_RunFlag = true;
+    }
+
+    try {
+        // Отдел событий
+        var eventsMind = unit.EventsMind;
+
+        // События за последний такт
+        var lastFrameEvents = HordeUtils.getValue(eventsMind, "LastFrameEvents");
+
+        // Перечисление событий за такт
+        var enumerator = lastFrameEvents.GetEnumerator();
+        while(enumerator.MoveNext()) {
+            var e = enumerator.Current;
+            logi('  #' + BattleController.GameTimer.GameFramesCounter, '-', e.ToString());
+            if (unit.Health <=0 && e.AttackerUnit) {
+                logi('    Тестовый юнит был убит юнитом:', e.AttackerUnit.ToString());
+            }
+
+            // Внимание! Объект события может "жить" от 1 до 2 игровых тактов. Зависит от места проверки событий.
+            // Если вести отсчет относительно времени обработки юнита, то объект события (e) живет ровно 1 такт.
+
+            // Важно! Не следует сохранять "e"-объекты в глобальные переменные, т.к. данные в них будут заменены через 1-2 такта.
+            // Это связанно с тем, что для оптимизации используется общий пул "e"-объектов.
+            // Если требуется сохранить какие-то данные собятия, то для этого нужно переместить их в отдельную структуру.
+        }
+        enumerator.Dispose();
+    } catch (ex) {
+        logExc(ex);
+        logi('  Пример', '"' + arguments.callee.name + '"', 'отключен!');
+        example_unitEnumerateEvents_RunFlag = false;
+    }
+}
+var example_unitEnumerateEvents_RunFlag;  // Флаг для отключения повторяющихся логов
+example_unitEnumerateEvents_RunFlag = undefined;

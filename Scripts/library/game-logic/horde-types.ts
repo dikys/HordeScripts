@@ -1,8 +1,17 @@
 
 // ===================================================
+// --- Глобальные переменные
+
+BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
+AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
+
+
+// ===================================================
 // --- Снаряды
 
+BaseBullet = HCL.HordeClassLibrary.World.Objects.Bullets.BaseBullet;
 BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;
+
 
 // ===================================================
 // --- Различные типы связанные с юнитами
@@ -11,6 +20,7 @@ BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatPar
 DelegateWork = HCL.HordeClassLibrary.UnitComponents.Workers.Interfaces.AUnitWorkerCommon.DelegateWork;
 Unit = HCL.HordeClassLibrary.World.Objects.Units.Unit;
 KnownUnit = HCL.HordeClassLibrary.World.Objects.Units.KnownUnit;
+
 
 // ===================================================
 // --- Перечисления связанные с юнитами
@@ -36,6 +46,7 @@ UnitSpecification = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitSpecif
 UnitState = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitState;
 UnitStateSpecial = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitStateSpecial;
 UnitVisibility = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitVisibility;
+
 
 // ===================================================
 // --- Команды и приказы

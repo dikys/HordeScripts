@@ -1,4 +1,7 @@
 
+// ===================================================
+// --- Отправка сообщений
+
 /**
  * Отправка игровых сообщений всем игрокам.
  */
@@ -17,13 +20,18 @@ function example_sendMessageToAll() {
 }
 
 
+// ===================================================
+// --- Перехват чат-сообщений
+
+
 /**
  * Обработка отправляемых сообщений в чате.
+ * Это правильный способ, но в версии "v0.62pre" этот пример не работает из-за `internal`-модификатора для ChatInputLine 
  */
 function example_hookSentChatMessages_v1() {
     logi('> Запущен пример', '"' + arguments.callee.name + '"');
 
-    logi('  Внимание! В данный момент этот пример не работает, т.к. событие chatInputLine.MessageSent имеет модификатор internal.');
+    logi('  Внимание! В данный момент этот пример не работает, т.к. класс ChatInputLine имеет модификатор internal, и соответственно MessageSent недоступен для ClearScript.');
     logi('  Поэтому этот пример отключен');
     return;
 
@@ -34,12 +42,12 @@ function example_hookSentChatMessages_v1() {
     var chatInputLine = HordeUtils.getValue(chatPanel, "ChatInputLine");
 
     // Удаляем предыдущий обработчик сообщений, если был закреплен
-    if (prevChatHook) {
-        prevChatHook.disconnect();
+    if (example_prevChatHook_v1) {
+        example_prevChatHook_v1.disconnect();
     }
 
     // Устанавливаем обработчик сообщений
-    prevChatHook = chatInputLine.MessageSent.connect(function (sender, args) {
+    example_prevChatHook_v1 = chatInputLine.MessageSent.connect(function (sender, args) {
         try {
             var senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
             var targets = HordeUtils.getValue(args, "Targets");
@@ -52,19 +60,14 @@ function example_hookSentChatMessages_v1() {
 
     logi('  Установлен хук на отправку сообщения');
 }
-var prevChatHook;
-
+var example_prevChatHook_v1;
 
 /**
  * Обработка отправляемых сообщений в чате.
- * 
- * Тут много магии с рефлексией, т.к. доступ к классам и некоторым полям закрыт
+ * Здесь демонстрируется возможность подключения к internal и private событиям с использованием темной магии.
  */
 function example_hookSentChatMessages_v2() {
-
-    logi('  Внимание! В данный момент, при выходе из сражения обработчик не удаляется, что приводит к крашу игры.');
-    logi('  Поэтому этот пример отключен');
-    return;
+    logi('> Запущен пример', '"' + arguments.callee.name + '"');
 
     // Получаем UI-объект строки чата
     var AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
@@ -73,19 +76,17 @@ function example_hookSentChatMessages_v2() {
     var chatInputLine = HordeUtils.getValue(chatPanel, "ChatInputLine");
 
     // Удаляем предыдущий обработчик сообщений, если был закреплен
-    if (prevChatHandler) {
-        var args = host.newArr(xHost.type('System.Object'), 1);
-        args[0] = prevChatHandler;
-        HordeUtils.call(chatInputLine, "remove_MessageSent", args);
+    if (example_prevChatHook_v2) {
+        example_prevChatHook_v2.disconnect();
     }
 
-    // Получение типов для создания обработчика сообщений
-    var MessageSentEventArgsClass = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.MultiuseControls.ChatPanel.ChatInputLine+MessageSentEventArgs, HordeResurrection.Game");
-    var MessageSentEventArgsType = xHost.type(MessageSentEventArgsClass);
-    var EventHandlerType = xHost.type("System.EventHandler", MessageSentEventArgsType);
+    // Создаём EventSource-объект для MessageSent-события в internal-классе ChatInputLine
+    var sentEventArgsT = HordeUtils.GetTypeByName('HordeResurrection.Game.UI.MultiuseControls.ChatPanel.ChatInputLine+MessageSentEventArgs, HordeResurrection.Game');
+    var messageSentEvent = makePrivateEventSource(chatInputLine, "MessageSent", sentEventArgsT);
+    logi('  EventSource:', messageSentEvent.ToString());
 
-    // Получение типов для создания обработчика сообщений
-    var handler = host.del(EventHandlerType, function (sender, args) {
+    // Устанавливаем обработчик сообщений
+    example_prevChatHook_v2 = messageSentEvent.connect(function (sender, args) {
         try {
             var senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
             var targets = HordeUtils.getValue(args, "Targets");
@@ -96,17 +97,9 @@ function example_hookSentChatMessages_v2() {
         }
     });
 
-    // Установка обработчика сообщений
-    var args = host.newArr(xHost.type('System.Object'), 1);
-    args[0] = handler;
-    HordeUtils.call(chatInputLine, "add_MessageSent", args);
-
-    // Запоминаем текущий обработчик сообщений
-    prevChatHandler = handler;
-
     logi('  Установлен хук на отправку сообщения');
 }
-var prevChatHandler;
+var example_prevChatHook_v2;
 
 
 /**
@@ -124,12 +117,12 @@ function example_hookReceivedChatMessages() {
     }
 
     // Удаляем предыдущий обработчик сообщений, если был закреплен
-    if (prevNetworkChatHook) {
-        prevNetworkChatHook.disconnect();
+    if (example_prevNetworkChatHook) {
+        example_prevNetworkChatHook.disconnect();
     }
 
     // Устанавливаем обработчик сообщений
-    prevNetworkChatHook = NetworkController.NetWorker.Events.ChatEvents.ChatItemPacketReceived.connect(function (sender, args) {
+    example_prevNetworkChatHook = NetworkController.NetWorker.Events.ChatEvents.ChatItemPacketReceived.connect(function (sender, args) {
         try {
             var senderPlayer = HordeEngine.HordeResurrection.Engine.Logic.Main.PlayersController.GetNetElementMainPlayer(HordeUtils.getValue(args, "NetworkElement"));
             var targets = host.cast(HordeEngine.HordeResurrection.Engine.Logic.Battle.Stuff.ChatTargets, HordeUtils.getValue(args, "Targets"));
@@ -142,5 +135,5 @@ function example_hookReceivedChatMessages() {
 
     logi('  Установлен хук на приём сообщения');
 }
-var prevNetworkChatHook;
+var example_prevNetworkChatHook;
 
