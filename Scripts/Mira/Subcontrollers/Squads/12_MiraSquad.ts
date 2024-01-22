@@ -75,8 +75,13 @@ class MiraSquad {
             let lowermostUnit: any = null;
             let leftmostUnit: any = null;
             let rightmostUnit: any = null;
+
+            let avgPosition = {X: 0, Y: 0};
             
             for (let unit of this.Units) {
+                avgPosition.X += unit.Cell.X;
+                avgPosition.Y += unit.Cell.Y;
+                
                 if (uppermostUnit === null) {
                     uppermostUnit = unit;
                 }
@@ -115,8 +120,8 @@ class MiraSquad {
             let spread = Math.max(verticalSpread, horizontalSpread);
 
             this.location = new MiraSquadLocation(
-                leftmostUnit.Cell.X + Math.round(horizontalSpread / 2),
-                uppermostUnit.Cell.Y + Math.round(verticalSpread / 2),
+                Math.round(avgPosition.X / this.Units.length),
+                Math.round(avgPosition.Y / this.Units.length),
                 spread
             );
         }
