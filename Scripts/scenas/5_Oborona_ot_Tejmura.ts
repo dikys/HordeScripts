@@ -43,6 +43,15 @@ var mapdefens_legendary_raider_unitsInfo;
 var mapdefens_legendary_worker_unitsInfo;
 
 export function mapdefens_onFirstRun() {
+    if (BattleController.GameTimer.GameFramesCounter == 0) {
+        // Идет запуск - ничего не делаем, т.к. инициализация будет запущена в "mapdefens_everyTick()" после установки всех игровых переменных
+    } else {
+        // Идет перезапуск скриптов - перезапускаем иницилизацию
+        mapdefens_onFirstTick();
+    }
+}
+
+function mapdefens_onFirstTick() {
     var realScena   = scena.GetRealScena();
     var settlements = realScena.Settlements;
     // Рандомизатор
@@ -63,6 +72,10 @@ export function mapdefens_onFirstRun() {
     for (var player of players) {
         var realPlayer = player.GetRealPlayer();
         var settlement = realPlayer.GetRealSettlement();
+
+        if (isReplayMode() && realPlayer.PlayerOrigin.ToString() != "Replay") {
+            continue;
+        }
         
         // игрок
         if (settlement.Uid < mapdefens_playersMaxCount) {
@@ -372,6 +385,11 @@ export function mapdefens_onFirstRun() {
 }
 
 export function mapdefens_everyTick(gameTickNum: number) {
+    if (gameTickNum == 1) {
+        // Инициализация в первый такт после запуска сцены
+        mapdefens_onFirstTick();
+    }
+
     var FPS = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController.GameTimer.CurrentFpsLimit;
 
     var realScena   = scena.GetRealScena();
