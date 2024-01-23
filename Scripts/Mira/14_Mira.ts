@@ -14,6 +14,7 @@ enum MiraLogLevel {
 
 class Mira {
     static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
+    static CanRun = true;
     
     private static controllers: Array<MiraSettlementController> = [];
     
@@ -22,21 +23,34 @@ class Mira {
     }
     
     static Tick(tickNumber: number): void {
-        for (var controller of this.controllers) {
-            if (!controller.Settlement.Existence.TotalDefeat) {
-                controller.Tick(tickNumber);
-            }
-            else {
-                Mira.Log(MiraLogLevel.Info, `Controller '${controller.Player.Nickname}' lost the battle, but not the war!`);
+        try {
+            if (this.CanRun) {
+                for (var controller of this.controllers) {
+                    if (!controller.Settlement.Existence.TotalDefeat) {
+                        controller.Tick(tickNumber);
+                    }
+                    else {
+                        Mira.Log(MiraLogLevel.Info, `Controller '${controller.Player.Nickname}' lost the battle, but not the war!`);
+                    }
+                }
+
+                this.controllers = this.controllers.filter((controller) => {return !controller.Settlement.Existence.TotalDefeat});
             }
         }
-
-        this.controllers = this.controllers.filter((controller) => {return !controller.Settlement.Existence.TotalDefeat});
+        catch (ex) {
+            logExc(ex);
+            this.CanRun = false;
+        }
     };
 
     static FirstRun(): void {
-        Mira.controllers.length = 0;
-        Mira.AttachToPlayer("1");
+        try {
+            Mira.controllers.length = 0;
+            Mira.AttachToPlayer("1");
+        }
+        catch (ex) {
+            logExc(ex);
+        }
     };
 
     static AttachToPlayer(playerId: string): void {
