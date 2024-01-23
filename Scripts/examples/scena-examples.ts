@@ -34,7 +34,11 @@ function example_scenaWorks() {
     }
     var unitAtFloor = unitsMap.Item.get(cell, UnitMapLayer.Floor);
     if (unitAtFloor) {
-        logi(`    Мост в клетке: ${unitAtFloor.ToString()}`);
+        if (unitAtFloor.IsNotDead && unitAtFloor.EffectsMind.HasEffect(UnitEffectFlag.Walkable)) {
+            logi(`    Мост в клетке: ${unitAtFloor.ToString()}`);
+        } else {
+            logi(`    Юнит на нижнем слое в клетке: ${unitAtFloor.ToString()}`);
+        }
     } else {
         logi(`    В этой клетке нет моста`);
     }
