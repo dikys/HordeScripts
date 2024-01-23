@@ -10,7 +10,7 @@ function example_gameWorks() {
     logi('  Текущий такт:', BattleController.GameTimer.GameFramesCounter);
     logi('  Текущий FPS:', BattleController.GameTimer.CurrentFpsLimit);
 
-    // Инфо по реплею
+    // Инфо по реплею (недоступно при инициализации сцены, т.е. в onFirstRun)
     var BattleControllerT = HordeUtils.GetTypeByName("HordeResurrection.Engine.Logic.Battle.BattleController", "HordeResurrection.Engine")
     var repl = HordeUtils.getValue(ReflectionUtils.GetStaticProperty(BattleControllerT, "ReplayModule").GetValue(BattleControllerT), "_mode");
     if (repl.ToString() == "Play") {
@@ -18,7 +18,23 @@ function example_gameWorks() {
     } else if (repl.ToString() == "Record") {
         logi('  В данный момент запущена запись реплея');
     } else {
-        logi('  В данный момент невозможно определить статус реплея');
+        logi('  В данный момент невозможно определить статус реплея:', repl.ToString());
+    }
+
+    // Инфо по игрокам
+    logi('  Происхождение игроков:');
+    for (var player of players) {
+        var realPlayer = player.GetRealPlayer();
+        var pOrigin = realPlayer.PlayerOrigin.ToString();
+        if (pOrigin == "Replay") {
+            logi('  - Реплей-игрок:', realPlayer.ToString());
+        } else if (pOrigin == "Local") {
+            logi('  - Локальный игрок:', realPlayer.ToString());
+        } else if (pOrigin == "Remote") {
+            logi('  - Удаленный игрок:', realPlayer.ToString());
+        } else {
+            logi('  - Невозможно определить происхождение игрока:', realPlayer.ToString());
+        }
     }
 }
 
