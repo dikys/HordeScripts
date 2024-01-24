@@ -5,6 +5,13 @@
 BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
 AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
 
+// ===================================================
+// --- Тайлы
+
+// Unknown, Grass, Forest, Water, Marsh, Sand, Mounts, Road, Ice
+TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
+// None, Gold, Metal
+ResourceTileType = HCL.HordeClassLibrary.World.Objects.Tiles.ResourceTileType;
 
 // ===================================================
 // --- Снаряды
