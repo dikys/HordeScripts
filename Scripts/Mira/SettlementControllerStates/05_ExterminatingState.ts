@@ -1,6 +1,7 @@
 
 class ExterminatingState extends MiraSettlementControllerState {
     private readonly COMBATIVITY_THRESHOLD = 0.5;
+    private currentTarget: any; //but actually Unit
     
     OnEntry(): void {
         this.settlementController.ProductionController.CancelAllProduction();
@@ -21,10 +22,10 @@ class ExterminatingState extends MiraSettlementControllerState {
             return;
         }
 
-        var combativityIndex = this.settlementController.StrategyController.CurrentCombativityIndex;
+        let combativityIndex = this.settlementController.TacticalController.CurrentCombativityIndex;
 
         if (combativityIndex >= this.COMBATIVITY_THRESHOLD) {   
-            var enemy = this.settlementController.StrategyController.CurrentEnemy;
+            let enemy = this.settlementController.StrategyController.CurrentEnemy;
             
             if (!enemy) {
                 if (!this.selectAndAttackEnemy()) {
@@ -32,11 +33,17 @@ class ExterminatingState extends MiraSettlementControllerState {
                     return;
                 }
             }
+            else {
+                if (!this.currentTarget || this.currentTarget.IsDead) {
+                    this.selectTarget(enemy);
+                }
+            }
         }
         else {
             this.settlementController.Log(MiraLogLevel.Debug, `Current combativity index '${combativityIndex}' is too low. Retreating...`);
-            this.settlementController.StrategyController.Pullback();
+            this.settlementController.TacticalController.Retreat();
             this.settlementController.State = new DevelopingState(this.settlementController);
+            return;
         }
     }
 
@@ -48,13 +55,20 @@ class ExterminatingState extends MiraSettlementControllerState {
         }
         
         if (enemy) {
-            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. Proceeding to attack`)
-            this.settlementController.StrategyController.AttackEnemy();
+            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. Proceeding to attack`);
+            this.settlementController.TacticalController.ComposeSquads();
+            this.selectTarget(enemy);
             return true;
         }
         else {
             this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
             return false;
         }
+    }
+
+    private selectTarget(enemy: any) {
+        let target = this.settlementController.StrategyController.GetOffensiveTarget(enemy);
+        this.currentTarget = target;
+        this.settlementController.TacticalController.Attack(target);
     }
 }

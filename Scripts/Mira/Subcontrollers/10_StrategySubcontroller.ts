@@ -1,12 +1,8 @@
 //TODO: add unit types analysis and listing from game configs
 
 class StrategySubcontroller extends MiraSubcontroller {
-    private readonly SQUAD_COMBATIVITY_THRESHOLD = 0.25;
     private currentEnemy: any; //but actually Settlement
-    private enemySettlements: Array<any> = []; //but actually settlement
-    private squads: Array<MiraSquad> = [];
-    private initialSquadCount: number;
-    private currentTarget: any; //but actually Unit
+    private enemySettlements: Array<any> = []; //but actually Settlement
     
     constructor (parent: MiraSettlementController) {
         super(parent);
@@ -15,16 +11,6 @@ class StrategySubcontroller extends MiraSubcontroller {
 
     public get Player(): any {
         return this.parentController.Player;
-    }
-
-    public get CurrentCombativityIndex(): number {
-        var combativityIndex = 0;
-
-        for (var squad of this.squads) {
-            combativityIndex += squad.CombativityIndex / this.initialSquadCount;
-        }
-
-        return combativityIndex;
     }
 
     public get CurrentEnemy(): any {
@@ -36,42 +22,14 @@ class StrategySubcontroller extends MiraSubcontroller {
             return;
         }
 
-        this.updateSquads();
-        var pullbackLocation = this.getPullbackCell();
-
-        if (pullbackLocation) {
-            for (var squad of this.squads) {
-                if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                    if (squad.TargetCell !== pullbackLocation) {
-                        squad.Move(pullbackLocation);
-                    }
-                }
-            }
-        }
-
-        for (let squad of this.squads) {
-            squad.Tick(tickNumber);
-        }
-
         if (!this.currentEnemy) {
             return;
         }
 
         if (this.currentEnemy.TotalDefeat) {
             this.parentController.Log(MiraLogLevel.Debug, "Enemy defeated");
+            this.ResetEnemy();
             return;
-        }
-        
-        if (!this.currentTarget?.IsAlive) {
-            this.currentTarget = this.getTarget(this.currentEnemy);
-
-            if (this.currentTarget) {
-                this.issueAttackCommand();
-            }
-            else {
-                this.parentController.Log(MiraLogLevel.Debug, "No valid targets left to attack");
-                this.currentEnemy = null;
-            }
         }
     }
 
@@ -81,9 +39,6 @@ class StrategySubcontroller extends MiraSubcontroller {
 
         unitList.set("#UnitConfig_Slavyane_Swordmen", 5);
         unitList.set("#UnitConfig_Slavyane_Archer", 5);
-
-        //!!DEBUG
-        //unitList.push(new MiraUnitCompositionItem("#UnitConfig_Slavyane_Swordmen", 1));
         
         return unitList;
     }
@@ -105,52 +60,6 @@ class StrategySubcontroller extends MiraSubcontroller {
         this.currentEnemy = null;
     }
 
-    AttackEnemy(): void {
-        if (!this.currentEnemy) {
-            this.parentController.Log(MiraLogLevel.Warning, "Unable to attack enemy: enemy not selected");
-            return;
-        }
-
-        if (!this.currentTarget) {
-            this.currentTarget = this.getTarget(this.currentEnemy);
-            this.parentController.Log(MiraLogLevel.Debug, `Selected '${this.currentTarget.Name}' as attack target`);
-        }
-
-        this.composeSquads();
-        this.issueAttackCommand();
-    }
-
-    Pullback(): void {
-        var pullbackLocation = this.getPullbackCell();
-
-        if (pullbackLocation) {
-            for (var squad of this.squads) {
-                squad.Move(pullbackLocation);
-            }
-        }
-    }
-
-    private getPullbackCell(): any {
-        var castle = this.parentController.Settlement.Units.Professions.MainBuildings.First();
-
-        if (castle) {
-            return castle.Cell;
-        }
-
-        return null;
-    }
-
-    private issueAttackCommand(): void {
-        this.parentController.Log(MiraLogLevel.Debug, `Issuing attack command`);
-        var nearestPoint = MiraUtils.FindFreeCell(this.currentTarget.Cell);
-        this.parentController.Log(MiraLogLevel.Debug, `Nearest point selected: (${nearestPoint.X}, ${nearestPoint.Y})`);
-
-        for (var squad of this.squads) {
-            this.parentController.Log(MiraLogLevel.Debug, `Squad attacking`);
-            squad.Attack(nearestPoint);
-        }
-    }
-
     private buildEnemyList(): void {
         this.enemySettlements = [];
         var diplomacy = this.parentController.Settlement.Diplomacy;
@@ -164,11 +73,90 @@ class StrategySubcontroller extends MiraSubcontroller {
         }
     }
 
-    private updateSquads(): void {
-        this.squads = this.squads.filter((squad) => {return squad.Units.length > 0});
+    // Returns one of enemy's production buildings
+    //TODO: rework target selection based on current map rules
+    GetOffensiveTarget(
+        enemySettlement: any //but actually Settlement
+    ): any { //but actually Point2D
+        if (!enemySettlement.Existence.TotalDefeat) {
+            var professionCenter = enemySettlement.Units.Professions;
+            var productionBuilding = professionCenter.ProducingBuildings.First();
+            
+            if (productionBuilding) {
+                return productionBuilding;
+            }
+        }
+
+        return null;
+    }
+}
+
+//TODO: add reinforcements processing
+class TacticalSubcontroller extends MiraSubcontroller {
+    private readonly SQUAD_COMBATIVITY_THRESHOLD = 0.25;
+    private squads: Array<MiraControllableSquad> = [];
+    private initialSquadCount: number;
+    private currentTarget: any; //but actually Unit
+
+    constructor (parent: MiraSettlementController) {
+        super(parent);
     }
 
-    private composeSquads(): void {
+    public get Player(): any {
+        return this.parentController.Player;
+    }
+
+    public get CurrentCombativityIndex(): number {
+        var combativityIndex = 0;
+
+        for (var squad of this.squads) {
+            combativityIndex += squad.CombativityIndex;
+        }
+
+        return combativityIndex / this.initialSquadCount;
+    }
+
+    Tick(tickNumber: number): void {
+        if (tickNumber % 10 !== 0) {
+            return;
+        }
+
+        this.updateSquads();
+        var pullbackLocation = this.getPullbackCell();
+
+        if (pullbackLocation) {
+            for (var squad of this.squads) {
+                if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
+                    if (squad.TargetCell !== pullbackLocation) {
+                        squad.Move(pullbackLocation);
+                    }
+                }
+            }
+        }
+
+        for (let squad of this.squads) {
+            squad.Tick(tickNumber);
+        }
+    }
+
+    Attack(target): void {
+        this.currentTarget = target;
+        this.parentController.Log(MiraLogLevel.Debug, `Selected '${this.currentTarget.Name}' as attack target`);
+        this.issueAttackCommand();
+    }
+
+    Retreat(): void {
+        this.parentController.Log(MiraLogLevel.Debug, `Retreating`);
+        var retreatLocation = this.getRetreatCell();
+
+        if (retreatLocation) {
+            for (var squad of this.squads) {
+                squad.Move(retreatLocation);
+            }
+        }
+    }
+
+    ComposeSquads(): void {
         this.parentController.Log(MiraLogLevel.Debug, `Composing squads`);
         
         this.squads.length = 0;
@@ -185,11 +173,26 @@ class StrategySubcontroller extends MiraSubcontroller {
             }
         }
 
-        var squad = new MiraSquad(combatUnits, this);
+        var squad = new MiraControllableSquad(combatUnits, this);
         this.squads.push(squad);
         this.initialSquadCount = this.squads.length;
 
         this.parentController.Log(MiraLogLevel.Debug, `${this.initialSquadCount} squads composed`);
+    }
+
+    private issueAttackCommand(): void {
+        this.parentController.Log(MiraLogLevel.Debug, `Issuing attack command`);
+        var nearestPoint = MiraUtils.FindFreeCell(this.currentTarget.Cell);
+        this.parentController.Log(MiraLogLevel.Debug, `Nearest point selected: (${nearestPoint.X}, ${nearestPoint.Y})`);
+
+        for (var squad of this.squads) {
+            this.parentController.Log(MiraLogLevel.Debug, `Squad attacking`);
+            squad.Attack(nearestPoint);
+        }
+    }
+
+    private updateSquads(): void {
+        this.squads = this.squads.filter((squad) => {return squad.Units.length > 0});
     }
 
     //TODO: use more generic approach to detecting whether unit is combat or not
@@ -197,20 +200,17 @@ class StrategySubcontroller extends MiraSubcontroller {
         return ["#UnitConfig_Slavyane_Swordmen", "#UnitConfig_Slavyane_Archer"].indexOf(unit.Cfg.Uid) > -1
     }
 
-    // Returns one of enemy's production buildings
-    //TODO: rework target selection based on current map rules
-    private getTarget(
-        enemySettlement: any //but actually Settlement
-    ): any { //but actually Point2D
-        if (!enemySettlement.Existence.TotalDefeat) {
-            var professionCenter = enemySettlement.Units.Professions;
-            var productionBuilding = professionCenter.ProducingBuildings.First();
-            
-            if (productionBuilding) {
-                return productionBuilding;
-            }
+    private getPullbackCell(): any {
+        var castle = this.parentController.Settlement.Units.Professions.MainBuildings.First();
+
+        if (castle) {
+            return castle.Cell;
         }
 
         return null;
+    }
+
+    private getRetreatCell(): any {
+        return this.getPullbackCell();
     }
 }

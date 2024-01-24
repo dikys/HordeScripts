@@ -4,9 +4,9 @@ const MAX_SPREAD_THRESHOLD_MULTIPLIER = 2.8;
 const MIN_SPREAD_THRESHOLD_MULTIPLIER = 2;
 
 abstract class MiraSquadState extends FsmState {
-    protected squad: MiraSquad;
+    protected squad: MiraControllableSquad;
     
-    constructor(squad: MiraSquad) {
+    constructor(squad: MiraControllableSquad) {
         super();
         this.squad = squad;
     }

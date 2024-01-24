@@ -12,61 +12,29 @@ class MiraSquadLocation {
 
 class MiraSquad {
     Units: Array<any>; //but actually Unit
-    private controller: StrategySubcontroller;
-    private initialUnitCount: number;
-    private state: MiraSquadState;
-    private minSpread: number;
-    private location: MiraSquadLocation;
+    protected location: MiraSquadLocation;
+
+    public get Strength(): number {
+        let strength = 0;
+        
+        for (let unit of this.Units) {
+            strength += unit.Health
+        }
+        
+        return strength;
+    }
     
-    public get MinSpread(): number {
-        return this.minSpread;
-    }
-
-    TargetCell: any;
-    IsAttackMode: boolean;
-    
-    public get Controller(): StrategySubcontroller {
-        return this.controller;
-    }
-
-    public get CombativityIndex(): number {
-        return this.Units.length / this.initialUnitCount;
-    }
-
-    constructor(units:Array<any>, controller: StrategySubcontroller){
-        this.controller = controller;
+    constructor(units:Array<any>) {
         this.Units = units;
-        this.initialUnitCount = this.Units.length;
-        this.recalcMinSpread();
+    }
 
-        this.SetState(new MiraSquadIdleState(this));
+    private cleanup(): void {
+        this.Units = this.Units.filter((unit) => {return unit.IsAlive});
     }
 
     Tick(tickNumber: number): void {
         this.location = null;
         this.cleanup();
-        this.state.Tick(tickNumber);
-    }
-
-    private cleanup(): void {
-        let unitCount = this.Units.length;
-        this.Units = this.Units.filter((unit) => {return unit.IsAlive});
-        
-        if (this.Units.length !== unitCount) {
-            this.recalcMinSpread();
-        }
-    }
-
-    Attack(targetLocation: any): void {
-        this.TargetCell = targetLocation;
-        this.IsAttackMode = true;
-        this.SetState(new MiraSquadAttackState(this));
-    }
-
-    Move(location: any): void {
-        this.TargetCell = location;
-        this.IsAttackMode = false;
-        this.SetState(new MiraSquadMoveState(this));
     }
 
     GetLocation(): MiraSquadLocation {
@@ -128,6 +96,55 @@ class MiraSquad {
 
         return this.location;
     }
+}
+
+class MiraControllableSquad extends MiraSquad {
+    private controller: TacticalSubcontroller;
+    private initialStrength: number;
+    private state: MiraSquadState;
+    private minSpread: number;
+
+    public get MinSpread(): number {
+        return this.minSpread;
+    }
+
+    public get Controller(): TacticalSubcontroller {
+        return this.controller;
+    }
+
+    public get CombativityIndex(): number {
+        return this.Strength / this.initialStrength;
+    }
+
+    TargetCell: any;
+    IsAttackMode: boolean;
+
+    constructor(units:Array<any>, controller: TacticalSubcontroller){
+        super(units);
+        this.controller = controller;
+        this.initialStrength = this.Strength;
+        this.recalcMinSpread();
+
+        this.SetState(new MiraSquadIdleState(this));
+    }
+
+    Tick(tickNumber: number): void {
+        this.location = null;
+        this.clean();
+        this.state.Tick(tickNumber);
+    }
+
+    Attack(targetLocation: any): void {
+        this.TargetCell = targetLocation;
+        this.IsAttackMode = true;
+        this.SetState(new MiraSquadAttackState(this));
+    }
+
+    Move(location: any): void {
+        this.TargetCell = location;
+        this.IsAttackMode = false;
+        this.SetState(new MiraSquadMoveState(this));
+    }
 
     SetState(newState: MiraSquadState): void {
         if (this.state) {
@@ -139,6 +156,15 @@ class MiraSquad {
     }
 
     private recalcMinSpread(): void {
-        this.minSpread = Math.round(Math.sqrt(this.initialUnitCount));
+        this.minSpread = Math.round(Math.sqrt(this.Units.length));
+    }
+
+    private clean(): void {
+        let unitCount = this.Units.length;
+        this.Units = this.Units.filter((unit) => {return unit.IsAlive});
+        
+        if (this.Units.length !== unitCount) {
+            this.recalcMinSpread();
+        }
     }
 }

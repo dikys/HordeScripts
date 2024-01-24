@@ -11,6 +11,7 @@ class MiraSettlementController {
     public MiningController: MiningSubcontroller;
     public ProductionController: ProductionSubcontroller;
     public StrategyController: StrategySubcontroller;
+    public TacticalController: TacticalSubcontroller;
     
     private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;
@@ -23,7 +24,7 @@ class MiraSettlementController {
         this.MasterMind = settlementMM;
 
         if (!this.MasterMind.IsWorkMode) {
-            this.Log(MiraLogLevel.Debug, "engaging MasterMind");
+            this.Log(MiraLogLevel.Debug, "Engaging MasterMind");
             this.MasterMind.IsWorkMode = true;
         }
 
@@ -37,6 +38,9 @@ class MiraSettlementController {
 
         this.StrategyController = new StrategySubcontroller(this);
         this.subcontrollers.push(this.StrategyController);
+
+        this.TacticalController = new TacticalSubcontroller(this);
+        this.subcontrollers.push(this.TacticalController);
 
         this.State = new DevelopingState(this);
     }
