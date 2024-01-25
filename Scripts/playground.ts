@@ -18,6 +18,9 @@ function onFirstRun() {
     globalStorage.reloadCounter = ++globalStorage.reloadCounter || 1;
     globalStorage.scriptWorkTicks = 0;
     logi("Playground running... (Start number:", globalStorage.reloadCounter, ")");
+
+    // Установка дебаг-параметров (доступно с v0.63pre)
+    //ScriptMachineDebugApi.SetHotReloadOnFileChanging(true);  // автоматическая перезагрузка скрипта при изменении файла
     
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runExamples();
