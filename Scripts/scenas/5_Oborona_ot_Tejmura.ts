@@ -1,10 +1,6 @@
 // оборачиваем все в пространство имен
 namespace _5_Oborona_ot_Tejmura {
 
-// \todo
-// сделать у Богдана шатер вместо замка
-// и когда игроки побеждают, то пусть шатер уничтожается
-
 // флаг, что игра закончилась
 var mapdefens_isFinish;
 // 40 минут с 50 кадрами в секунду
@@ -65,7 +61,7 @@ function mapdefens_onFirstTick() {
         w: 182,
         h: 22
     };
-
+    
     mapdefens_playersMaxCount = 5;
     mapdefens_playersCount    = 0;
     // пробегаемся по занятым слотам
@@ -574,23 +570,6 @@ export function mapdefens_everyTick(gameTickNum: number) {
     // логика поведения юнитов
     //////////////////////////////////////////
 
-    // приказываем врагам атаковать из места спавна
-    //if (gameTickNum % 180 == 0) {
-    //    // выделяем юнитов в точке спавна
-    //    inputSelectUnits(mapdefens_enemyPlayer,
-    //        createPoint(mapdefens_enemySpawnRectangle.x, mapdefens_enemySpawnRectangle.y),
-    //        createPoint(mapdefens_enemySpawnRectangle.x + mapdefens_enemySpawnRectangle.w, mapdefens_enemySpawnRectangle.y + mapdefens_enemySpawnRectangle.h));
-
-    //    // отправляем их в бой в ближайшую пустую точку к замку
-    //    var generator = generatePositionInSpiral(mapdefens_goalCastle.Cell.X, mapdefens_goalCastle.Cell.Y);
-    //    for (var position = generator.next(); !position.done; position = generator.next()) {
-    //        if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_Barbarian_Swordmen"], position.value.X, position.value.Y)) {
-    //            inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
-    //            break;
-    //        }
-    //    }
-    //}
-
     // приказываем бездействующим юнитам врага атаковать
     if (gameTickNum % 180 == 0) {
         // позиция для атаки цели
@@ -621,11 +600,7 @@ export function mapdefens_everyTick(gameTickNum: number) {
 
             // юнит бездействует и у него фулл хп, то отправляем его на базу врага
             if (ordersMind.IsIdle() && worker.Health == mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) {
-                // выделяем данного юнита
-                //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
-
                 // в конце отправляем в атаку на цель
-                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint);
                 var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
                 worker.Cfg.GetOrderWorker(worker, pointCommandArgs);
 
@@ -641,9 +616,6 @@ export function mapdefens_everyTick(gameTickNum: number) {
                 continue;
             }
 
-            // выделяем данного юнита
-            //inputSelectUnitsById(mapdefens_enemyPlayer, [worker.Id]);
-
             // Отменить все приказы юнита
             ordersMind.CancelOrders(true);
 
@@ -651,8 +623,6 @@ export function mapdefens_everyTick(gameTickNum: number) {
             var generator = generatePositionInSpiral(worker.Cell.X, worker.Cell.Y);
             for (var position = generator.next(); !position.done; position = generator.next()) {
                 if (unitCanBePlacedByRealMap(mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], position.value.X, position.value.Y)) {
-                    //inputProduceBuildingCommand(mapdefens_enemyPlayer, mapdefens_enemyUnitsCfg["UnitConfig_legendary_worker_Tower"].Uid, createPoint(position.value.X, position.value.Y), null);
-
                     // делаем так, чтобы инженер не отвлекался, когда строит башню (убираем реакцию на инстинкты)
                     ordersMind.AssignSmartOrder(worker.Cell, AssignOrderMode.Replace, 100000);
 
@@ -684,17 +654,10 @@ export function mapdefens_everyTick(gameTickNum: number) {
                 continue;
             }
 
-            // выделяем данного юнита
-            //inputSelectUnitsById(mapdefens_enemyPlayer, [raider.Id]);
-
             // генерируем 5 рандомных достижимых точек вокруг цели
             var generator = generateRandomPositionInRect2D(mapdefens_goalCastle.Cell.X - 20, mapdefens_goalCastle.Cell.Y - 20, 40, 40);
             for (var position = generator.next(); !position.done; position = generator.next()) {
                 if (unitCheckPathTo(raider, createPoint(position.value.X, position.value.Y))) {
-                    //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-                    //var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-                    //raider.Cfg.GetOrderWorker(raider, pointCommandArgs);
-
                     ordersMind.AssignSmartOrder(createPoint(position.value.X, position.value.Y), AssignOrderMode.Queue, 100000);
 
                     break;
@@ -721,9 +684,6 @@ export function mapdefens_everyTick(gameTickNum: number) {
                 continue;
             }
 
-            // выделяем данного юнита
-            //inputSelectUnitsById(mapdefens_enemyPlayer, [unit.Id]);
-            
             // если Y < 80, то оправляем сначала в центр
             if (unit.Cell.Y < 80) {
                 var positionFound = false;
@@ -740,7 +700,6 @@ export function mapdefens_everyTick(gameTickNum: number) {
                         generator = generateRandomPositionInRect2D(centerRect.x, centerRect.y, centerRect.w, centerRect.h);
                     }
                 }
-                //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(position.value.X, position.value.Y), UnitCommand.Attack);
                 var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
                 unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
 
@@ -765,7 +724,6 @@ export function mapdefens_everyTick(gameTickNum: number) {
             }
             
             // в конце отправляем в атаку на цель
-            //inputPointBasedCommand(mapdefens_enemyPlayer, createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
             var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
             unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
         }
