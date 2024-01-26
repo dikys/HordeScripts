@@ -18,15 +18,15 @@ function example_playerWorks() {
 
         // Поселение игрока
         var realSettlement = realPlayer.GetRealSettlement();
-        logi(`  Предводитель: ${realSettlement.LeaderName}`);
+        logi(`    Предводитель: ${realSettlement.LeaderName}`);
         // Подробнее см. в примерах работы с поселением
 
         // Объект для бота
         var realMasterMind = HordeUtils.getValue(realPlayer, "MasterMind");
         if (realMasterMind){
-            logi(`  Характер:`, realMasterMind.Character.Description);
+            logi(`    Характер:`, realMasterMind.Character.Description);
         } else {
-            logi(`  Управляется игроком`);
+            logi(`    Управляется игроком`);
         }
         // Подробнее см. в примерах к MasterMind
 
