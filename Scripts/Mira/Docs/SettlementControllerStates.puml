@@ -2,15 +2,15 @@
 
 state EXPLOIT {
     state Develop: Build-up economy
-    state Defend #pink: Defend against attacks
+    state Defend: Defend against attacks
     state GatherUp: Build an army that\ncounters enemy strategy
 
     state Exploit_Entry <<inputPin>>
 
     Exploit_Entry --> Develop
-    Develop -[#Red]-> Defend: Attacked
-    Defend -[#Red]-> Develop: Attack countered
-    GatherUp -[#Red]-> Defend: Attacked
+    Develop --> Defend: Attacked
+    Defend --> Develop: Attack countered
+    GatherUp --> Defend: Attacked
     
     Develop --> GatherUp: Economy functioning
     GatherUp -down-> Exploit_ArmyGathered <<outputPin>>: Army gathered
@@ -31,7 +31,7 @@ Exploit_ArmyGathered -right-> Exterminate: Army gathered
 
 Exterminate --> [*]: Enemy defeated
 Exterminate --> Exploit_Entry: Army slain
-Exterminate -[#Red]-> Defend: Main or expand attacked
+Exterminate --> Defend: Main or expand attacked
 
 
 legend
