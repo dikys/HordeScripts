@@ -155,6 +155,10 @@ class MiraControllableSquad extends MiraSquad {
         this.state.OnEntry();
     }
 
+    IsIdle(): boolean {
+        return this.state.IsIdle();
+    }
+
     private recalcMinSpread(): void {
         this.minSpread = Math.round(Math.sqrt(this.Units.length));
     }

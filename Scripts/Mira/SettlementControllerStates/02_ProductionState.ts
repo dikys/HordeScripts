@@ -16,8 +16,15 @@ abstract class ProductionState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 5 != 0) {
+        if (tickNumber % 5 !== 0) {
             return;
+        }
+
+        if (tickNumber % 1000 !== 0) {
+            if (this.settlementController.IsUnderAttack()) {
+                this.settlementController.State = new DefendingState(this.settlementController);
+                return;
+            }
         }
 
         this.refreshTargetProductionLists();

@@ -10,6 +10,10 @@ abstract class MiraSquadState extends FsmState {
         super();
         this.squad = squad;
     }
+
+    IsIdle(): boolean {
+        return false;
+    }
 }
 
 //TODO: find best position for each unit of the squad
@@ -22,6 +26,10 @@ class MiraSquadIdleState extends MiraSquadState {
     OnExit(): void {}
     
     Tick(tickNumber: number): void {}
+
+    IsIdle(): boolean {
+        return true;
+    }
 }
 
 class MiraSquadMoveState extends MiraSquadState {

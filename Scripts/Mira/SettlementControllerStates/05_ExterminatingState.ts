@@ -18,11 +18,18 @@ class ExterminatingState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 > 0) {
+        if (tickNumber % 10 !== 0) {
             return;
         }
 
-        let combativityIndex = this.settlementController.TacticalController.CurrentCombativityIndex;
+        if (tickNumber % 50 !== 0) {
+            if (this.settlementController.IsUnderAttack()) {
+                this.settlementController.State = new DefendingState(this.settlementController);
+                return;
+            }
+        }
+
+        let combativityIndex = this.settlementController.TacticalController.OffenseCombativityIndex;
 
         if (combativityIndex >= this.COMBATIVITY_THRESHOLD) {   
             let enemy = this.settlementController.StrategyController.CurrentEnemy;

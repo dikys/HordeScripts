@@ -13,6 +13,33 @@ class MiraSettlementData {
 type UnitComposition = Map<string, number>;
 
 class MiraUtils {
+    static GetUnitsInArea(cell: any, radius: number): Array<any> {
+        let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
+        let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
+        let count = HordeUtils.getValue(unitsInBox, "Count");
+        let units = HordeUtils.getValue(unitsInBox, "Units");
+
+        let unitsIds = new Set<number>();
+        let result = new Array<any>();
+
+        for (let index = 0; index < count; ++index) {
+            let unit = units[index];
+
+            if (unit == null) {
+                continue;
+            }
+
+            if (unitsIds.has(unit.Id)) {
+                continue;
+            }
+
+            unitsIds.add(unit.Id);
+            result.push(unit);
+        }
+
+        return result;
+    }
+    
     static PrintMap(map: UnitComposition) {
         map.forEach(
             (value, key, m) => {
