@@ -20,6 +20,7 @@ function runExamples() {
     // logi("[*] Примеры работы с игровой логикой");
     // example_spawnUnit();
     // example_spawnBullet();
+    // example_customBullet();
     // example_spawnBulletsRain();
     // example_scenaWorks();
     // example_settlementWorks();

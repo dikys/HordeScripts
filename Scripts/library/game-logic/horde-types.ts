@@ -17,7 +17,8 @@ ResourceTileType = HCL.HordeClassLibrary.World.Objects.Tiles.ResourceTileType;
 // --- Снаряды
 
 BaseBullet = HCL.HordeClassLibrary.World.Objects.Bullets.BaseBullet;
-BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;
+BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;  // Unknown, Flying, Collided, OutOfScena, ReachedTheGoal
+ScriptBullet = HCL.HordeClassLibrary.World.Objects.Bullets.Implementations.Other.ScriptBullet;
 
 
 // ===================================================
