@@ -6,7 +6,7 @@ function scenaScriptsFirstRun() {
     scenaScripts = new ScenaScripts();
 
     // регистрируем сцены
-    scenaScripts.registerScena({name: "5 - Оборона от Теймура", onFirstRun: _5_Oborona_ot_Tejmura.mapdefens_onFirstRun, onEveryTick: _5_Oborona_ot_Tejmura.mapdefens_everyTick});
+    scenaScripts.registerScena({name: "5 - Оборона от Теймура", onFirstRun: _5_Oborona_ot_Tejmura.onFirstRun, onEveryTick: _5_Oborona_ot_Tejmura.everyTick});
     scenaScripts.registerScena({name: "6 - ДОТА", onFirstRun: _6_DOTA.scena_onFirstRun, onEveryTick: _6_DOTA.scena_onEveryTick});
 
     // запускаем текущую сцену
