@@ -29,7 +29,7 @@ class MiraSquad {
     }
 
     private cleanup(): void {
-        this.Units = this.Units.filter((unit) => {return unit.IsAlive});
+        this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive});
     }
 
     Tick(tickNumber: number): void {
@@ -39,59 +39,64 @@ class MiraSquad {
 
     GetLocation(): MiraSquadLocation {
         if (!this.location) {
-            let uppermostUnit: any = null;
-            let lowermostUnit: any = null;
-            let leftmostUnit: any = null;
-            let rightmostUnit: any = null;
+            if (this.Units.length > 0) {
+                let uppermostUnit: any = null;
+                let lowermostUnit: any = null;
+                let leftmostUnit: any = null;
+                let rightmostUnit: any = null;
 
-            let avgPosition = {X: 0, Y: 0};
-            
-            for (let unit of this.Units) {
-                avgPosition.X += unit.Cell.X;
-                avgPosition.Y += unit.Cell.Y;
+                let avgPosition = {X: 0, Y: 0};
                 
-                if (uppermostUnit === null) {
-                    uppermostUnit = unit;
+                for (let unit of this.Units) {
+                    avgPosition.X += unit.Cell.X;
+                    avgPosition.Y += unit.Cell.Y;
+                    
+                    if (uppermostUnit == null) {
+                        uppermostUnit = unit;
+                    }
+
+                    if (lowermostUnit == null) {
+                        lowermostUnit = unit;
+                    }
+
+                    if (leftmostUnit == null) {
+                        leftmostUnit = unit;
+                    }
+
+                    if (rightmostUnit == null) {
+                        rightmostUnit = unit;
+                    }
+
+                    if (unit !== uppermostUnit && unit.Cell.Y < uppermostUnit.Cell.Y) {
+                        uppermostUnit = unit;
+                    }
+
+                    if (unit !== lowermostUnit && unit.Cell.Y > lowermostUnit.Cell.Y) {
+                        lowermostUnit = unit;
+                    }
+
+                    if (unit !== leftmostUnit && unit.Cell.X < leftmostUnit.Cell.X) {
+                        leftmostUnit = unit;
+                    }
+
+                    if (unit !== rightmostUnit && unit.Cell.X > rightmostUnit.Cell.X) {
+                        rightmostUnit = unit;
+                    }
                 }
 
-                if (lowermostUnit === null) {
-                    lowermostUnit = unit;
-                }
+                let verticalSpread = lowermostUnit.Cell.Y - uppermostUnit.Cell.Y;
+                let horizontalSpread = rightmostUnit.Cell.X - leftmostUnit.Cell.X;
+                let spread = Math.max(verticalSpread, horizontalSpread);
 
-                if (leftmostUnit === null) {
-                    leftmostUnit = unit;
-                }
-
-                if (rightmostUnit === null) {
-                    rightmostUnit = unit;
-                }
-
-                if (unit !== uppermostUnit && unit.Cell.Y < uppermostUnit.Cell.Y) {
-                    uppermostUnit = unit;
-                }
-
-                if (unit !== lowermostUnit && unit.Cell.Y > lowermostUnit.Cell.Y) {
-                    lowermostUnit = unit;
-                }
-
-                if (unit !== leftmostUnit && unit.Cell.X < leftmostUnit.Cell.X) {
-                    leftmostUnit = unit;
-                }
-
-                if (unit !== rightmostUnit && unit.Cell.X > rightmostUnit.Cell.X) {
-                    rightmostUnit = unit;
-                }
+                this.location = new MiraSquadLocation(
+                    Math.round(avgPosition.X / this.Units.length),
+                    Math.round(avgPosition.Y / this.Units.length),
+                    spread
+                );
             }
-
-            let verticalSpread = lowermostUnit.Cell.Y - uppermostUnit.Cell.Y;
-            let horizontalSpread = rightmostUnit.Cell.X - leftmostUnit.Cell.X;
-            let spread = Math.max(verticalSpread, horizontalSpread);
-
-            this.location = new MiraSquadLocation(
-                Math.round(avgPosition.X / this.Units.length),
-                Math.round(avgPosition.Y / this.Units.length),
-                spread
-            );
+            else {
+                this.location = new MiraSquadLocation(0, 0, 0);
+            }
         }
 
         return this.location;
@@ -165,7 +170,7 @@ class MiraControllableSquad extends MiraSquad {
 
     private clean(): void {
         let unitCount = this.Units.length;
-        this.Units = this.Units.filter((unit) => {return unit.IsAlive});
+        this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive});
         
         if (this.Units.length !== unitCount) {
             this.recalcMinSpread();

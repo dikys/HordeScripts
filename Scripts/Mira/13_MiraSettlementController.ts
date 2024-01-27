@@ -58,7 +58,7 @@ class MiraSettlementController {
     }
     
     Tick(tickNumber: number): void {
-        this.currentUnitComposition = undefined;
+        this.currentUnitComposition = null;
         
         if (this.nextState) {
             if (this.state) {

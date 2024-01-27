@@ -16,7 +16,7 @@ class IdleState extends MiraSettlementControllerState {
 class DefendingState extends MiraSettlementControllerState {
     OnEntry(): void {
         this.refreshAttackersList();
-        this.settlementController.TacticalController.Retreat();
+        this.settlementController.TacticalController.Defend();
     }
 
     OnExit(): void {
@@ -26,8 +26,12 @@ class DefendingState extends MiraSettlementControllerState {
     Tick(tickNumber: number): void {
         if (tickNumber % 50 !== 0) {
             if (!this.settlementController.IsUnderAttack()) {
+                this.settlementController.Log(MiraLogLevel.Debug, `Attack countered`);
                 this.settlementController.State = new DevelopingState(this.settlementController);
                 return;
+            }
+            else {
+                this.refreshAttackersList();
             }
         }
     }
@@ -57,11 +61,12 @@ class DefendingState extends MiraSettlementControllerState {
         let enemySettlement = unit.Owner;
         
         let newEnemies = enemies.filter((unit) => {return unit.Owner === enemySettlement});
-        let currentEnemies = new Array<any>();
+        let currentEnemies = [];
+        enemies = [];
 
         do {
-            enemies.push(newEnemies);
-            currentEnemies = newEnemies;
+            enemies.push(...newEnemies);
+            currentEnemies = [...newEnemies];
             newEnemies = [];
 
             for (let enemy of currentEnemies) {
@@ -74,7 +79,7 @@ class DefendingState extends MiraSettlementControllerState {
                 let friends = this.settlementController.GetEnemiesInArea(enemy.Cell, UNIT_SEARCH_RADIUS);
                 friends.filter((unit) => {return unit.Owner === enemySettlement && !processedUnitIds.has(unit.Id)});
 
-                newEnemies.push(friends);
+                newEnemies.push(...friends);
             }
         }
         while (newEnemies.length > 0);

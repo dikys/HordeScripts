@@ -147,7 +147,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
 
         this.updateSquads();
 
-        if (this.currentTarget !== null) { //we are attacking
+        if (this.currentTarget != null) { //we are attacking
             var pullbackLocation = this.getPullbackCell();
 
             if (pullbackLocation) {
@@ -160,8 +160,21 @@ class TacticalSubcontroller extends MiraSubcontroller {
                 }
             }
         }
-        else { //we are under attack
+        else if (this.parentController.AttackingSquads.length > 0) { //we are under attack
             this.updateDefenseTargets();
+        }
+        else { //building up or something
+            let retreatCell = this.getRetreatCell();
+            
+            for (let squad of this.defensiveSquads) {
+                if (squad.IsIdle()) {
+                    squad.Move(retreatCell);
+                }
+            }
+        }
+
+        for (let squad of this.parentController.AttackingSquads) {
+            squad.Tick(tickNumber);
         }
 
         for (let squad of this.offensiveSquads) {
@@ -181,6 +194,13 @@ class TacticalSubcontroller extends MiraSubcontroller {
 
     Defend(): void {
         this.currentTarget = null;
+
+        if (
+            this.offensiveSquads.length == 0 &&
+            this.defensiveSquads.length == 0
+        ) {
+            this.ComposeSquads();
+        }
         
         let defensiveStrength = 0;
         this.defensiveSquads.forEach((squad) => {defensiveStrength += squad.Strength});
@@ -189,10 +209,13 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.parentController.AttackingSquads.forEach((squad) => {enemyStrength += squad.Strength});
 
         if (defensiveStrength < enemyStrength) {
+            this.parentController.Log(MiraLogLevel.Debug, `Current defense strength ${defensiveStrength} is not enough to counter attack srength ${enemyStrength}`);
             this.Retreat();
             this.defensiveSquads = [...this.defensiveSquads, ...this.offensiveSquads];
             this.offensiveSquads = [];
         }
+
+        this.updateDefenseTargets();
     }
 
     Retreat(): void {
@@ -210,6 +233,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.parentController.Log(MiraLogLevel.Debug, `Composing squads`);
         
         this.offensiveSquads = [];
+        this.defensiveSquads = [];
         //TODO: compose more than one squad
 
         var units = enumerate(this.parentController.Settlement.Units);
@@ -244,6 +268,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
     private updateSquads(): void {
         this.offensiveSquads = this.offensiveSquads.filter((squad) => {return squad.Units.length > 0});
         this.defensiveSquads = this.defensiveSquads.filter((squad) => {return squad.Units.length > 0});
+        this.parentController.AttackingSquads = this.parentController.AttackingSquads.filter((squad) => {return squad.Units.length > 0});
     }
 
     //TODO: use more generic approach to detecting whether unit is combat or not

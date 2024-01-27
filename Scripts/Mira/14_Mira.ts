@@ -45,6 +45,7 @@ class Mira {
 
     static FirstRun(): void {
         try {
+            Mira.CanRun = true;
             Mira.controllers.length = 0;
             Mira.AttachToPlayer("1");
         }
