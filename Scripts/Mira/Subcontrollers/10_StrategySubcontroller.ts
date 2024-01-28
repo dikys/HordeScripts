@@ -91,20 +91,16 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     OrderAttackersByDangerLevel(): Array<MiraSquad> {
-        let castle = this.parentController.Settlement.Units.Professions.MainBuildings.First();
+        let settlementCenter = this.parentController.GetSettlementCenter();
 
-        if (!castle) {
-            castle = this.parentController.Settlement.Units.Professions.ProducingBuildings.First();
-        }
-        
-        if (castle) {
+        if (settlementCenter) {
             return this.parentController.AttackingSquads.sort(
                 (a, b) => {
                     let aLoc = a.GetLocation();
                     let bLoc = b.GetLocation();
 
-                    return MiraUtils.ChebyshevDistance(castle.Cell, {X: aLoc.X, Y: aLoc.Y}) - 
-                    MiraUtils.ChebyshevDistance(castle.Cell, {X: bLoc.X, Y: bLoc.Y})
+                    return MiraUtils.ChebyshevDistance(settlementCenter, aLoc.Point) - 
+                    MiraUtils.ChebyshevDistance(settlementCenter, bLoc.Point)
                 }
             );
         }
@@ -165,10 +161,12 @@ class TacticalSubcontroller extends MiraSubcontroller {
         }
         else { //building up or something
             let retreatCell = this.getRetreatCell();
-            
-            for (let squad of this.defensiveSquads) {
-                if (squad.IsIdle()) {
-                    squad.Move(retreatCell);
+
+            if (retreatCell) {
+                for (let squad of this.defensiveSquads) {
+                    if (squad.IsIdle()) {
+                        squad.Move(retreatCell);
+                    }
                 }
             }
         }
@@ -211,8 +209,6 @@ class TacticalSubcontroller extends MiraSubcontroller {
         if (defensiveStrength < enemyStrength) {
             this.parentController.Log(MiraLogLevel.Debug, `Current defense strength ${defensiveStrength} is not enough to counter attack srength ${enemyStrength}`);
             this.Retreat();
-            this.defensiveSquads = [...this.defensiveSquads, ...this.offensiveSquads];
-            this.offensiveSquads = [];
         }
 
         this.updateDefenseTargets();
@@ -224,7 +220,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
 
         if (retreatLocation) {
             for (var squad of this.offensiveSquads) {
-                squad.Move(retreatLocation);
+                squad.Move(retreatLocation, this.parentController.SETTLEMENT_RADIUS);
             }
         }
     }
@@ -277,13 +273,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private getPullbackCell(): any {
-        var castle = this.parentController.Settlement.Units.Professions.MainBuildings.First();
-
-        if (castle) {
-            return castle.Cell;
-        }
-
-        return null;
+        return this.parentController.GetSettlementCenter();
     }
 
     private getRetreatCell(): any {
@@ -297,13 +287,29 @@ class TacticalSubcontroller extends MiraSubcontroller {
         let attackerLocation = attackers[attackerIndex].GetLocation();
         let attackerStrength = attackers[attackerIndex].Strength;
         let accumulatedStrength = 0;
+
+        let allSquads = [...this.defensiveSquads, ...this.offensiveSquads];
+        let settlementCenter = this.parentController.GetSettlementCenter();
+
+        if (!settlementCenter) { //everything is lost :(
+            return;
+        }
         
-        for (let squad of this.defensiveSquads) {
+        for (let squad of allSquads) {
             if (!squad.IsIdle()) {
                 continue;
             }
+
+            let distanceToSettlement = MiraUtils.ChebyshevDistance(
+                squad.GetLocation().Point,
+                settlementCenter
+            );
+
+            if (distanceToSettlement > this.parentController.SETTLEMENT_RADIUS) {
+                continue;
+            }
             
-            squad.Attack({X: attackerLocation.X, Y: attackerLocation.Y});
+            squad.Attack(attackerLocation.Point);
             accumulatedStrength += squad.Strength;
 
             if (accumulatedStrength > attackerStrength) {

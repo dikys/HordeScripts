@@ -41,8 +41,13 @@ class DefendingState extends MiraSettlementControllerState {
         let processedUnitIds = new Set<number>();
 
         //TODO: add enemy detection around expands
-        let castle = this.settlementController.Settlement.Units.Professions.MainBuildings.First();
-        let attackers = this.settlementController.GetEnemiesInArea(castle.Cell, this.settlementController.ENEMY_SEARCH_RADIUS);
+        let settlementCenter = this.settlementController.GetSettlementCenter();
+
+        if (!settlementCenter) {
+            return;
+        }
+
+        let attackers = this.settlementController.GetEnemiesInArea(settlementCenter, this.settlementController.SETTLEMENT_RADIUS);
 
         for (let unit of attackers) {
             if (processedUnitIds.has(unit.Id)) {
@@ -55,7 +60,7 @@ class DefendingState extends MiraSettlementControllerState {
     }
 
     private constructSquad(unit: any, processedUnitIds: Set<number>): MiraSquad {
-        const UNIT_SEARCH_RADIUS = 5;
+        const UNIT_SEARCH_RADIUS = 3;
         
         let enemies = this.settlementController.GetEnemiesInArea(unit.Cell, UNIT_SEARCH_RADIUS);
         let enemySettlement = unit.Owner;

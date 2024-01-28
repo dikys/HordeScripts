@@ -1,11 +1,14 @@
+
 class MiraSquadLocation {
-    X: number;
-    Y: number;
+    Point: {
+        X: number;
+        Y: number;
+    };
+    
     Spread: number;
 
     constructor(x: number, y: number, spread: number) {
-        this.X = x;
-        this.Y = y;
+        this.Point = {X: x, Y: y};
         this.Spread = spread;
     }
 }
@@ -28,7 +31,7 @@ class MiraSquad {
         this.Units = units;
     }
 
-    private cleanup(): void {
+    protected cleanup(): void {
         this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive});
     }
 
@@ -122,6 +125,9 @@ class MiraControllableSquad extends MiraSquad {
     }
 
     TargetCell: any;
+    MovementPrecision: number;
+    public readonly DEFAULT_MOVEMENT_PRECISION = 3;
+
     IsAttackMode: boolean;
 
     constructor(units:Array<any>, controller: TacticalSubcontroller){
@@ -135,18 +141,22 @@ class MiraControllableSquad extends MiraSquad {
 
     Tick(tickNumber: number): void {
         this.location = null;
-        this.clean();
+        this.cleanup();
         this.state.Tick(tickNumber);
     }
 
-    Attack(targetLocation: any): void {
+    Attack(targetLocation: any, precision?: number): void {
         this.TargetCell = targetLocation;
+        this.MovementPrecision = precision ? precision : this.DEFAULT_MOVEMENT_PRECISION;
+
         this.IsAttackMode = true;
         this.SetState(new MiraSquadAttackState(this));
     }
 
-    Move(location: any): void {
+    Move(location: any, precision?: number): void {
         this.TargetCell = location;
+        this.MovementPrecision = precision ? precision : this.DEFAULT_MOVEMENT_PRECISION;
+
         this.IsAttackMode = false;
         this.SetState(new MiraSquadMoveState(this));
     }
@@ -168,7 +178,7 @@ class MiraControllableSquad extends MiraSquad {
         this.minSpread = Math.round(Math.sqrt(this.Units.length));
     }
 
-    private clean(): void {
+    protected cleanup(): void {
         let unitCount = this.Units.length;
         this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive});
         

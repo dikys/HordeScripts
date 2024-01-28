@@ -4,7 +4,7 @@
 */
 
 class MiraSettlementController {
-    public readonly ENEMY_SEARCH_RADIUS = 24;
+    public readonly SETTLEMENT_RADIUS = 24;
     
     public Settlement: any;
     public MasterMind: any;
@@ -101,8 +101,13 @@ class MiraSettlementController {
 
     IsUnderAttack(): boolean {
         //TODO: add enemy detection around expands
-        let castle = this.Settlement.Units.Professions.MainBuildings.First();
-        let enemies = this.GetEnemiesInArea(castle.Cell, this.ENEMY_SEARCH_RADIUS);
+        let settlementCenter = this.GetSettlementCenter();
+
+        if (!settlementCenter) {
+            return false;
+        }
+
+        let enemies = this.GetEnemiesInArea(settlementCenter, this.SETTLEMENT_RADIUS);
         
         return enemies.length > 0;
     }
@@ -112,5 +117,21 @@ class MiraSettlementController {
         let enemies = units.filter((unit) => {return this.StrategyController.EnemySettlements.indexOf(unit.Owner) > -1});
 
         return enemies;
+    }
+
+    GetSettlementCenter(): any {
+        let castle = this.Settlement.Units.Professions.MainBuildings.First();
+
+        if (castle) {
+            return castle.Cell;
+        }
+
+        let productionBuilding = this.Settlement.Units.Professions.ProducingBuildings.First();
+
+        if (productionBuilding) {
+            return productionBuilding.Cell;
+        }
+
+        return null;
     }
 }

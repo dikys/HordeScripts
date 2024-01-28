@@ -1,5 +1,4 @@
 
-const LOCATION_THRESHOLD_DISTANCE = 4;
 const MAX_SPREAD_THRESHOLD_MULTIPLIER = 2.8;
 const MIN_SPREAD_THRESHOLD_MULTIPLIER = 2;
 
@@ -19,7 +18,12 @@ abstract class MiraSquadState extends FsmState {
 //TODO: find best position for each unit of the squad
 class MiraSquadIdleState extends MiraSquadState {
     OnEntry(): void {
-        // this.squad.TargetCell = null;
+        this.squad.TargetCell = this.squad.GetLocation().Point;
+        
+        for (let unit of this.squad.Units) {
+            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.TargetCell);
+        }
+
         // this.squad.IsAttackMode = false;
     }
     
@@ -44,13 +48,13 @@ class MiraSquadMoveState extends MiraSquadState {
     OnExit(): void {}
     
     Tick(tickNumber: number): void {
+        let location = this.squad.GetLocation();
+        let distance = MiraUtils.ChebyshevDistance(
+            this.squad.TargetCell, 
+            location.Point
+        );
+        
         if (!this.timeoutTick) {
-            let location = this.squad.GetLocation();
-            let distance = MiraUtils.ChebyshevDistance(
-                this.squad.TargetCell, 
-                {X: location.X, Y: location.Y}
-            );
-
             this.timeoutTick = tickNumber + distance * 1000 * 3; // given that the speed will be 1 cell/s
         }
 
@@ -58,15 +62,8 @@ class MiraSquadMoveState extends MiraSquadState {
             this.squad.SetState(new MiraSquadIdleState(this.squad));
             return;
         }
-        
-        let location = this.squad.GetLocation();
-        
-        let distance = MiraUtils.ChebyshevDistance(
-            this.squad.TargetCell, 
-            {X: location.X, Y: location.Y}
-        );
 
-        if (distance < LOCATION_THRESHOLD_DISTANCE) {
+        if (distance <= this.squad.MovementPrecision) {
             this.squad.SetState(new MiraSquadIdleState(this.squad));
             return;
         }
@@ -87,10 +84,10 @@ class MiraSquadAttackState extends MiraSquadState {
         
         let distance = MiraUtils.ChebyshevDistance(
             this.squad.TargetCell, 
-            {X: location.X, Y: location.Y}
+            location.Point
         );
 
-        if (distance < LOCATION_THRESHOLD_DISTANCE) {
+        if (distance <= this.squad.MovementPrecision) {
             this.squad.SetState(new MiraSquadIdleState(this.squad));
             return;
         }
