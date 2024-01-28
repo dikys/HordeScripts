@@ -16,7 +16,7 @@ var playerStartResources : any;
 // текущая волна
 var spawnWaveNum : number;
 // план для спавна
-var spawnPlan;
+var spawnPlan : any;
 // генераторы планов для спавна на выбор
 var spawnPlanGenerators : Array<any>;
 
@@ -55,6 +55,8 @@ export function onFirstRun() {
         // Идет перезапуск скриптов - перезапускаем иницилизацию
     }
     logi(`Текущее состояние ${gameState}`);
+
+    initWavePlan_test();
 }
 
 export function everyTick(gameTickNum: number) {
@@ -113,7 +115,7 @@ export function everyTick(gameTickNum: number) {
         var secondsLeft = Math.round(timeEnd - gameTickNum) / FPS;
         var minutesLeft = Math.floor(secondsLeft / 60);
         secondsLeft -= minutesLeft * 60;
-
+        secondsLeft = Math.round(secondsLeft);
         broadcastMessage("Осталось продержаться " + (minutesLeft > 0 ? minutesLeft + " минут " : "") + secondsLeft + " секунд", createHordeColor(255, 100, 100, 100));
     }
 
@@ -125,7 +127,10 @@ export function everyTick(gameTickNum: number) {
     if ((!goalCastle || goalCastle.IsDead)) {
         gameState = GameState.End;
         broadcastMessage("ИГРОКИ ПРОИГРАЛИ", createHordeColor(255, 255, 50, 10));
-        for (var i = 0; i < playersMaxCount; i++) {
+        for (var i = 0; i < 6; i++) {
+            if (i == enemySettlementId) {
+                continue;
+            }
             scena.GetRealScena().Settlements.Item.get("" + i).Existence.ForceDefeat();
         }
         return;
@@ -134,7 +139,7 @@ export function everyTick(gameTickNum: number) {
     if (gameTickNum >= timeEnd) {
         gameState = GameState.End;
         broadcastMessage("ИГРОКИ ПОБЕДИЛИ", createHordeColor(255, 255, 50, 10));
-        scena.GetRealScena().Settlements.Item.get("" + playersMaxCount).Existence.ForceDefeat();
+        scena.GetRealScena().Settlements.Item.get("" + enemySettlementId).Existence.ForceDefeat();
         return;
     }
 
@@ -222,6 +227,7 @@ export function everyTick(gameTickNum: number) {
                         unit: spawnedUnit,
                         cloneDepth: (legendary_swordmen_unitsInfo[i].cloneDepth + 1)
                     });
+                    spawnDecoration(scena.GetRealScena(), HordeContent.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), spawnedUnit.Position);
                 }
             }
             
@@ -263,6 +269,9 @@ export function everyTick(gameTickNum: number) {
                 Math.min(playersCount, 3),
                 UnitDirection.Down,
                 generator);
+            for (var spawnedUnit of spawnedUnits) {
+                spawnDecoration(scena.GetRealScena(), HordeContent.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), spawnedUnit.Position);
+            }
         }
     }
 
@@ -458,6 +467,106 @@ function InitGame() {
     enemySettlementId   = 4;
     enemySettlement     = settlements.Item.get('' + enemySettlementId);
     
+    ////////////////////////////////////////////////////
+    // регистрируем генераторов планов
+    ////////////////////////////////////////////////////
+
+    var spawnPlanGeneratorsDescriptions = new Array<string>();
+
+    spawnPlanGenerators = new Array<any>();
+    spawnPlanGenerators.push(initWavePlan_1);
+    spawnPlanGeneratorsDescriptions.push("15 волн, 1-ая на 1-ой минуте, сбалансированная армия врага.");
+    spawnPlanGenerators.push(initWavePlan_2);
+    spawnPlanGeneratorsDescriptions.push("враги идут непрерывно начиная с 3-ой минуты, сбалансированная армия врага.");
+    spawnPlanGenerators.push(initWavePlan_3);
+    spawnPlanGeneratorsDescriptions.push("враги идут непрерывно начиная с 1-ой минуты, в составе армии только рыцари.");
+    spawnPlanGenerators.push(initWavePlan_4);
+    spawnPlanGeneratorsDescriptions.push("враги идут каждые 2 минуты, в составе армии только легендарные юниты, у которых здоровье в 10 раз меньше обычного.");
+    //spawnPlanGenerators.push(initWavePlan_test);
+    //spawnPlanGeneratorsDescriptions.push("Тестовая волна");
+
+    //////////////////////////////////////////
+    // настраиваем целевого юнита
+    //////////////////////////////////////////
+
+    var goalUnitCfg = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_StoneCastle"));
+    // увеличиваем хп до 500
+    HordeUtils.setValue(goalUnitCfg, "MaxHealth", 500);
+    // убираем починку
+    goalUnitCfg.ProfessionParams.Remove(UnitProfession.Reparable);
+    // меняем цвет
+    // HordeUtils.setValue(goalUnitCfg, "TintColor", createHordeColor(255, 0, 255, 0));
+    // добавляем постройку волн
+    {
+        var producerParams = goalUnitCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+        var produceList    = producerParams.CanProduceList;
+        produceList.Clear();
+
+        for (var spawnPlanGeneratorIdx = 0; spawnPlanGeneratorIdx < spawnPlanGenerators.length; spawnPlanGeneratorIdx++) {
+            var cfg = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Barbarian_Swordmen"));
+            // назначаем имя
+            HordeUtils.setValue(cfg, "Name", "План спавна " + (spawnPlanGeneratorIdx+1));
+            // описание
+            HordeUtils.setValue(cfg, "Description", spawnPlanGeneratorsDescriptions[spawnPlanGeneratorIdx]);
+            // записываем ид плана
+            HordeUtils.setValue(cfg, "Shield", spawnPlanGeneratorIdx);
+            // убираем цену
+            HordeUtils.setValue(cfg.CostResources, "Gold",   0);
+            HordeUtils.setValue(cfg.CostResources, "Metal",  0);
+            HordeUtils.setValue(cfg.CostResources, "Lumber", 0);
+            HordeUtils.setValue(cfg.CostResources, "People", 0);
+            // убираем требования
+            cfg.TechConfig.Requirements.Clear();
+            produceList.Add(cfg);
+        }
+    }
+
+    //////////////////////////////////////////
+    // считаем количество игроков
+    //////////////////////////////////////////
+
+    var settlementAccounted = new Array<boolean>(6);
+    for (var settlementNum = 0; settlementNum < settlementAccounted.length; settlementNum++) {
+        settlementAccounted[settlementNum] = false;
+    }
+
+    playersCount    = 0;
+    for (var player of players) {
+        var realPlayer = player.GetRealPlayer();
+        var settlement = realPlayer.GetRealSettlement();
+        
+        if (isReplayMode() && realPlayer.PlayerOrigin.ToString() != "Replay") {
+            continue;
+        }
+
+        // игрок
+        if (settlement.Uid < 6 && settlement.Uid != enemySettlementId) {
+            if (!HordeUtils.getValue(realPlayer, "MasterMind")) {
+                // несколько игроков может играть за 1 поселение
+                if (!settlementAccounted[settlement.Uid]) {
+                    playersCount++;
+                    settlementAccounted[settlement.Uid] = true;
+                }
+
+                // позиция цели врагов
+                var position = createPoint(88, 123);
+                //var position = createPoint(89, 150); // для тестов;
+
+                // любому игроку добавляем церковь - цель врагов
+                if (!goalCastle) {
+                    goalCastle = spawnUnit(
+                        settlement,
+                        goalUnitCfg,
+                        position,
+                        UnitDirection.Down
+                    );
+                }
+                logi("Поселение ", settlement.Uid, " is player");
+            }
+        }
+    }
+    logi("Игроков: ", playersCount);
+
     ////////////////////////////
     // задаем конфиги врагов
     ////////////////////////////
@@ -491,7 +600,7 @@ function InitGame() {
     enemyUnitsCfg["UnitConfig_Mage_Villur"]        = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Mage_Villur"));
     // (маг) Ольга (шторм из молний)
     enemyUnitsCfg["UnitConfig_Mage_Olga"]          = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Mage_Olga"));
-
+    
     // (легендарный) рыцарь
     legendaryUnitsCFGId.push("UnitConfig_legendary_swordmen");
     legendaryUnitsInformation.push("Слабости: давится, горит. Преимущества: очень силен в ближнем бою.");
@@ -675,14 +784,6 @@ function InitGame() {
     }
     
     ////////////////////////////////////////////////////
-    // регистрируем генераторов планов
-    ////////////////////////////////////////////////////
-
-    spawnPlanGenerators = new Array<any>();
-    spawnPlanGenerators.push(initWavePlan_1);
-    spawnPlanGenerators.push(initWavePlan_2);
-
-    ////////////////////////////////////////////////////
     // списки легендарных юнитов на карте
     ////////////////////////////////////////////////////
 
@@ -695,79 +796,6 @@ function InitGame() {
     if (!legendary_worker_unitsInfo) {
         legendary_worker_unitsInfo = [];
     }
-
-    //////////////////////////////////////////
-    // настраиваем целевого юнита
-    //////////////////////////////////////////
-
-    var goalUnitCfg = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Slavyane_StoneCastle"));
-    // увеличиваем хп до 500
-    HordeUtils.setValue(goalUnitCfg, "MaxHealth", 500);
-    // убираем починку
-    goalUnitCfg.ProfessionParams.Remove(UnitProfession.Reparable);
-    // меняем цвет
-    // HordeUtils.setValue(goalUnitCfg, "TintColor", createHordeColor(255, 0, 255, 0));
-    // добавляем постройку волн
-    {
-        var producerParams = goalUnitCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
-        var produceList    = producerParams.CanProduceList;
-        produceList.Clear();
-
-        for (var spawnPlanGeneratorIdx = 0; spawnPlanGeneratorIdx < spawnPlanGenerators.length; spawnPlanGeneratorIdx++) {
-            var cfg = HordeContent.CloneConfig(HordeContent.GetUnitConfig("#UnitConfig_Barbarian_Swordmen"));
-            // назначаем имя
-            HordeUtils.setValue(cfg, "Name", "План спавна " + (spawnPlanGeneratorIdx+1));
-            // описание
-            HordeUtils.setValue(cfg, "Description", "Не советую!");
-            // записываем ид плана
-            HordeUtils.setValue(cfg, "Shield", spawnPlanGeneratorIdx);
-            // убираем цену
-            HordeUtils.setValue(cfg.CostResources, "Gold",   0);
-            HordeUtils.setValue(cfg.CostResources, "Metal",  0);
-            HordeUtils.setValue(cfg.CostResources, "Lumber", 0);
-            HordeUtils.setValue(cfg.CostResources, "People", 0);
-            // убираем требования
-            cfg.TechConfig.Requirements.Clear();
-            produceList.Add(cfg);
-        }
-    }
-
-    //////////////////////////////////////////
-    // считаем количество игроков
-    //////////////////////////////////////////
-
-    playersCount    = 0;
-    for (var player of players) {
-        var realPlayer = player.GetRealPlayer();
-        var settlement = realPlayer.GetRealSettlement();
-
-        if (isReplayMode() && realPlayer.PlayerOrigin.ToString() != "Replay") {
-            continue;
-        }
-        
-        // игрок
-        if (settlement.Uid < 6 && settlement.Uid != enemySettlementId) {
-            if (!HordeUtils.getValue(realPlayer, "MasterMind")) {
-                playersCount++;
-
-                // позиция цели врагов
-                var position = createPoint(88, 123);
-                //var position = createPoint(89, 150); // для тестов;
-
-                // любому игроку добавляем церковь - цель врагов
-                if (!goalCastle) {
-                    goalCastle = spawnUnit(
-                        settlement,
-                        goalUnitCfg,
-                        position,
-                        UnitDirection.Down
-                    );
-                }
-                logi("Поселение ", settlement.Uid, " is player");
-            }
-        }
-    }
-    logi("Игроков: ", playersCount);
 
     //////////////////////////////////////////
     // отбираем ресурсы у игроков
@@ -905,8 +933,8 @@ function initWavePlan_1() {
         message: "БОСС ВОЛНА 9",
         gameTickNum: 20 * 60 * 50,
         units: [
-            { count: 10 * playersCount, cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 10 * playersCount, cfgId: "UnitConfig_Slavyane_Balista" }
+            { count: 8 * playersCount, cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: 8 * playersCount, cfgId: "UnitConfig_Slavyane_Balista" }
         ]
     }, {
         message: "ВОЛНА 10",
@@ -935,8 +963,8 @@ function initWavePlan_1() {
             { count: 16 * playersCount, cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 8 * playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 10 * playersCount, cfgId: "UnitConfig_Barbarian_Archer_2" },
-            { count: 3 * playersCount,  cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 3 * playersCount,  cfgId: "UnitConfig_Slavyane_Balista" }
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Balista" }
         ]
     }, {
         gameTickNum: 26.3 * 60 * 50,
@@ -966,9 +994,9 @@ function initWavePlan_1() {
             { count: 20 * playersCount,         cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 10 * playersCount,         cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 10 * playersCount,         cfgId: "UnitConfig_Barbarian_Archer_2" },
-            { count: 3 * playersCount,          cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 3 * playersCount,          cfgId: "UnitConfig_Slavyane_Balista" },
-            { count: 3 * playersCount,          cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Balista" },
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Mag_2" },
             { count: 1,                         cfgId: randomItem(legendaryUnitsCFGId) },
             { count: playersCount >= 3 ? 1 : 0, cfgId: randomItem(legendaryUnitsCFGId) },
             { count: playersCount >= 5 ? 1 : 0, cfgId: randomItem(legendaryUnitsCFGId) }
@@ -981,11 +1009,11 @@ function initWavePlan_1() {
             { count: 25 * playersCount,         cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 12 * playersCount,         cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 12 * playersCount,         cfgId: "UnitConfig_Barbarian_Archer_2" },
-            { count: 3 * playersCount,          cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 3 * playersCount,          cfgId: "UnitConfig_Slavyane_Balista" },
-            { count: 1 * playersCount,          cfgId: "UnitConfig_Mage_Mag_2" },
-            { count: 1 * playersCount,          cfgId: "UnitConfig_Mage_Villur" },
-            { count: 1 * playersCount,          cfgId: "UnitConfig_Mage_Olga" },
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: Math.round(3 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Balista" },
+            { count: Math.round(1 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: Math.round(1 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Villur" },
+            { count: Math.round(1 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Olga" },
             { count: 1,                         cfgId: randomItem(legendaryUnitsCFGId) },
             { count: playersCount >= 3 ? 1 : 0, cfgId: randomItem(legendaryUnitsCFGId) },
             { count: playersCount >= 5 ? 1 : 0, cfgId: randomItem(legendaryUnitsCFGId) }
@@ -998,11 +1026,11 @@ function initWavePlan_1() {
             { count: 30 * playersCount,  cfgId: "UnitConfig_Barbarian_Heavymen" },
             { count: 10 * playersCount,  cfgId: "UnitConfig_Barbarian_Archer" },
             { count: 20 * playersCount,  cfgId: "UnitConfig_Barbarian_Archer_2" },
-            { count: 6 * playersCount,   cfgId: "UnitConfig_Slavyane_Catapult" },
-            { count: 6 * playersCount,   cfgId: "UnitConfig_Slavyane_Balista" },
-            { count: 1 * playersCount,   cfgId: "UnitConfig_Mage_Mag_2" },
-            { count: 1 * playersCount,   cfgId: "UnitConfig_Mage_Villur" },
-            { count: 1 * playersCount,   cfgId: "UnitConfig_Mage_Olga" },
+            { count: Math.round(6 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Catapult" },
+            { count: Math.round(6 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Slavyane_Balista" },
+            { count: Math.round(1 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Mag_2" },
+            { count: Math.round(1 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Villur" },
+            { count: Math.round(1 * Math.sqrt(playersCount)), cfgId: "UnitConfig_Mage_Olga" },
             { count: 1,                  cfgId: "UnitConfig_legendary_swordmen" },
             { count: 1,                  cfgId: "UnitConfig_legendary_heavymen" },
             { count: 1,                  cfgId: "UnitConfig_legendary_archer" },
@@ -1015,7 +1043,7 @@ function initWavePlan_1() {
 }
 
 function initWavePlan_2() {
-    broadcastMessage("волны пойдут по плану 2 (5 минут до первой волны)", createHordeColor(255, 255, 50, 10));
+    broadcastMessage("волны пойдут по плану 2 (3 минут до первой волны)", createHordeColor(255, 255, 50, 10));
     
     spawnPlan = [];
     var gameStartTick;
@@ -1077,7 +1105,8 @@ function initWavePlan_2() {
 
     gameStartTick = 18 * 60 * 50 + 35 * 50;
     for (var gameTick = gameStartTick; gameTick < timeEnd; gameTick += 45 * 50) {
-        var spawnCount = Math.round(playersCount * (1 + 1 * (timeEnd - gameStartTick) / (timeEnd - gameStartTick)));
+        var spawnCoeff = Math.round(1 * Math.sqrt(playersCount));
+        var spawnCount = Math.round(spawnCoeff * (1 + 1 * (timeEnd - gameStartTick) / (timeEnd - gameStartTick)));
         spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1088,7 +1117,8 @@ function initWavePlan_2() {
 
     gameStartTick = 19 * 60 * 50 + 5 * 50;
     for (var gameTick = gameStartTick; gameTick < timeEnd; gameTick += 45 * 50) {
-        var spawnCount = Math.round(playersCount * (1 + 1 * (timeEnd - gameStartTick) / (timeEnd - gameStartTick)));
+        var spawnCoeff = Math.round(1 * Math.sqrt(playersCount));
+        var spawnCount = Math.round(spawnCoeff * (1 + 1 * (timeEnd - gameStartTick) / (timeEnd - gameStartTick)));
         spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1099,13 +1129,7 @@ function initWavePlan_2() {
 
     gameStartTick = 25 * 60 * 50 + 15 * 50;
     for (var gameTick = gameStartTick; gameTick < timeEnd; gameTick += 50 * 50) {
-        var spawnCount = 1;
-        if (playersCount >= 5) {
-            spawnCount = 3;
-        } else if (playersCount >= 3) {
-            spawnCount = 2;
-        }
-
+        var spawnCount = Math.round(1 * Math.sqrt(playersCount));
         spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1117,7 +1141,7 @@ function initWavePlan_2() {
     gameStartTick = 30 * 60 * 50;
     for (var gameTick = gameStartTick; gameTick < timeEnd; gameTick += 60 * 50) {
         var spawnCount = 0;
-        if (playersCount >= 3) {
+        if (playersCount >= 4) {
             spawnCount = 1;
         }
         spawnPlan.push({
@@ -1131,9 +1155,6 @@ function initWavePlan_2() {
     gameStartTick = 35 * 60 * 50 + 30 * 50;
     for (var gameTick = gameStartTick; gameTick < timeEnd; gameTick += 120 * 50) {
         var spawnCount = 1;
-        if (playersCount >= 4) {
-            spawnCount = 2;
-        }
         spawnPlan.push({
             gameTickNum: gameTick,
             units: [{
@@ -1162,6 +1183,86 @@ function initWavePlan_2() {
 
     // сортируем в порядке тиков
     spawnPlan.sort((a, b) => a.gameTickNum > b.gameTickNum ? 1 : -1);
+}
+
+function initWavePlan_3() {
+    broadcastMessage("волны пойдут по плану 3 (1 минута до первой волны)", createHordeColor(255, 255, 50, 10));
+    
+    spawnPlan = [];
+    var gameStartTick;
+
+    gameStartTick = 1 * 60 * 50;
+    var spawnCount = 5;
+    for (var gameTick = gameStartTick; gameTick < timeEnd; gameTick += 15 * 50) {
+        spawnPlan.push({
+            gameTickNum: gameTick,
+            units: [{
+                count: Math.round(playersCount*spawnCount), cfgId: "UnitConfig_Barbarian_Swordmen"
+            }]
+        });
+        spawnCount *= 1.05;
+    }
+
+    // сортируем в порядке тиков
+    spawnPlan.sort((a, b) => a.gameTickNum > b.gameTickNum ? 1 : -1);
+}
+
+function initWavePlan_4() {
+    broadcastMessage("волны пойдут по плану 4 (3 минуты до первой волны).", createHordeColor(255, 255, 50, 10));
+    
+    spawnPlan = [];
+    var gameStartTick;
+
+    // делаем легендарных юнитов слабее
+    for (var legendaryCFGId of legendaryUnitsCFGId) {
+        HordeUtils.setValue(enemyUnitsCfg[legendaryCFGId], "MaxHealth", Math.max(40, Math.round(enemyUnitsCfg[legendaryCFGId].MaxHealth * 0.1)));
+    }
+    // урезаем легендарного рыцаря
+    var cloneDepth = 0;
+    while (enemyUnitsCfg["UnitConfig_legendary_swordmen_" + cloneDepth]) {
+        delete enemyUnitsCfg["UnitConfig_legendary_swordmen_" + cloneDepth];
+        cloneDepth++;
+    }
+    // создаем конфиги для клонов
+    var swordmenClonesDepth = 2;
+    for (var i = 0; i < swordmenClonesDepth; i++) {
+        var uid = "UnitConfig_legendary_swordmen_" + i;
+
+        // копируем базового рыцаря
+        enemyUnitsCfg[uid] = HordeContent.CloneConfig(enemyUnitsCfg["UnitConfig_legendary_swordmen"]);
+        // задаем количество здоровья
+        HordeUtils.setValue(enemyUnitsCfg[uid], "MaxHealth", Math.ceil(enemyUnitsCfg["UnitConfig_legendary_swordmen"].MaxHealth / Math.pow(2, i + 1)));
+        // задаем цвет
+        HordeUtils.setValue(enemyUnitsCfg[uid], "TintColor", createHordeColor(255, 255, Math.floor(255 * (i + 1) / swordmenClonesDepth), Math.floor(255 * (i + 1) / swordmenClonesDepth)));
+    }
+
+    gameStartTick  = 3 * 60 * 50;
+    for (var gameTick = gameStartTick, waveNum = 1, spawnCoeff = 2; gameTick < timeEnd; gameTick += 120 * 50, waveNum++, spawnCoeff *= 1.2) {
+        var spawnCount = Math.round(playersCount * spawnCoeff);
+
+        spawnPlan.push({
+            message: "ВОЛНА " + waveNum,
+            gameTickNum: gameTick,
+            units: []
+        });
+        for (var i = 0; i < spawnCount; i++) {
+            spawnPlan[spawnPlan.length - 1].units.push({count: 1, cfgId: randomItem(legendaryUnitsCFGId)});
+        }
+    }
+
+    // сортируем в порядке тиков
+    spawnPlan.sort((a, b) => a.gameTickNum > b.gameTickNum ? 1 : -1);
+}
+
+function initWavePlan_test() {
+    spawnPlan = [];
+    spawnPlan.push({
+        message: "ТЕСТОВАЯ ВОЛНА",
+        gameTickNum: 1 * 60 * 50,
+        units: [
+            { count: 30 * playersCount, cfgId: "UnitConfig_legendary_Raider" }
+        ]
+    });
 }
 
 } // namespace
