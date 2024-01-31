@@ -1,6 +1,7 @@
 
 const MAX_SPREAD_THRESHOLD_MULTIPLIER = 2.8;
 const MIN_SPREAD_THRESHOLD_MULTIPLIER = 2;
+const COVER_SEARCH_RADIUS = 5;
 
 abstract class MiraSquadState extends FsmState {
     protected squad: MiraControllableSquad;
@@ -15,24 +16,58 @@ abstract class MiraSquadState extends FsmState {
     }
 }
 
-//TODO: find best position for each unit of the squad
 class MiraSquadIdleState extends MiraSquadState {
     OnEntry(): void {
         this.squad.TargetCell = this.squad.GetLocation().Point;
-        
-        for (let unit of this.squad.Units) {
-            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.TargetCell);
-        }
+        this.distributeUnits();
 
         // this.squad.IsAttackMode = false;
     }
     
     OnExit(): void {}
     
-    Tick(tickNumber: number): void {}
+    //TODO: this needs better processing of too large spread, implement different gathering up state
+    Tick(tickNumber: number): void {
+        if (
+            this.squad.IsAllUnitsIdle() &&
+            this.squad.GetLocation().Spread > this.squad.MinSpread * MIN_SPREAD_THRESHOLD_MULTIPLIER
+        ) {
+            this.distributeUnits();
+        }
+    }
 
     IsIdle(): boolean {
         return true;
+    }
+
+    private distributeUnits(): void {
+        let unitsToDistribute = [];
+
+        for (let unit of this.squad.Units) {
+            let tileType = MiraUtils.GetTileType(unit.Cell);
+            
+            if (tileType !== TileType.Forest) { //run, Forest, run!!
+                unitsToDistribute.push(unit);
+            }
+        }
+
+        if (unitsToDistribute.length == 0) {
+            return;
+        }
+
+        let searchRadius = COVER_SEARCH_RADIUS;
+        let forestCells = MiraUtils.FindCells(this.squad.TargetCell, searchRadius, MiraUtils.ForestCellFilter);
+        let cellIndex = 0;
+
+        for (let unit of unitsToDistribute) {
+            if (cellIndex >= forestCells.length) {
+                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.TargetCell);
+            }
+            else {
+                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, forestCells[cellIndex]);
+                cellIndex++;
+            }
+        }
     }
 }
 
@@ -58,7 +93,7 @@ class MiraSquadMoveState extends MiraSquadState {
             this.timeoutTick = tickNumber + distance * 1000 * 3; // given that the speed will be 1 cell/s
         }
 
-        if (tickNumber > this.timeoutTick) { // не шмогли...
+        if (this.squad.IsAllUnitsIdle() || tickNumber > this.timeoutTick) { // не шмогли...
             this.squad.SetState(new MiraSquadIdleState(this.squad));
             return;
         }
@@ -130,16 +165,7 @@ class MiraSquadGatheringUpState extends MiraSquadState {
             return;
         }
 
-        let allUnitsIdle = true;
-
-        for (let unit of this.squad.Units) {
-            if (!unit.OrdersMind.IsIdle()) {
-                allUnitsIdle = false;
-                break;
-            }
-        }
-
-        if (allUnitsIdle) {
+        if (this.squad.IsAllUnitsIdle()) {
             this.continueMotion();
             return;
         }

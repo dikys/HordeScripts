@@ -10,9 +10,78 @@ class MiraSettlementData {
     }
 }
 
+class DotnetHolder {
+    private static realScena;
+    
+    public static get RealScena() {
+        if (!DotnetHolder.realScena) {
+            DotnetHolder.realScena = scena.GetRealScena();
+        }
+
+        return DotnetHolder.realScena;
+    }
+
+    private static unitsMap;
+    
+    public static get UnitsMap() {
+        if (!DotnetHolder.unitsMap) {
+            DotnetHolder.unitsMap = scena.GetRealScena().UnitsMap;
+        }
+        
+        return DotnetHolder.unitsMap;
+    }
+
+    private static landscapeMap;
+    
+    public static get LandscapeMap() {
+        if (!DotnetHolder.landscapeMap) {
+            DotnetHolder.landscapeMap = scena.GetRealScena().LandscapeMap;
+        }
+        
+        return DotnetHolder.landscapeMap;
+    }
+}
+
+let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 type UnitComposition = Map<string, number>;
 
 class MiraUtils {
+    static FindCells(
+        center: {X: number; Y: number;}, 
+        radius: number, 
+        filter: (cell: any) => boolean
+    ): Array<any> {
+        let result = [];
+        
+        let generator = generatePositionInSpiral(center.X, center.Y);
+        let cell: any;
+        for (cell = generator.next(); !cell.done; cell = generator.next()) {
+            if (MiraUtils.ChebyshevDistance(cell.value, center) > radius) {
+                return result;
+            }
+
+            if ( filter(cell.value) ) {
+                result.push(cell.value);
+            }
+        }
+
+        return result;
+    }
+    
+    static GetTileType(point: {X: number; Y: number;}): any {
+        if (
+            0 <= point.X && point.X < DotnetHolder.RealScena.Size.Width &&
+            0 <= point.Y && point.Y < DotnetHolder.RealScena.Size.Height
+        ) {
+            var tile = DotnetHolder.LandscapeMap.Item.get(point.X, point.Y);
+
+            return tile.Cfg.Type;
+        }
+        else {
+            return null;
+        }
+    }
+    
     static GetUnitsInArea(cell: any, radius: number): Array<any> {
         let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
         let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
@@ -174,5 +243,17 @@ class MiraUtils {
         const yDiff = Math.abs(cell1.Y - cell2.Y);
 
         return Math.max(xDiff, yDiff);
+    }
+
+    static ForestCellFilter(cell: any): boolean {
+        let unit = DotnetHolder.UnitsMap.GetUpperUnit(cell.X, cell.Y);
+
+        if (unit) {
+            return false;
+        }
+
+        let tileType = MiraUtils.GetTileType({X: cell.X, Y: cell.Y});
+
+        return tileType == TileType.Forest;
     }
 }

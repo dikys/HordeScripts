@@ -104,6 +104,16 @@ class MiraSquad {
 
         return this.location;
     }
+
+    IsAllUnitsIdle(): boolean {
+        for (let unit of this.Units) {
+            if (!unit.OrdersMind.IsIdle()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 class MiraControllableSquad extends MiraSquad {
