@@ -1,7 +1,6 @@
 
 const MAX_SPREAD_THRESHOLD_MULTIPLIER = 2.8;
 const MIN_SPREAD_THRESHOLD_MULTIPLIER = 2;
-const COVER_SEARCH_RADIUS = 5;
 
 abstract class MiraSquadState extends FsmState {
     protected squad: MiraControllableSquad;
@@ -55,7 +54,7 @@ class MiraSquadIdleState extends MiraSquadState {
             return;
         }
 
-        let searchRadius = COVER_SEARCH_RADIUS;
+        let searchRadius = this.squad.MinSpread * (MAX_SPREAD_THRESHOLD_MULTIPLIER + MIN_SPREAD_THRESHOLD_MULTIPLIER) / 2;
         let forestCells = MiraUtils.FindCells(this.squad.TargetCell, searchRadius, MiraUtils.ForestCellFilter);
         let cellIndex = 0;
 
