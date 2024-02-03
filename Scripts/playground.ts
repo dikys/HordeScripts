@@ -7,6 +7,9 @@
  */
 if (globalStorage === undefined) {
     let globalStorage : { [name: string]: any } = {};
+
+    // Debug parameters
+    let hotReloadOnFileChanging = false;  // автоматическая перезагрузка скрипта при изменении файла
 }
 
 
@@ -20,7 +23,7 @@ function onFirstRun() {
     logi("Playground running... (Start number:", globalStorage.reloadCounter, ")");
 
     // Установка дебаг-параметров
-    //ScriptMachineDebugApi.SetHotReloadOnFileChanging(true);  // автоматическая перезагрузка скрипта при изменении файла
+    ScriptMachineDebugApi.SetHotReloadOnFileChanging(hotReloadOnFileChanging);
     
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runExamples();

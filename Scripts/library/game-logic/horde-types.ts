@@ -5,6 +5,7 @@
 BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
 AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
 
+
 // ===================================================
 // --- Тайлы
 
@@ -13,12 +14,22 @@ TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 // None, Gold, Metal
 ResourceTileType = HCL.HordeClassLibrary.World.Objects.Tiles.ResourceTileType;
 
+
 // ===================================================
 // --- Снаряды
 
 BaseBullet = HCL.HordeClassLibrary.World.Objects.Bullets.BaseBullet;
 BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;  // Unknown, Flying, Collided, OutOfScena, ReachedTheGoal
 ScriptBullet = HCL.HordeClassLibrary.World.Objects.Bullets.Implementations.Other.ScriptBullet;
+
+
+// ===================================================
+// --- Конфиг юнита
+
+UnitConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitConfig;
+
+BuildingConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.BuildingConfig;
+UnitTechConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitTechConfig;
 
 
 // ===================================================
