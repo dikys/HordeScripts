@@ -28,6 +28,9 @@ function onFirstRun() {
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runExamples();
 
+    // Запук плагинов
+    pluginsFirstRun();
+
     // Запускаем скрипты сцены
     scenaScriptsFirstRun();
 }
@@ -53,6 +56,9 @@ function everyTick(gameTickNum: number) {
 
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runEveryTickExamples();
+
+    // Запук плагинов
+    pluginsEveryTick();
 
     // Запускаем скрипты сцены
     scenaScriptsEveryTick(gameTickNum);
