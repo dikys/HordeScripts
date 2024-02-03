@@ -46,7 +46,7 @@ function example_configWorks() {
 
 /**
  * Пример добавления конфига
- * Внимание! Для сброса изменений требуется перезапуск игры.
+ * Внимание! Для сброса изменений требуется запуск "example_configRemoving()".
  */
 function example_configCreation() {
     logi('> Запущен пример', '"' + arguments.callee.name + '"');
@@ -55,8 +55,16 @@ function example_configCreation() {
     var ballistaCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Balista");
     var factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
 
+    // Идентификатор для нового конфига
+    // Если установить null или существующий идентификатор, то будет при клонировании будет сгенерирован уникальный идентификатор
+    var newCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
+    // var newCfgUid = null;
+
+    // Чистим, если конфиг с таким идентификатором уже имеется (видимо пример запускается не первый раз)
+    example_configRemoving(noTitle=true);
+
     // Клонируем конфиг и изменяем
-    var newBallistaCfg = HordeContent.CloneConfig(ballistaCfg);
+    var newBallistaCfg = HordeContent.CloneConfig(ballistaCfg, newCfgUid);
     HordeUtils.setValue(newBallistaCfg, "Name", "Динамическая баллиста");
     HordeUtils.setValue(newBallistaCfg, "ProductionTime", 50);
     HordeUtils.setValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
@@ -69,6 +77,35 @@ function example_configCreation() {
     logi('  Добавляем только что созданную баллисту в список производства..');
     produceList.Add(newBallistaCfg);
     logi('  Теперь завод производит:', produceList.Count, 'вида техники');
+}
+
+
+/**
+ * Пример добавления конфига
+ * Внимание! Конфиг добавляется в примере "example_configCreation()".
+ */
+function example_configRemoving(noTitle) {
+    if (!noTitle) {
+        logi('> Запущен пример', '"' + arguments.callee.name + '"');
+    }
+    
+    var targetCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
+
+    // Добавлен?
+    if (!HordeContent.HasUnitConfig(targetCfgUid)) {
+        logi('  Конфиг пока что не был добавлен:', targetCfgUid);
+        return;
+    }
+    var targetCfg = HordeContent.GetUnitConfig(targetCfgUid);
+
+    logi('  Удаление конфига из контента:', targetCfgUid);
+    HordeContent.RemoveConfig(targetCfg);
+
+    logi('  Удаление из завода ссылок на конфиг:', targetCfgUid);
+    var factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+    var producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+    var produceList = producerParams.CanProduceList;
+    ScriptExtensions.RemoveAll(produceList, targetCfg);
 }
 
 
