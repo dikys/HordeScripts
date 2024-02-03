@@ -22,6 +22,22 @@ function makeFlags(flagsType, flagsArray) {
 // --- Enumerations
 
 /**
+ * ForEach - специальная функция для перечисления .Net-объектов.
+ * 
+ * Примеры:
+ * ```
+ * ForEach(someList, item => {
+ *     logi('-', item.ToString());
+ * });
+ * 
+ * ForEach(someList, (item, i, source) => {
+ *     logi('#' + i, item.ToString(), 'from', source);
+ * });
+ * ```
+ */
+ForEach = ScriptExtensions.ForEach;
+
+/**
  * Делает IEnumerable перечислимым в JS.
  * 
  * Пример:
