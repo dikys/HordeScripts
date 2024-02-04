@@ -6,7 +6,7 @@ function pluginsFirstRun() {
     hordePlugins = new HordePluginsManager();
 
     // Регистрируем плагины
-    hordePlugins.registerPlugin(new AttentionSmokePlugin());
+    hordePlugins.registerPlugin(new AttentionOnSurfacePlugin());
 
     // Запускаем плагины
     hordePlugins.onFirstRun();
@@ -27,14 +27,15 @@ function pluginsEveryTick(gameTickNum: number) {
  * Класс для работы с плагинами.
  */
 class HordePluginsManager {
-    private _plugins : Array<HordePluginBase>;
+    private _plugins: Array<HordePluginBase>;
 
     public constructor() {
         this._plugins = [];
     }
 
-    public registerPlugin(plugin : HordePluginBase) {
+    public registerPlugin(plugin: HordePluginBase) {
         this._plugins.push(plugin);
+        logi('Plugin registered:', plugin.name);
     }
 
     public onFirstRun() {
@@ -54,9 +55,9 @@ class HordePluginsManager {
  * Класс-заготовка для плагина.
  */
 class HordePluginBase {
-    private name : String;
+    private name: string;
 
-    public constructor(name: String) {
+    public constructor(name: string) {
         this.name = name;
     }
 
@@ -72,4 +73,4 @@ class HordePluginBase {
 /**
  * Объект для работы с плагинами.
  */
-var hordePlugins : HordePluginsManager;
+var hordePlugins: HordePluginsManager;

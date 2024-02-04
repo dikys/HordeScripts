@@ -58,7 +58,7 @@ function everyTick(gameTickNum: number) {
     runEveryTickExamples();
 
     // Запук плагинов
-    pluginsEveryTick();
+    pluginsEveryTick(gameTickNum);
 
     // Запускаем скрипты сцены
     scenaScriptsEveryTick(gameTickNum);

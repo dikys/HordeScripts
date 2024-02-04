@@ -4,6 +4,13 @@
 
 BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
 AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
+WorldConstants = HCL.HordeClassLibrary.World.Const.WorldConstants;
+
+
+// ===================================================
+// --- Сцена
+
+Scena = HCL.HordeClassLibrary.World.ScenaComponents.Scena;
 
 
 // ===================================================
@@ -107,3 +114,24 @@ OrderProduceAt = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderP
 OrderRepair = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepair;
 OrderRepairParameters = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepairParameters;
 OrderRepairSelf = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepairSelf;
+
+
+// ===================================================
+// --- Конфиги
+
+BulletConfig = HCL.HordeClassLibrary.HordeContent.Configs.Bullets.BulletConfig;
+Force = HCL.HordeClassLibrary.HordeContent.Configs.Army.Force;
+RuleConfig = HCL.HordeClassLibrary.HordeContent.Configs.Rules.RuleConfig;
+SoundEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.SoundEffects.SoundEffectConfig;
+SoundsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Audio.SoundsCatalog;
+BackgroundAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.BackgroundAnimationsCatalog;
+BulletAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.BulletAnimationsCatalog;
+ButtonAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.ButtonAnimationsCatalog;
+DecayAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.DecayAnimationsCatalog;
+FontCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.FontCatalog;
+SimpleAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.SimpleAnimationsCatalog;
+UnitAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.UnitAnimationsCatalog;
+VisualEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.VisualEffects.VisualEffectConfig;
+UnitCommandConfig = HCL.HordeClassLibrary.HordeContent.Configs.UnitCommandConfig;
+MindCharacterConfig = HCL.HordeClassLibrary.HordeContent.Configs.MasterMind.MindCharacterConfig;
+
