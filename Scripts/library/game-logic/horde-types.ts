@@ -115,6 +115,10 @@ OrderRepair = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepa
 OrderRepairParameters = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepairParameters;
 OrderRepairSelf = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepairSelf;
 
+StateMotion = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.StateMotion;
+
+AMotionBase = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.AMotionBase;
+MotionHit = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.MotionHit;
 
 // ===================================================
 // --- Конфиги
@@ -134,4 +138,10 @@ UnitAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceC
 VisualEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.VisualEffects.VisualEffectConfig;
 UnitCommandConfig = HCL.HordeClassLibrary.HordeContent.Configs.UnitCommandConfig;
 MindCharacterConfig = HCL.HordeClassLibrary.HordeContent.Configs.MasterMind.MindCharacterConfig;
+
+
+// ===================================================
+// --- Прочее
+
+AnimatorScriptTasks = HCL.HordeClassLibrary.HordeContent.ViewResources.Graphics.InternalLogic.Tasks.AnimatorScriptTasks;
 
