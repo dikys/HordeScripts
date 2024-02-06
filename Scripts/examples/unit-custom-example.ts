@@ -9,131 +9,70 @@ function example_customUnit() {
     var settlement_0 = realScena.Settlements.Item.get('0');  // Олег
 
     // Создание конфига воина
-    var beammanCfg = example_customUnit_getOrCreateUnitConfig();
+    var unitCfg = example_customUnit_getOrCreateUnitConfig();
 
     // Создание обработчика
-    var hitWorker = host.newObj(JsUnitWorkerCommon);
-    HordeUtils.setValue(hitWorker, "FuncName", "example_customUnit_hitWorker");
+    var moveWorker = host.newObj(JsUnitWorkerCommon);
+    HordeUtils.setValue(moveWorker, "FuncName", "example_customUnit_moveWorker");
 
     // Установка обработчика
-    var stateWorkers = HordeUtils.getValue(beammanCfg, "StateWorkers");
-    stateWorkers.Item.set(UnitState.Hit, hitWorker);
+    var stateWorkers = HordeUtils.getValue(unitCfg, "StateWorkers");
+    stateWorkers.Item.set(UnitState.Move, moveWorker);
 
     // Инициализация переменных
-    example_customUnit_initBeammanHitTable();
+    example_customUnit_initVars();
 
-    logi('  Настройка воина с дубиной завершена!');
+    logi('  Настройка воина завершена!');
 }
 
 /**
- * Создание конфига воина с дубиной
+ * Создание конфига воина
  */
 function example_customUnit_getOrCreateUnitConfig() {
-    var beammanCfgOrig = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Beamman");
-    var exampleCfgUid = "#UnitConfig_Slavyane_Beamman_EXAMPLE";
+    var unitCfgOrig = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Araider");
+    var exampleCfgUid = "#UnitConfig_Slavyane_Araider_EXAMPLE";
     if (HordeContent.HasUnitConfig(exampleCfgUid)) {
         // Конфиг уже был создан, берем предыдущий
-        var beammanCfg = HordeContent.GetUnitConfig(exampleCfgUid);
-        logi('  Конфиг воина для теста:', beammanCfg.ToString());
+        var unitCfg = HordeContent.GetUnitConfig(exampleCfgUid);
+        logi('  Конфиг воина для теста:', unitCfg.ToString());
     } else {
         // Создание нового конфига
-        var beammanCfg = HordeContent.CloneConfig(beammanCfgOrig, exampleCfgUid);
+        var unitCfg = HordeContent.CloneConfig(unitCfgOrig, exampleCfgUid);
 
-        // Добавление юнита в казарму
-        var barrakCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Barrack");
-        var producerParams = barrakCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+        // Добавление юнита в конюшню
+        var producerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Stables");
+        var producerParams = producerCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
         var produceList = producerParams.CanProduceList;
-        produceList.Add(beammanCfg);
+        produceList.Add(unitCfg);
 
-        logi('  Создан новый конфиг воина для теста:', beammanCfg.ToString());
+        logi('  Создан новый конфиг воина для теста:', unitCfg.ToString());
     }
 
     // Настройка
-    HordeUtils.setValue(beammanCfg, "ProductionTime", 50);
-    HordeUtils.setValue(beammanCfg, "Shield", 1);
-    HordeUtils.setValue(beammanCfg, "CostResources", createResourcesAmount(50, 100, 0 ,1));
+    HordeUtils.setValue(unitCfg, "ProductionTime", 50); // Быстрое производство для теста
+    HordeUtils.setValue(unitCfg, "CostResources", createResourcesAmount(150, 200, 50 ,1));
 
-    // Установка снаряда "Удар дубины"
-    var beamBulletCfg = example_customUnit_getOrCreateBeamBulletConfig();
-    HordeUtils.getValue(beammanCfg.MainArmament, "BulletConfigRef").SetConfig(beamBulletCfg);
-    HordeUtils.setValue(beammanCfg.MainArmament.BulletCombatParams, "Damage", 10);
-
-    return beammanCfg;
+    return unitCfg;
 }
 
 /**
- * Создание конфига снаряда для удара дубины
+ * Обработчик состояния Move
  */
-function example_customUnit_getOrCreateBeamBulletConfig() {
-    var meleBulletCfg = HordeContent.GetBulletConfig("#BulletConfig_CommonMele");
-    var beamBulletCfgUid = "#BulletConfig_BeamMele";
+function example_customUnit_moveWorker(u) {
+    // Запуск обычного обработчика
+    baseUnitMoveWorker.Work(u);
 
-    if (HordeContent.HasBulletConfig(beamBulletCfgUid)) {
-        // Конфиг уже был создан, берем предыдущий
-        var beamBulletCfg = HordeContent.GetBulletConfig(beamBulletCfgUid);
-        logi('  Конфиг снаряда для теста:', beamBulletCfg.ToString());
-    } else {
-        // Создание нового конфига
-        var beamBulletCfg = HordeContent.CloneConfig(meleBulletCfg, beamBulletCfgUid);
-        logi('  Создан новый конфиг снаряда для теста:', beamBulletCfg.ToString());
+    // В CustomData можно хранить произвольные переменные для скрипта, но сначала их туда нужно поместить
+    if (!("araiderShoot" in u.CustomData)) {
+        u.CustomData.araiderShoot = new AraiderShootData();
     }
 
-    // Настройка
-    HordeUtils.setValue(beamBulletCfg, "Description", "Удар дубины");
-    HordeUtils.setValue(beamBulletCfg, "CanDamageAllied", true);
-    HordeUtils.setValue(beamBulletCfg, "UnitDeathType", UnitDeathType.Heavy);
-
-    return beamBulletCfg;
-}
-
-/**
- * Обработчик состояния Hit
- */
-function example_customUnit_hitWorker(u) {
-    var motion = u.OrdersMind.ActiveMotion;  // Здесь MotionHit
-    if (motion.IsUnprepared)
-    {
-        motion.State = StateMotion.InProgress;
-
-        const stage = 0;
-        const looped = false;
-        u.VisualMind.SetAnimState(UnitAnimState.Attack, stage, looped);
-    }
-
-    // Произвести удар в момент, который задан анимацией (обычно, когда оружие достигает цели)
-    if (u.VisualMind.Animator.HasTask(AnimatorScriptTasks.Hit))
-    {
-        // Дубина бьёт три раза, начиная с 4-го кадра (задано в "beamman.ginf")
-
-        // Вычисляем номер текущего удара
-        var hitNum = (u.VisualMind.Animator.CurrentAnimFrame - 4);
-
-        // Удар
-        example_customUnit_oneHit(u, motion, hitNum);
-
-        // Звуки боя на первый удар
-        if (hitNum == 0) {
-            var sounds = HordeContent.GetSoundsCatalog("#SoundsCatalog_Hits_Mele_Dubina_02eb130f59b6");
-            var snd = u.SoundsMind.UtterSound(sounds, "Hit", u.Position);
+    // Выстрелить как только пришло время
+    if (u.CustomData.araiderShoot.checkCharge()) {
+        const result = example_customUnit_oneHit(u);
+        if (result) {
+            u.CustomData.araiderShoot.setReloadTime(araiderArmament.ReloadTime);
         }
-
-        // Устанавливаем время перезарядки
-        u.ReloadCounter = u.Cfg.ReloadTime;
-
-        // Отмечаем, что удар был произведен
-        u.VisualMind.Animator.CompleteTask(AnimatorScriptTasks.Hit);
-    }
-
-    // Движение удара считается завершенным только на последнем кадре анимации
-    if (u.VisualMind.Animator.IsAnimationCompleted)
-    {
-        motion.State = StateMotion.Done;
-
-        u.VisualMind.SetAnimState(UnitAnimState.Stand);
-    }
-    else
-    {
-        motion.State = StateMotion.InProgress;
     }
 }
 
@@ -141,86 +80,96 @@ function example_customUnit_hitWorker(u) {
  * Выполняет один удар.
  */
 function example_customUnit_oneHit(u, motion, hitNum) {
-    // Смещения координат удара относительно центра воина в зависимости от направления
-    var hits = beammanHitTable[u.Direction.ToString()];
-    if (!hits) {
-        return;
+    // Временно устанавливаем другое вооружение, для корректного поиска врага
+    var prevArmament = u.BattleMind.SelectedArmament;
+    HordeUtils.setValue(u.BattleMind, "SelectedArmament", araiderArmament);
+
+    // Поиск ближайшего врага
+    var allowedQueryFlags = makeFlags(UnitQueryFlag, [UnitQueryFlag.CanAttackTarget, UnitQueryFlag.Harmless, UnitQueryFlag.NearDeathUnits]);
+    var nearestEnemy = u.CommunicationMind.GetNearestEnemy(allowedQueryFlags, araiderArmament.Range);
+
+    // Был ли найден враг?
+    if (!nearestEnemy) {
+        // Возвращаем вооружение юнита
+        HordeUtils.setValue(u.BattleMind, "SelectedArmament", prevArmament);
+
+        return false;
     }
 
-    // Смещение текущего удара
-    var hitBias = hits[hitNum];
-    if (!hitBias) {
-        return;
-    }
-
-    // Координаты текущего удара
-    var targetPosition = createPoint(hitBias.X + u.Position.X,
-                                     hitBias.Y + u.Position.Y);
-
-    // Дружественным воинам урон не наносим
-    var unitInCell = u.Scena.UnitsMap.GetUpperUnit(Math.floor(targetPosition.X / WorldConstants.CellSize),
-                                           Math.floor(targetPosition.Y / WorldConstants.CellSize));
-    if (unitInCell != null && unitInCell.Owner.Diplomacy.IsAllianceStatus(u.Owner)) {
-        // Исключение - здания и те, кого юнит атакует умышленно
-        if (!unitInCell.Cfg.IsBuilding && unitInCell != motion.Target) {
-            return;
-        }
-    }
+    // Координаты выстрела и цели
+    var bias = araiderArmament.GunCoord.Item.get(u.Direction);
+    var launchPos = createPoint(bias.X + u.Position.X,
+                                bias.Y + u.Position.Y);
+    var targetPos = createPoint(nearestEnemy.Position.X, nearestEnemy.Position.Y);
 
     // Создание снаряда
-    var armament = u.BattleMind.SelectedArmament;
-    spawnBullet(u, motion.Target, armament, armament.BulletConfig, armament.BulletCombatParams, targetPosition, targetPosition, motion.TargetMapLayer);
+    //spawnBullet(u, nearestEnemy, araiderArmament, araiderArmament.BulletConfig, araiderArmament.BulletCombatParams, launchPos, targetPos, nearestEnemy.MapLayer);
 
-    // В большинстве случаев для создания снаряда удобно использовать метод "Shot",
-    // но он не позволяет задать SourcePosition, который необходим здесь для удара дубины
-    //u.BattleMind.SelectedArmament.Shot(u, motion.Target, targetPosition, motion.TargetMapLayer);
+    // В большинстве случаев для создания снаряда удобно использовать метод "Shot", но там используется вооружение заданное в конфиге юнита
+    u.BattleMind.SelectedArmament.Shot(u, nearestEnemy, targetPos, nearestEnemy.MapLayer);
+
+    // Возвращаем вооружение юнита
+    HordeUtils.setValue(u.BattleMind, "SelectedArmament", prevArmament);
+
+    return true;
 }
 
 /**
- * Таблица смещений удара относительно центра воина по направлениям.
+ * Настройка глобальных переменных.
  */
-var beammanHitTable;
-function example_customUnit_initBeammanHitTable() {
-    beammanHitTable = {
-        "Up": [
-            createPoint(25,-25),
-            createPoint(0,-25),
-            createPoint(-25,-25),
-        ],
-        "RightUp": [
-            createPoint(25, -3),
-            createPoint(25,-25),
-            createPoint(0,-25),
-        ],
-        "Right": [
-            createPoint(25, 25),
-            createPoint(25, -3),
-            createPoint(25,-25),
-        ],
-        "RightDown": [
-            createPoint(0, 20),
-            createPoint(25, 25),
-            createPoint(25, -3),
-        ],
-        "Down": [
-            createPoint(-25, 25),
-            createPoint(0, 20),
-            createPoint(25, 25),
-        ],
-        "LeftDown": [
-            createPoint(-25,  3),
-            createPoint(-25, 25),
-            createPoint(0, 20),
-        ],
-        "Left": [
-            createPoint(-25,-25),
-            createPoint(-25,  3),
-            createPoint(-25, 25),
-        ],
-        "LeftUp": [
-            createPoint(0,-25),
-            createPoint(-25,-25),
-            createPoint(-25,  3),
-        ],
-    };
+function example_customUnit_initVars() {
+    // Базовый обработчик движения
+    baseUnitMoveWorker = host.newObj(HCL.HordeClassLibrary.UnitComponents.Workers.BaseUnit.BaseUnitMove);
+
+    // Смещение арбалета по направлениям
+    var gunCoord = host.newObj(Dictionary(UnitDirection, Point2D));
+    gunCoord.Add(UnitDirection.Up, createPoint(3,-10));
+    gunCoord.Add(UnitDirection.RightUp, createPoint(5, -5));
+    gunCoord.Add(UnitDirection.Right, createPoint(8, -4));
+    gunCoord.Add(UnitDirection.RightDown, createPoint(0, 0));
+    gunCoord.Add(UnitDirection.Down, createPoint(0, 0));
+    gunCoord.Add(UnitDirection.LeftDown, createPoint(0, 0));
+    gunCoord.Add(UnitDirection.Left, createPoint(-8, -4));
+    gunCoord.Add(UnitDirection.LeftUp, createPoint(-10, -10));
+
+    // Снаряд
+    var arrowCfg = HordeContent.GetBulletConfig("#BulletConfig_Arrow");
+
+    // Вооружение
+    araiderArmament = UnitArmament.CreateArmament(arrowCfg);
+    HordeUtils.setValue(araiderArmament.BulletCombatParams, "Damage", 4);
+    HordeUtils.setValue(araiderArmament.BulletCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
+    HordeUtils.setValue(araiderArmament, "Range", 7);
+    HordeUtils.setValue(araiderArmament, "ForestRange", 1);
+    HordeUtils.setValue(araiderArmament, "RangeMin", 0);
+    HordeUtils.setValue(araiderArmament, "Levels", 6);
+    HordeUtils.setValue(araiderArmament, "ReloadTime", 15);
+    HordeUtils.setValue(araiderArmament, "BaseAccuracy", 8);
+    HordeUtils.setValue(araiderArmament, "MaxDistanceDispersion", 63);
+    HordeUtils.setValue(araiderArmament, "DisableDispersion", false);
+    HordeUtils.setValue(araiderArmament, "GunCoord", gunCoord);
+    HordeUtils.setValue(araiderArmament, "EmitBulletsCountMin", 1);
+    HordeUtils.setValue(araiderArmament, "EmitBulletsCountMax", 1);
+}
+var baseUnitMoveWorker;
+var araiderArmament;
+
+/**
+ * Данные стрельбы конного арбалетчика.
+ */
+class AraiderShootData {
+    public reloadTime: number;
+
+    public constructor() {
+        this.reloadTime = 0;
+    }
+
+    public checkCharge() {
+        this.reloadTime--;
+        return this.reloadTime <= 0;
+    }
+
+    public setReloadTime(ticks: number) {
+        this.reloadTime = ticks;
+    }
 }
