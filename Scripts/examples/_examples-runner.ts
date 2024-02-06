@@ -20,7 +20,6 @@ function runExamples() {
     // logi("[*] Примеры работы с игровой логикой");
     // example_spawnUnit();
     // example_spawnBullet();
-    // example_customBullet();
     // example_spawnBulletsRain();
     // example_scenaWorks();
     // example_settlementWorks();
@@ -31,6 +30,8 @@ function runExamples() {
     // example_getUnitsInArea_v1();
     // example_getUnitsInArea_v2();
     // example_getUnitsInArea_v3();
+    // example_customBullet();
+    // example_customUnit();
 
     // logi("[*] Примеры работы с конфигами");
     // example_configWorks();
