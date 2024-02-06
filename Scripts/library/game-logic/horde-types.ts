@@ -46,6 +46,7 @@ BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatPar
 DelegateWork = HCL.HordeClassLibrary.UnitComponents.Workers.Interfaces.AUnitWorkerCommon.DelegateWork;
 Unit = HCL.HordeClassLibrary.World.Objects.Units.Unit;
 KnownUnit = HCL.HordeClassLibrary.World.Objects.Units.KnownUnit;
+UnitArmament = HCL.HordeClassLibrary.UnitComponents.BattleSystem.UnitArmament;
 
 
 // ===================================================
