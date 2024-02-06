@@ -12,7 +12,6 @@ function example_customUnit() {
     var beammanCfg = example_customUnit_getOrCreateUnitConfig();
 
     // Создание обработчика
-    var JsUnitWorkerCommon = HCL.HordeClassLibrary.UnitComponents.Workers.Script.JsUnitWorkerCommon;
     var hitWorker = host.newObj(JsUnitWorkerCommon);
     HordeUtils.setValue(hitWorker, "FuncName", "example_customUnit_hitWorker");
 
@@ -21,7 +20,9 @@ function example_customUnit() {
     stateWorkers.Item.set(UnitState.Hit, hitWorker);
 
     // Инициализация переменных
-    init_beammanHitTable();
+    example_customUnit_initBeammanHitTable();
+
+    logi('  Настройка воина с дубиной завершена!');
 }
 
 /**
@@ -53,7 +54,7 @@ function example_customUnit_getOrCreateUnitConfig() {
     HordeUtils.setValue(beammanCfg, "CostResources", createResourcesAmount(50, 100, 0 ,1));
 
     // Установка снаряда "Удар дубины"
-    var beamBulletCfg = example_customUnit_getOrCreateBeamHitBullet();
+    var beamBulletCfg = example_customUnit_getOrCreateBeamBulletConfig();
     HordeUtils.getValue(beammanCfg.MainArmament, "BulletConfigRef").SetConfig(beamBulletCfg);
     HordeUtils.setValue(beammanCfg.MainArmament.BulletCombatParams, "Damage", 10);
 
@@ -61,9 +62,9 @@ function example_customUnit_getOrCreateUnitConfig() {
 }
 
 /**
- * Создание снаряда для удара дубины
+ * Создание конфига снаряда для удара дубины
  */
-function example_customUnit_getOrCreateBeamHitBullet() {
+function example_customUnit_getOrCreateBeamBulletConfig() {
     var meleBulletCfg = HordeContent.GetBulletConfig("#BulletConfig_CommonMele");
     var beamBulletCfgUid = "#BulletConfig_BeamMele";
 
@@ -102,34 +103,16 @@ function example_customUnit_hitWorker(u) {
     // Произвести удар в момент, который задан анимацией (обычно, когда оружие достигает цели)
     if (u.VisualMind.Animator.HasTask(AnimatorScriptTasks.Hit))
     {
-        var unitsMap = u.Scena.UnitsMap;
+        // Дубина бьёт три раза, начиная с 4-го кадра (задано в "beamman.ginf")
 
-        var hits = beammanHitTable[u.Direction.ToString()];
-        if (hits) {
-            for (var hit of hits) {
-                var targetPosition = createPoint(hit.X + u.Position.X,
-                                                 hit.Y + u.Position.Y);
+        // Вычисляем номер текущего удара
+        var hitNum = (u.VisualMind.Animator.CurrentAnimFrame - 4);
 
-                // Дружественным воинам урон не наносим
-                var unitInCell = unitsMap.GetUpperUnit(Math.floor(targetPosition.X / WorldConstants.CellSize),
-                                                       Math.floor(targetPosition.Y / WorldConstants.CellSize));
-                if (unitInCell != null && unitInCell.Owner.Diplomacy.IsAllianceStatus(u.Owner)) {
-                    // Исключение - здания и те, кого юнит атакует умышленно
-                    if (!unitInCell.Cfg.IsBuilding && unitInCell != motion.Target) {
-                        continue;
-                    }
-                }
+        // Удар
+        example_customUnit_oneHit(u, motion, hitNum);
 
-                // Создание снаряда
-                var armament = u.BattleMind.SelectedArmament;
-                spawnBullet(u, motion.Target, armament, armament.BulletConfig, armament.BulletCombatParams, targetPosition, targetPosition, motion.TargetMapLayer);
-
-                // В большинстве случаев для создания снаряда удобно использовать метод "Shot",
-                // но он не позволяет задать SourcePosition, который необходим здесь для удара дубины
-                //u.BattleMind.SelectedArmament.Shot(u, motion.Target, targetPosition, motion.TargetMapLayer);
-            }
-
-            // Звуки боя
+        // Звуки боя на первый удар
+        if (hitNum == 0) {
             var sounds = HordeContent.GetSoundsCatalog("#SoundsCatalog_Hits_Mele_Dubina_02eb130f59b6");
             var snd = u.SoundsMind.UtterSound(sounds, "Hit", u.Position);
         }
@@ -155,10 +138,49 @@ function example_customUnit_hitWorker(u) {
 }
 
 /**
- * Таблица смещений удара по направлениям
+ * Выполняет один удар.
+ */
+function example_customUnit_oneHit(u, motion, hitNum) {
+    // Смещения координат удара относительно центра воина в зависимости от направления
+    var hits = beammanHitTable[u.Direction.ToString()];
+    if (!hits) {
+        return;
+    }
+
+    // Смещение текущего удара
+    var hitBias = hits[hitNum];
+    if (!hitBias) {
+        return;
+    }
+
+    // Координаты текущего удара
+    var targetPosition = createPoint(hitBias.X + u.Position.X,
+                                     hitBias.Y + u.Position.Y);
+
+    // Дружественным воинам урон не наносим
+    var unitInCell = u.Scena.UnitsMap.GetUpperUnit(Math.floor(targetPosition.X / WorldConstants.CellSize),
+                                           Math.floor(targetPosition.Y / WorldConstants.CellSize));
+    if (unitInCell != null && unitInCell.Owner.Diplomacy.IsAllianceStatus(u.Owner)) {
+        // Исключение - здания и те, кого юнит атакует умышленно
+        if (!unitInCell.Cfg.IsBuilding && unitInCell != motion.Target) {
+            return;
+        }
+    }
+
+    // Создание снаряда
+    var armament = u.BattleMind.SelectedArmament;
+    spawnBullet(u, motion.Target, armament, armament.BulletConfig, armament.BulletCombatParams, targetPosition, targetPosition, motion.TargetMapLayer);
+
+    // В большинстве случаев для создания снаряда удобно использовать метод "Shot",
+    // но он не позволяет задать SourcePosition, который необходим здесь для удара дубины
+    //u.BattleMind.SelectedArmament.Shot(u, motion.Target, targetPosition, motion.TargetMapLayer);
+}
+
+/**
+ * Таблица смещений удара относительно центра воина по направлениям.
  */
 var beammanHitTable;
-function init_beammanHitTable() {
+function example_customUnit_initBeammanHitTable() {
     beammanHitTable = {
         "Up": [
             createPoint(25,-25),

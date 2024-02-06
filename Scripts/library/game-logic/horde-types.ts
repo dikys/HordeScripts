@@ -120,6 +120,10 @@ StateMotion = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.StateMot
 AMotionBase = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.AMotionBase;
 MotionHit = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.MotionHit;
 
+// Обработчики
+JsUnitWorkerCommon = HCL.HordeClassLibrary.UnitComponents.Workers.Script.JsUnitWorkerCommon;
+JsUnitWorkerEveryTick = HCL.HordeClassLibrary.UnitComponents.Workers.Script.JsUnitWorkerEveryTick;
+
 // ===================================================
 // --- Конфиги
 
