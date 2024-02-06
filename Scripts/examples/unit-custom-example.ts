@@ -96,17 +96,11 @@ function example_customUnit_oneHit(u, motion, hitNum) {
         return false;
     }
 
-    // Координаты выстрела и цели
-    var bias = araiderArmament.GunCoord.Item.get(u.Direction);
-    var launchPos = createPoint(bias.X + u.Position.X,
-                                bias.Y + u.Position.Y);
-    var targetPos = createPoint(nearestEnemy.Position.X, nearestEnemy.Position.Y);
+    // В большинстве случаев для создания снаряда удобно использовать метод "Shot"
+    u.BattleMind.SelectedArmament.Shot(u, nearestEnemy, nearestEnemy.Position, nearestEnemy.MapLayer);
 
-    // Создание снаряда
+    // В некоторых требуется более детальный контроль при создании снаряда, тогда следует использовать следующую функцию:
     //spawnBullet(u, nearestEnemy, araiderArmament, araiderArmament.BulletConfig, araiderArmament.BulletCombatParams, launchPos, targetPos, nearestEnemy.MapLayer);
-
-    // В большинстве случаев для создания снаряда удобно использовать метод "Shot", но там используется вооружение заданное в конфиге юнита
-    u.BattleMind.SelectedArmament.Shot(u, nearestEnemy, targetPos, nearestEnemy.MapLayer);
 
     // Возвращаем вооружение юнита
     HordeUtils.setValue(u.BattleMind, "SelectedArmament", prevArmament);
