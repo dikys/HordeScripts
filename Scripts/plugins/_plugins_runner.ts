@@ -8,6 +8,9 @@ function pluginsFirstRun() {
     // Регистрируем плагины
     hordePlugins.registerPlugin(new AttentionOnSurfacePlugin());
 
+    // Плагины для отладки (раскомментировать необходимые)
+    // hordePlugins.registerPlugin(new SetResourcesPlugin());
+
     // Запускаем плагины
     hordePlugins.onFirstRun();
 }
