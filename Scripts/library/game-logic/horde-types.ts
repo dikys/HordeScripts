@@ -42,11 +42,10 @@ UnitTechConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitTechConfig
 // ===================================================
 // --- Различные типы связанные с юнитами
 
-BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatParams;
-DelegateWork = HCL.HordeClassLibrary.UnitComponents.Workers.Interfaces.AUnitWorkerCommon.DelegateWork;
 Unit = HCL.HordeClassLibrary.World.Objects.Units.Unit;
 KnownUnit = HCL.HordeClassLibrary.World.Objects.Units.KnownUnit;
 UnitArmament = HCL.HordeClassLibrary.UnitComponents.BattleSystem.UnitArmament;
+BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatParams;
 
 
 // ===================================================

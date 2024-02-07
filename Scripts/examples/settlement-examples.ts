@@ -42,10 +42,7 @@ function example_settlementWorks() {
     // Объявить поражение
     var existence = realSettlement.Existence;
     // Убрать false и тогда этому поселению будет засчитано поражение
-    if (false) { existence.ForceDefeat(); }
-    // Внимание!
-    // Пока что не работает, если вызывать на первом такте игры
-    // Пока что не отображает сообщение о поражении
+    if (false) { existence.ForceTotalDefeat(); }
 }
 
 

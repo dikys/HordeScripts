@@ -147,14 +147,14 @@ function example_unitOrders() {
     logi('  Команда тренировки:', '"' + produceCommandArgs.ToString() + '"');
 
     // Выдача приказа согласно команде
-    if (unit.Cfg.GetOrderWorker(unit, oneClickCommandArgs)) {
+    if (unit.Cfg.GetOrderDelegate(unit, oneClickCommandArgs)) {
         logi('  Добавлен приказ для команды:', '"' + oneClickCommandArgs.ToString() + '"');
     } else {
         logi('  Не удалось добавить команду');
     }
 
     // Выдача приказа согласно команде
-    if (unit.Cfg.GetOrderWorker(unit, pointCommandArgs)) {
+    if (unit.Cfg.GetOrderDelegate(unit, pointCommandArgs)) {
         logi('  Добавлен приказ для команды:', '"' + pointCommandArgs.ToString() + '"');
     } else {
         logi('  Не удалось добавить команду');

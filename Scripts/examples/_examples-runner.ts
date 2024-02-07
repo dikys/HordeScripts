@@ -37,8 +37,6 @@ function runExamples() {
     // example_configWorks();
     // example_configCreation();
     // example_configRemoving();
-    // example_changeUnitWorker_1();
-    // example_changeUnitWorker_2();
 
     // logi("[*] Примеры работы с сообщениями:");
     // example_sendMessageToAll();

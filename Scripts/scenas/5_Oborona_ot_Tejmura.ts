@@ -131,7 +131,7 @@ export function everyTick(gameTickNum: number) {
             if (i == enemySettlementId) {
                 continue;
             }
-            scena.GetRealScena().Settlements.Item.get("" + i).Existence.ForceDefeat();
+            scena.GetRealScena().Settlements.Item.get("" + i).Existence.ForceTotalDefeat();
         }
         return;
     }
@@ -139,7 +139,7 @@ export function everyTick(gameTickNum: number) {
     if (gameTickNum >= timeEnd) {
         gameState = GameState.End;
         broadcastMessage("ИГРОКИ ПОБЕДИЛИ", createHordeColor(255, 255, 50, 10));
-        scena.GetRealScena().Settlements.Item.get("" + enemySettlementId).Existence.ForceDefeat();
+        scena.GetRealScena().Settlements.Item.get("" + enemySettlementId).Existence.ForceTotalDefeat();
         return;
     }
 
@@ -322,7 +322,7 @@ export function everyTick(gameTickNum: number) {
             if (ordersMind.IsIdle() && worker.Health == enemyUnitsCfg["UnitConfig_legendary_worker"].MaxHealth) {
                 // в конце отправляем в атаку на цель
                 var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.MoveToPoint, AssignOrderMode.Queue);
-                worker.Cfg.GetOrderWorker(worker, pointCommandArgs);
+                worker.Cfg.GetOrderDelegate(worker, pointCommandArgs);
 
                 continue;
             }
@@ -347,7 +347,7 @@ export function everyTick(gameTickNum: number) {
                     ordersMind.AssignSmartOrder(worker.Cell, AssignOrderMode.Replace, 100000);
 
                     var produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, enemyUnitsCfg["UnitConfig_legendary_worker_Tower"], createPoint(position.value.X, position.value.Y));
-                    worker.Cfg.GetOrderWorker(worker, produceAtCommandArgs);
+                    worker.Cfg.GetOrderDelegate(worker, produceAtCommandArgs);
 
                     // уменьшаем количество создаваемых башен на 1
                     legendary_worker_unitsInfo[i].towersBuild--;
@@ -421,7 +421,7 @@ export function everyTick(gameTickNum: number) {
                     }
                 }
                 var pointCommandArgs = new PointCommandArgs(createPoint(position.value.X, position.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-                unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
+                unit.Cfg.GetOrderDelegate(unit, pointCommandArgs);
 
                 // вызывает рассинхрон
                 // 20% юнитов идут в обход
@@ -445,7 +445,7 @@ export function everyTick(gameTickNum: number) {
             
             // в конце отправляем в атаку на цель
             var pointCommandArgs = new PointCommandArgs(createPoint(goalPosition.value.X, goalPosition.value.Y), UnitCommand.Attack, AssignOrderMode.Queue);
-            unit.Cfg.GetOrderWorker(unit, pointCommandArgs);
+            unit.Cfg.GetOrderDelegate(unit, pointCommandArgs);
         }
         enemyUnitsEnumerator.Dispose();
     }
