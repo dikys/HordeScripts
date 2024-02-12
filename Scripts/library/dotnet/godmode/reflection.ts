@@ -10,3 +10,22 @@ function makeBindingFlags(flagsArray) {
 	return makeFlags(BindingFlags, flagsArray);
 }
 
+/**
+ * Возвращает имя с неймспейсом для указанного хост-типа.
+ */
+function getTypeNameWithNamespace(hostType) {
+	var csType = host.typeOf(hostType);
+	var name = csType.Name;
+	if (csType.Namespace) {
+		name = csType.Namespace + '.' + name;
+	}
+	return name;
+}
+
+/**
+ * Возвращает полное имя указанного хост-типа.
+ */
+function getTypeFullName(hostType) {
+	var csType = host.typeOf(hostType);
+	return csType.FullName;
+}

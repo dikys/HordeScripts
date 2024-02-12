@@ -26,14 +26,10 @@ function example_sendMessageToAll() {
 
 /**
  * Обработка отправляемых сообщений в чате.
- * Это правильный способ, но в версии "v0.62pre" этот пример не работает из-за `internal`-модификатора для ChatInputLine 
+ * Так же это пример корректной обработки .net-событий.
  */
 function example_hookSentChatMessages_v1() {
     logi('> Запущен пример', '"' + arguments.callee.name + '"');
-
-    logi('  Внимание! В данный момент этот пример не работает, т.к. класс ChatInputLine имеет модификатор internal, и соответственно MessageSent недоступен для ClearScript.');
-    logi('  Поэтому этот пример отключен');
-    return;
 
     // Получаем UI-объект строки чата
     var AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
@@ -62,9 +58,11 @@ function example_hookSentChatMessages_v1() {
 }
 var example_prevChatHook_v1;
 
+
 /**
  * Обработка отправляемых сообщений в чате.
- * Здесь демонстрируется возможность подключения к internal и private событиям с использованием темной магии.
+ * Здесь демонстрируется способ, который позволяет подключиться к internal и private событиям.
+ * Внимание! Используется темная магия!
  */
 function example_hookSentChatMessages_v2() {
     logi('> Запущен пример', '"' + arguments.callee.name + '"');

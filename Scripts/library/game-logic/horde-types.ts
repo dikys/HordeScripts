@@ -4,22 +4,48 @@
 
 BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
 AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
+WorldConstants = HCL.HordeClassLibrary.World.Const.WorldConstants;
+
+
+// ===================================================
+// --- Сцена
+
+Scena = HCL.HordeClassLibrary.World.ScenaComponents.Scena;
+
+
+// ===================================================
+// --- Тайлы
+
+// Unknown, Grass, Forest, Water, Marsh, Sand, Mounts, Road, Ice
+TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
+// None, Gold, Metal
+ResourceTileType = HCL.HordeClassLibrary.World.Objects.Tiles.ResourceTileType;
 
 
 // ===================================================
 // --- Снаряды
 
 BaseBullet = HCL.HordeClassLibrary.World.Objects.Bullets.BaseBullet;
-BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;
+BulletState = HCL.HordeClassLibrary.World.Objects.Bullets.BulletState;  // Unknown, Flying, Collided, OutOfScena, ReachedTheGoal
+ScriptBullet = HCL.HordeClassLibrary.World.Objects.Bullets.Implementations.Other.ScriptBullet;
+
+
+// ===================================================
+// --- Конфиг юнита
+
+UnitConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitConfig;
+
+BuildingConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.BuildingConfig;
+UnitTechConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitTechConfig;
 
 
 // ===================================================
 // --- Различные типы связанные с юнитами
 
-BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatParams;
-DelegateWork = HCL.HordeClassLibrary.UnitComponents.Workers.Interfaces.AUnitWorkerCommon.DelegateWork;
 Unit = HCL.HordeClassLibrary.World.Objects.Units.Unit;
 KnownUnit = HCL.HordeClassLibrary.World.Objects.Units.KnownUnit;
+UnitArmament = HCL.HordeClassLibrary.UnitComponents.BattleSystem.UnitArmament;
+BulletCombatParams = HCL.HordeClassLibrary.World.Objects.Bullets.BulletCombatParams;
 
 
 // ===================================================
@@ -88,3 +114,38 @@ OrderProduceAt = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderP
 OrderRepair = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepair;
 OrderRepairParameters = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepairParameters;
 OrderRepairSelf = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Orders.OrderRepairSelf;
+
+StateMotion = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.StateMotion;
+
+AMotionBase = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.AMotionBase;
+MotionHit = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motions.MotionHit;
+
+// Обработчики
+JsUnitWorkerCommon = HCL.HordeClassLibrary.UnitComponents.Workers.Script.JsUnitWorkerCommon;
+JsUnitWorkerEveryTick = HCL.HordeClassLibrary.UnitComponents.Workers.Script.JsUnitWorkerEveryTick;
+
+// ===================================================
+// --- Конфиги
+
+BulletConfig = HCL.HordeClassLibrary.HordeContent.Configs.Bullets.BulletConfig;
+Force = HCL.HordeClassLibrary.HordeContent.Configs.Army.Force;
+RuleConfig = HCL.HordeClassLibrary.HordeContent.Configs.Rules.RuleConfig;
+SoundEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.SoundEffects.SoundEffectConfig;
+SoundsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Audio.SoundsCatalog;
+BackgroundAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.BackgroundAnimationsCatalog;
+BulletAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.BulletAnimationsCatalog;
+ButtonAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.ButtonAnimationsCatalog;
+DecayAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.DecayAnimationsCatalog;
+FontCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.FontCatalog;
+SimpleAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.SimpleAnimationsCatalog;
+UnitAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.UnitAnimationsCatalog;
+VisualEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.VisualEffects.VisualEffectConfig;
+UnitCommandConfig = HCL.HordeClassLibrary.HordeContent.Configs.UnitCommandConfig;
+MindCharacterConfig = HCL.HordeClassLibrary.HordeContent.Configs.MasterMind.MindCharacterConfig;
+
+
+// ===================================================
+// --- Прочее
+
+AnimatorScriptTasks = HCL.HordeClassLibrary.HordeContent.ViewResources.Graphics.InternalLogic.Tasks.AnimatorScriptTasks;
+

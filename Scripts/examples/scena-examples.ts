@@ -32,6 +32,16 @@ function example_scenaWorks() {
     } else {
         logi(`    Юнита нету`);
     }
+    var unitAtFloor = unitsMap.Item.get(cell, UnitMapLayer.Floor);
+    if (unitAtFloor) {
+        if (unitAtFloor.IsNotDead && unitAtFloor.EffectsMind.HasEffect(UnitEffectFlag.Walkable)) {
+            logi(`    Мост в клетке: ${unitAtFloor.ToString()}`);
+        } else {
+            logi(`    Юнит на нижнем слое в клетке: ${unitAtFloor.ToString()}`);
+        }
+    } else {
+        logi(`    В этой клетке нет моста`);
+    }
 
     // Некоторые методы могут работать без Point2D
     var x = 25, y = 25;

@@ -46,7 +46,7 @@ function example_configWorks() {
 
 /**
  * Пример добавления конфига
- * Внимание! Для сброса изменений требуется перезапуск игры.
+ * Внимание! Для сброса изменений требуется запуск "example_configRemoving()".
  */
 function example_configCreation() {
     logi('> Запущен пример', '"' + arguments.callee.name + '"');
@@ -55,8 +55,16 @@ function example_configCreation() {
     var ballistaCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Balista");
     var factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
 
+    // Идентификатор для нового конфига
+    // Если установить null или существующий идентификатор, то будет при клонировании будет сгенерирован уникальный идентификатор
+    var newCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
+    // var newCfgUid = null;
+
+    // Чистим, если конфиг с таким идентификатором уже имеется (видимо пример запускается не первый раз)
+    example_configRemoving(noTitle=true);
+
     // Клонируем конфиг и изменяем
-    var newBallistaCfg = HordeContent.CloneConfig(ballistaCfg);
+    var newBallistaCfg = HordeContent.CloneConfig(ballistaCfg, newCfgUid);
     HordeUtils.setValue(newBallistaCfg, "Name", "Динамическая баллиста");
     HordeUtils.setValue(newBallistaCfg, "ProductionTime", 50);
     HordeUtils.setValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
@@ -73,89 +81,29 @@ function example_configCreation() {
 
 
 /**
- * Пример замены обработчика состояния юнита
- * Внимание! Для сброса изменений требуется перезапуск игры.
+ * Пример удаления конфига
+ * Внимание! Конфиг добавляется в примере "example_configCreation()".
  */
-function example_changeUnitWorker_1() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+function example_configRemoving(noTitle) {
+    if (!noTitle) {
+        logi('> Запущен пример', '"' + arguments.callee.name + '"');
+    }
+    
+    var targetCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
 
-    // Создаём новый обработчик.
-    // Это будет обработчик для состояния Stay, т.е. когда юнит ничего не делает
-    var newWorker = host.del(DelegateWork, function (unit) {
+    // Добавлен?
+    if (!HordeContent.HasUnitConfig(targetCfgUid)) {
+        logi('  Конфиг пока что не был добавлен:', targetCfgUid);
+        return;
+    }
+    var targetCfg = HordeContent.GetUnitConfig(targetCfgUid);
 
-        // Важно делать обработку ошибок, т.к. иначе игра вылетит в меню (пока что)
-        try {
+    logi('  Удаление конфига из контента:', targetCfgUid);
+    HordeContent.RemoveConfig(targetCfg);
 
-            // Устанавливаем анимацию "Стоит"
-            unit.VisualMind.SetAnimState(UnitAnimState.Stand);
-
-            // Лечим юнита каждые 100 тактов
-            if (globalStorage.gameTickNum % 100 == 0) {
-                unit.AddHealth(1);
-            }
-
-            // Внимание! Обработчики некоторых состояний вызываются очень часто, как, например, для состояний Stay, Move.
-            // Поэтому здесь не должно быть логов без дополнительных условий, ведь логгирование это очень дорогостоящая операция.
-
-            // Т.е. так делать не стоит!
-            //logi('Unit:', unit.ToString());
-
-        } catch (ex) {
-            logExc(ex);
-        }
-    });
-
-    // Для теста можно взять любого подходящего юнита и подать внутрь нового обработчика, например, так:
-    //newWorker(anySwordsmen);
-
-    // Непосредственно установка созданного обработчика в конфиг мечника
-    var swordCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Swordmen");
-    swordCfg.StateWorkers.Item.set(UnitState.Stay, newWorker);
-    logi(swordCfg.StateWorkers.Item.get(UnitState.Stay) == newWorker
-        ? '  Обработчик мечника успешно изменен!'
-        : '  Обработчик мечника НЕ изменен!');
-    // Если все ок, то теперь все мечники не будут поворачиваться когда стоят, но будут лечиться!
-}
-
-
-/**
- * Пример замены обработчика состояния юнита с проксированием в исходный обработчик
- * Внимание! Для сброса изменений требуется перезапуск игры.
- */
-function example_changeUnitWorker_2() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
-
-    var archerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer");
-
-    // Запоминаем текущий обработчик
-    var prevWorker = archerCfg.StateWorkers.Item.get(UnitState.Stay);
-
-    // Создаём новый обработчик с использованием предыдущего
-    var newWorker_2 = host.del(DelegateWork, function (unit) {
-        try {
-
-            // Проксируем вызов в предыдущий обработчик
-            // Т.е. выполняем все то, что и должно делаться
-            prevWorker(unit);
-
-            // Дополнительно добавляем лечение
-            if (globalStorage.gameTickNum % 100 == 0) {
-                unit.AddHealth(1);
-            }
-
-        } catch (ex) {
-            logExc(ex);
-        }
-    });
-
-    // Непосредственно установка созданного обработчика в конфиг мечника
-    archerCfg.StateWorkers.Item.set(UnitState.Stay, newWorker_2);
-    logi(archerCfg.StateWorkers.Item.get(UnitState.Stay) == newWorker_2
-        ? '  Обработчик лучника успешно изменен!'
-        : '  Обработчик лучника НЕ изменен!');
-
-    // Внимание!
-    // При каждом следующем вызове примера "текущий обработчик" уже будет содержать предыдущий код лечения + проксирование,
-    // поэтому туда дополнительно добавится ещё одно лечение.
-    // Желательно сохранить исходный обработчик в глобальную переменную, чтобы не делать матрешку из вызовов.
+    logi('  Удаление из завода ссылок на конфиг:', targetCfgUid);
+    var factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+    var producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+    var produceList = producerParams.CanProduceList;
+    ScriptExtensions.RemoveAll(produceList, targetCfg);
 }

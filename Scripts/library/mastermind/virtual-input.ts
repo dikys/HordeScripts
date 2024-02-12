@@ -3,6 +3,9 @@ VirtualSelectUnitsMode = HordeEngine.HordeResurrection.Engine.Logic.Battle.Input
 AssignOrderMode = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.AssignOrderMode;
 
 function inputSelectUnits(player, cellStart, cellEnd, selectMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var VirtualSelectUnits = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSelectUnits;
 	if (selectMode === undefined) { selectMode = VirtualSelectUnitsMode.Select; }
 
@@ -11,6 +14,9 @@ function inputSelectUnits(player, cellStart, cellEnd, selectMode) {
 }
 
 function inputSelectUnitsById(player, ids, selectMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var UnitIdLabel = HCL.HordeClassLibrary.World.Objects.Units.UnitIdLabel;
 	var VirtualSelectUnitsById = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSelectUnitsById;
 	if (selectMode === undefined) { selectMode = VirtualSelectUnitsMode.Select; }
@@ -25,6 +31,9 @@ function inputSelectUnitsById(player, ids, selectMode) {
 }
 
 function inputSmartClick(player, cell, assignMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var VirtualSmartMouseClick = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSmartMouseClick;
 	if (assignMode === undefined) { assignMode = AssignOrderMode.Replace; }
 
@@ -33,6 +42,9 @@ function inputSmartClick(player, cell, assignMode) {
 }
 
 function inputPointBasedCommand(player, cell, cmd, assignMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var VirtualPointBasedCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualPointBasedCommand;
 	if (assignMode === undefined) { assignMode = AssignOrderMode.Replace; }
 
@@ -41,6 +53,9 @@ function inputPointBasedCommand(player, cell, cmd, assignMode) {
 }
 
 function inputOneClickCommand(player, cmd, assignMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var VirtualOneClickCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualOneClickCommand;
 	if (assignMode === undefined) { assignMode = AssignOrderMode.Replace; }
 	
@@ -49,6 +64,9 @@ function inputOneClickCommand(player, cmd, assignMode) {
 }
 
 function inputProduceBuildingCommand(player, productCfg, cellStart, cellEnd, assignMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var VirtualProduceBuildingCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualProduceBuildingCommand;
 	if (assignMode === undefined) { assignMode = AssignOrderMode.Replace; }
 	
@@ -62,6 +80,9 @@ function inputProduceBuildingCommand(player, productCfg, cellStart, cellEnd, ass
 }
 
 function inputProduceUnitCommand(player, productCfg, count, assignMode) {
+    if(!_checkPlayerIsLocal(player))
+        return;
+
 	var VirtualProduceUnitCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualProduceUnitCommand;
 	if (assignMode === undefined) { assignMode = AssignOrderMode.Replace; }
 	
@@ -73,6 +94,10 @@ function inputProduceUnitCommand(player, productCfg, count, assignMode) {
 }
 
 
+
+function _checkPlayerIsLocal(player) {
+    return player.PlayerOrigin.ToString() == "Local";
+}
 
 function _inputPush(vii) {
 	HordeUtils.call(vii.InitiatorPlayer.VirtualInput, "AddLocalInput", vii);

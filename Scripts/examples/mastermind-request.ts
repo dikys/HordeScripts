@@ -30,8 +30,7 @@ function example_requestForMasterMind() {
     // Проверяем запросы
     var requests = masterMind.Requests;
     logi('  Запросов в обработке:', requests.Count);
-    var requests = enumerate(requests);
-    while ((request = eNext(requests)) !== undefined) {
-        logi('  -', request.ToString());
-    }
+    ForEach(requests, item => {
+        logi('  -', item.ToString());
+    });
 }

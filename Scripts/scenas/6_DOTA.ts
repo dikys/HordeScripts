@@ -413,7 +413,7 @@ namespace _6_DOTA {
                         // отправляем в путь
                         for (var unit of units) {
                             for (var command of commands) {
-                                unit.Cfg.GetOrderWorker(unit, command);
+                                unit.Cfg.GetOrderDelegate(unit, command);
                             }
                         }
                     }

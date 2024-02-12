@@ -30,12 +30,13 @@ function runExamples() {
     // example_getUnitsInArea_v1();
     // example_getUnitsInArea_v2();
     // example_getUnitsInArea_v3();
+    // example_customBullet();
+    // example_customUnit();
 
     // logi("[*] Примеры работы с конфигами");
     // example_configWorks();
     // example_configCreation();
-    // example_changeUnitWorker_1();
-    // example_changeUnitWorker_2();
+    // example_configRemoving();
 
     // logi("[*] Примеры работы с сообщениями:");
     // example_sendMessageToAll();

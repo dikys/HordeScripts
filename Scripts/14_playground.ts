@@ -7,6 +7,9 @@
  */
 if (globalStorage === undefined) {
     let globalStorage : { [name: string]: any } = {};
+
+    // Debug parameters
+    let hotReloadOnFileChanging = false;  // автоматическая перезагрузка скрипта при изменении файла
 }
 
 
@@ -18,9 +21,15 @@ function onFirstRun() {
     globalStorage.reloadCounter = ++globalStorage.reloadCounter || 1;
     globalStorage.scriptWorkTicks = 0;
     logi("Playground running... (Start number:", globalStorage.reloadCounter, ")");
+
+    // Установка дебаг-параметров
+    ScriptMachineDebugApi.SetHotReloadOnFileChanging(hotReloadOnFileChanging);
     
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runExamples();
+
+    // Запук плагинов
+    pluginsFirstRun();
 
     // Запускаем скрипты сцены
     scenaScriptsFirstRun();
@@ -50,6 +59,9 @@ function everyTick(gameTickNum: number) {
 
     // Примеры. Нужно настроить, см. файл "examples.ts"
     runEveryTickExamples();
+
+    // Запук плагинов
+    pluginsEveryTick(gameTickNum);
 
     // Запускаем скрипты сцены
     scenaScriptsEveryTick(gameTickNum);
