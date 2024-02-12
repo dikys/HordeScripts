@@ -46,6 +46,62 @@ let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 type UnitComposition = Map<string, number>;
 
 class MiraUtils {
+    static GetSettlementsSquadsFromUnits(units: Array<any>, settlements: Array<any>): Array<MiraSquad> {
+        let processedUnitIds = new Set<number>();
+        let result: Array<MiraSquad> = [];
+        
+        for (let unit of units) {
+            if (processedUnitIds.has(unit.Id)) {
+                continue;
+            }
+
+            let squad = MiraUtils.constructMiraSquad(unit, processedUnitIds, settlements);
+            result.push(squad);
+        }
+
+        return result;
+    }
+    
+    private static constructMiraSquad(unit: any, processedUnitIds: Set<number>, settlements: Array<any>): MiraSquad {
+        const UNIT_SEARCH_RADIUS = 3;
+        
+        let units = MiraUtils.GetSettlementUnitsInArea(unit.Cell, UNIT_SEARCH_RADIUS, settlements);
+        let unitSettlement = unit.Owner;
+        
+        let newUnits = units.filter((unit) => {return unit.Owner === unitSettlement});
+        let currentEnemies = [];
+        units = [];
+
+        do {
+            units.push(...newUnits);
+            currentEnemies = [...newUnits];
+            newUnits = [];
+
+            for (let enemy of currentEnemies) {
+                if (processedUnitIds.has(enemy.Id)) {
+                    continue;
+                }
+
+                processedUnitIds.add(enemy.Id);
+
+                let friends = MiraUtils.GetSettlementUnitsInArea(enemy.Cell, UNIT_SEARCH_RADIUS, settlements);
+                friends.filter((unit) => {return unit.Owner === unitSettlement && !processedUnitIds.has(unit.Id)});
+
+                newUnits.push(...friends);
+            }
+        }
+        while (newUnits.length > 0);
+
+        return new MiraSquad(units);
+    }
+    
+    static GetSettlementUnitsInArea(cell: any, radius: number, enemySettelemnts: Array<any>): Array<any> {
+        let units = MiraUtils.GetUnitsInArea(cell, radius);
+        let enemies = units.filter((unit) => {return enemySettelemnts.indexOf(unit.Owner) > -1});
+
+        return enemies;
+    }
+
     static FindCells(
         center: {X: number; Y: number;}, 
         radius: number, 

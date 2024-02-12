@@ -107,16 +107,13 @@ class MiraSettlementController {
             return false;
         }
 
-        let enemies = this.GetEnemiesInArea(settlementCenter, this.SETTLEMENT_RADIUS);
+        let enemies = MiraUtils.GetSettlementUnitsInArea(settlementCenter, this.SETTLEMENT_RADIUS, this.StrategyController.EnemySettlements);
         
         return enemies.length > 0;
     }
 
-    GetEnemiesInArea(cell, radius): Array<any> {
-        let units = MiraUtils.GetUnitsInArea(cell, radius);
-        let enemies = units.filter((unit) => {return this.StrategyController.EnemySettlements.indexOf(unit.Owner) > -1});
-
-        return enemies;
+    GetEnemiesInArea(cell: any, radius: number): Array<any> {
+        return MiraUtils.GetSettlementUnitsInArea(cell, radius, this.StrategyController.EnemySettlements);
     }
 
     GetSettlementCenter(): any {

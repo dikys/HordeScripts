@@ -38,7 +38,6 @@ class DefendingState extends MiraSettlementControllerState {
 
     private refreshAttackersList(): void {
         this.settlementController.AttackingSquads = [];
-        let processedUnitIds = new Set<number>();
 
         //TODO: add enemy detection around expands
         let settlementCenter = this.settlementController.GetSettlementCenter();
@@ -48,47 +47,7 @@ class DefendingState extends MiraSettlementControllerState {
         }
 
         let attackers = this.settlementController.GetEnemiesInArea(settlementCenter, this.settlementController.SETTLEMENT_RADIUS);
-
-        for (let unit of attackers) {
-            if (processedUnitIds.has(unit.Id)) {
-                continue;
-            }
-
-            let enemySquad = this.constructSquad(unit, processedUnitIds);
-            this.settlementController.AttackingSquads.push(enemySquad);
-        }
-    }
-
-    private constructSquad(unit: any, processedUnitIds: Set<number>): MiraSquad {
-        const UNIT_SEARCH_RADIUS = 3;
-        
-        let enemies = this.settlementController.GetEnemiesInArea(unit.Cell, UNIT_SEARCH_RADIUS);
-        let enemySettlement = unit.Owner;
-        
-        let newEnemies = enemies.filter((unit) => {return unit.Owner === enemySettlement});
-        let currentEnemies = [];
-        enemies = [];
-
-        do {
-            enemies.push(...newEnemies);
-            currentEnemies = [...newEnemies];
-            newEnemies = [];
-
-            for (let enemy of currentEnemies) {
-                if (processedUnitIds.has(enemy.Id)) {
-                    continue;
-                }
-
-                processedUnitIds.add(enemy.Id);
-
-                let friends = this.settlementController.GetEnemiesInArea(enemy.Cell, UNIT_SEARCH_RADIUS);
-                friends.filter((unit) => {return unit.Owner === enemySettlement && !processedUnitIds.has(unit.Id)});
-
-                newEnemies.push(...friends);
-            }
-        }
-        while (newEnemies.length > 0);
-
-        return new MiraSquad(enemies);
+        let attackingSquads = MiraUtils.GetSettlementsSquadsFromUnits(attackers, this.settlementController.StrategyController.EnemySettlements);
+        this.settlementController.AttackingSquads.push(...attackingSquads);
     }
 }

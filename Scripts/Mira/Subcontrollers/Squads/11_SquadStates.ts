@@ -1,6 +1,7 @@
 
 const MAX_SPREAD_THRESHOLD_MULTIPLIER = 2.8;
 const MIN_SPREAD_THRESHOLD_MULTIPLIER = 2;
+const ENEMY_SEARCH_RADIUS = 10; //TODO: maybe calculate this by adding some fixed number to a range of a longest range unit in game
 
 abstract class MiraSquadState extends FsmState {
     protected squad: MiraControllableSquad;
@@ -177,5 +178,25 @@ class MiraSquadGatheringUpState extends MiraSquadState {
         else {
             this.squad.SetState(new MiraSquadMoveState(this.squad));
         }
+    }
+}
+
+class MiraSquadBattleState extends MiraSquadState {
+    OnEntry(): void {
+        let location = this.squad.GetLocation();
+        
+        let enemies = MiraUtils.GetSettlementUnitsInArea(
+            location.Point, 
+            ENEMY_SEARCH_RADIUS, 
+            this.squad.Controller.EnemySettlements
+        );
+
+
+    }
+    
+    OnExit(): void {}
+    
+    Tick(tickNumber: number): void {
+        
     }
 }

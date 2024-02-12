@@ -136,6 +136,10 @@ class TacticalSubcontroller extends MiraSubcontroller {
         return combativityIndex / this.initialOffensiveSquadCount;
     }
 
+    public get EnemySettlements(): Array<any> {
+        return this.parentController.StrategyController.EnemySettlements;
+    }
+
     Tick(tickNumber: number): void {
         if (tickNumber % 10 !== 0) {
             return;
