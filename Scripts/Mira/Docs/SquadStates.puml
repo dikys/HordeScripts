@@ -1,4 +1,4 @@
-@startuml controller states
+@startuml squad states
 
 state Idle : Standing doing nothing\nstart battle if enemy is nearby
 state Move : Moving to a destination and\nignoring enemies on the way
