@@ -140,7 +140,7 @@ class MiraUtils {
     
     static GetUnitsInArea(cell: any, radius: number): Array<any> {
         let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
-        let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
+        let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox", box);
         let count = HordeUtils.getValue(unitsInBox, "Count");
         let units = HordeUtils.getValue(unitsInBox, "Units");
 
@@ -264,17 +264,18 @@ class MiraUtils {
         return null;
     }
 
-    static IssueAttackCommand(unit, player, location) {
-        MiraUtils.issueCommand(unit, player, location, UnitCommand.Attack);
+    static IssueAttackCommand(unit: any, player: any, location: any, isReplaceMode: boolean = true) {
+        MiraUtils.issueCommand(unit, player, location, UnitCommand.Attack, isReplaceMode);
     }
 
-    static IssueMoveCommand(unit, player, location) {
-        MiraUtils.issueCommand(unit, player, location, UnitCommand.MoveToPoint);
+    static IssueMoveCommand(unit: any, player: any, location: any, isReplaceMode: boolean = true) {
+        MiraUtils.issueCommand(unit, player, location, UnitCommand.MoveToPoint, isReplaceMode);
     }
 
-    private static issueCommand(unit, player, location, command) {
+    private static issueCommand(unit: any, player: any, location: any, command: any, isReplaceMode: boolean = true) {
+        let mode = isReplaceMode ? AssignOrderMode.Replace : AssignOrderMode.Queue;
         inputSelectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
-        inputPointBasedCommand(player, createPoint(location.X, location.Y), command, AssignOrderMode.Replace);
+        inputPointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
     }
 
     static RequestMasterMindProduction(unitConfig: string, productionDepartment: any) {
@@ -311,5 +312,25 @@ class MiraUtils {
         let tileType = MiraUtils.GetTileType({X: cell.X, Y: cell.Y});
 
         return tileType == TileType.Forest;
+    }
+
+    static ForEachCell(center: any, radius: any, action: (cell: any) => void): void {
+        for (
+            let row = Math.max(center.Y - radius, 0);
+            row <= Math.min(center.Y + radius, DotnetHolder.RealScena.Size.Height);
+            row++
+        ) {
+            for (
+                let col = Math.max(center.X - radius, 0);
+                col <= Math.min(center.X + radius, DotnetHolder.RealScena.Size.Width);
+                col++
+            ) {
+                action({X: col, Y: row});
+            }
+        }
+    }
+
+    static IsCellReachable(cell: any, unit: any): boolean {
+        return unit.MapMind.CheckPathTo(createPoint(cell.X, cell.Y), false);
     }
 }

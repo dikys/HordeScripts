@@ -184,6 +184,16 @@ class MiraControllableSquad extends MiraSquad {
         return this.state.IsIdle();
     }
 
+    IsEnemyNearby(): boolean {
+        let enemies = MiraUtils.GetSettlementUnitsInArea(
+            this.GetLocation().Point, 
+            ENEMY_SEARCH_RADIUS, 
+            this.Controller.EnemySettlements
+        );
+
+        return enemies.length > 0;
+    }
+
     private recalcMinSpread(): void {
         this.minSpread = Math.round(Math.sqrt(this.Units.length));
     }
