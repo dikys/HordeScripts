@@ -248,6 +248,11 @@ class MiraUtils {
         return new MiraSettlementData(settlement, masterMind, realPlayer);
     }
 
+    static GetUnit(cell: any): any {
+        var unitsMap = DotnetHolder.RealScena.UnitsMap;
+        return unitsMap.GetUpperUnit(cell.X, cell.Y);
+    }
+
     // finds a free cell nearest to given
     static FindFreeCell(point): any {
         var unitsMap = scena.GetRealScena().UnitsMap;
@@ -332,5 +337,19 @@ class MiraUtils {
 
     static IsCellReachable(cell: any, unit: any): boolean {
         return unit.MapMind.CheckPathTo(createPoint(cell.X, cell.Y), false);
+    }
+
+    static GetUnitTarget(unit: any): any {
+        let action = unit.OrdersMind.ActiveAct;
+        
+        if (
+            action.GetType() != 
+                HordeUtils.GetTypeByName("HordeClassLibrary.UnitComponents.OrdersSystem.Acts.ActAttackUnit", "HordeClassLibrary")
+        ) {
+            return null;
+        }
+        else {
+            return action.Target;
+        }
     }
 }
