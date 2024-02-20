@@ -196,26 +196,60 @@ class MiraSquadGatheringUpState extends MiraSquadState {
     }
 }
 
-class MiraThreatMap {
-    threatMap: any;
-
+abstract class MiraCellDataHolder {
+    protected data: any;
+    
     constructor () {
-        this.threatMap = {};
+        this.Clear();
     }
 
-    GetThreat(cell: any): number {
-        let index = this.makeIndex(cell);
-        return (this.threatMap[index] ?? 0);
+    abstract Get(cell: any): any;
+    abstract Set(cell: any, value: any): void;
+
+    Clear(): void {
+        this.data = {};
     }
 
-    AddThreat(cell: any, value: number): void {
-        let index = `(${cell.X},${cell.Y})`;
-        let threat = (this.threatMap[index] ?? 0) + value;
-        this.threatMap[index] = threat;
-    }
-
-    private makeIndex(cell: any): string {
+    protected makeIndex(cell: any): string {
         return `(${cell.X},${cell.Y})`;
+    }
+}
+
+class MiraThreatMap extends MiraCellDataHolder {
+    constructor () {
+        super();
+    }
+
+    Get(cell: any): any {
+        let index = this.makeIndex(cell);
+        return (this.data[index] ?? 0);
+    }
+
+    Set(cell: any, value: any) {
+        let index = this.makeIndex(cell);
+        this.data[index] = value;
+    }
+
+    Add(cell: any, value: any): void {
+        let index = this.makeIndex(cell);
+        let threat = (this.data[index] ?? 0) + value;
+        this.data[index] = threat;
+    }
+}
+
+class MiraHeuristicsCalcFlags extends MiraCellDataHolder {
+    constructor () {
+        super();
+    }
+
+    Get(cell: any): any {
+        let index = this.makeIndex(cell);
+        return (this.data[index] ?? false);
+    }
+
+    Set(cell: any, value: any) {
+        let index = this.makeIndex(cell);
+        this.data[index] = value;
     }
 }
 
@@ -223,6 +257,7 @@ class MiraSquadBattleState extends MiraSquadState {
     private enemySquads: Array<MiraSquad>;
     private enemyUnits: Array<any>;
     private threatMap: MiraThreatMap;
+    private cellHeuristicsFlags: MiraHeuristicsCalcFlags;
     private reservedCells: Array<any>;
     
     OnEntry(): void {
@@ -278,16 +313,17 @@ class MiraSquadBattleState extends MiraSquadState {
 
         //TODO: this should also process second armament
         let target = MiraUtils.GetUnitTarget(unit);
-        let unitDps = unit.Cfg.MainArmament.BulletCombatParams.Damage / unit.Cfg.MainArmament.ReloadTime;
 
         if (target) {
+            let unitDps = unit.Cfg.MainArmament.BulletCombatParams.Damage / unit.Cfg.MainArmament.ReloadTime;
+
             if (unit.Cfg.MainArmament.MaxDistanceDispersion > 0) {
                 MiraUtils.ForEachCell(target.Cell, 1, (cell) => {
-                    this.threatMap.AddThreat(cell, unitDps);
+                    this.threatMap.Add(cell, unitDps);
                 });
             }
             else {
-                this.threatMap.AddThreat(target.Cell, unitDps);
+                this.threatMap.Add(target.Cell, unitDps);
             }
         }
     }
@@ -296,7 +332,8 @@ class MiraSquadBattleState extends MiraSquadState {
         this.reservedCells = [];
         
         for (let unit of this.squad.Units) {
-            let targetsHeuristics = [];
+            let optimalTarget = null;
+            this.cellHeuristicsFlags = new MiraHeuristicsCalcFlags();
             
             for (let enemy of this.enemyUnits) {
                 if (!unit.BattleMind.CanAttackTarget(enemy)) {
@@ -319,43 +356,52 @@ class MiraSquadBattleState extends MiraSquadState {
                 }
 
                 MiraUtils.ForEachCell(enemy.Cell, atttackRadius, (cell) => {
-                    let heuristic = this.calcCellHeuristic(cell, unit);
-                    targetsHeuristics.push({cell: cell, heuristic: heuristic, target: enemy});
+                    if (!this.cellHeuristicsFlags.Get(cell)) {
+                        let heuristic = this.calcCellHeuristic(cell, unit);
+                        this.cellHeuristicsFlags.Set(cell, true);
+
+                        let targetData = {cell: cell, heuristic: heuristic, target: enemy};
+
+                        if (optimalTarget == null) {
+                            if (heuristic != Infinity) {
+                                optimalTarget = targetData;
+                            }
+                        }
+                        else if (targetData.heuristic < optimalTarget.heuristic) {
+                            if (MiraUtils.IsCellReachable(cell, unit)) {
+                                optimalTarget = targetData;
+                            }
+                        }
+                        else if (targetData.heuristic == optimalTarget.heuristic) {
+                            if (targetData.target.Health < optimalTarget.target.Health) {
+                                if (MiraUtils.IsCellReachable(cell, unit)) {
+                                    optimalTarget = targetData;
+                                }
+                            }
+                        }
+                    }
                 });
             }
 
-            if (targetsHeuristics.length > 0) {
-                targetsHeuristics.sort((a, b) => {
-                    if (a.heuristic != b.heuristic) {
-                        return a.heuristic - b.heuristic;
-                    }
-                    else {
-                        return a.target.Health - b.target.Health;
-                    }
-                });
+            if (optimalTarget) {
+                let attackCell = optimalTarget.target.MoveToCell ?? optimalTarget.target.Cell;
 
-                let optimalTarget = targetsHeuristics[0];
-
-                if (optimalTarget.heuristic != Infinity) {
-                    let attackCell = optimalTarget.target.MoveToCell ?? optimalTarget.target.Cell;
-
-                    if (unit.Cell != optimalTarget.cell) {
-                        MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
-                        MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
-                        this.reservedCells.push(optimalTarget.cell);
-                    }
-                    else {
-                        MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
-                    }
+                if (unit.Cell != optimalTarget.cell) {
+                    MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
+                    MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
+                    this.reservedCells.push(optimalTarget.cell);
                 }
                 else {
-                    MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, unit.Cell);
+                    MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
                 }
+            }
+            else {
+                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, unit.Cell);
             }
         }
     }
 
-    private calcCellHeuristic(targetCell: any, unit: any): number {
+    private calcCellHeuristic(targetCell: any, unit: any): number | null {
         let occupyingUnit = MiraUtils.GetUnit(targetCell);
         
         if (occupyingUnit && occupyingUnit != unit) {
@@ -365,13 +411,9 @@ class MiraSquadBattleState extends MiraSquadState {
         if (this.reservedCells.indexOf(targetCell) >= 0) {
             return Infinity;
         }
-        
-        if (!MiraUtils.IsCellReachable(targetCell, unit)) {
-            return Infinity;
-        }
 
-        let threat = this.threatMap.GetThreat(targetCell);
+        let threat = this.threatMap.Get(targetCell);
 
-        return threat + 2 * MiraUtils.ChebyshevDistance(unit.Cell, targetCell);
+        return threat + MiraUtils.ChebyshevDistance(unit.Cell, targetCell);
     }
 }

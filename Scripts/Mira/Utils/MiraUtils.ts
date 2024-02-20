@@ -320,14 +320,17 @@ class MiraUtils {
     }
 
     static ForEachCell(center: any, radius: any, action: (cell: any) => void): void {
+        let endRow = Math.min(center.Y + radius, DotnetHolder.RealScena.Size.Height);
+        let endCol = Math.min(center.X + radius, DotnetHolder.RealScena.Size.Width)
+        
         for (
             let row = Math.max(center.Y - radius, 0);
-            row <= Math.min(center.Y + radius, DotnetHolder.RealScena.Size.Height);
+            row <= endRow;
             row++
         ) {
             for (
                 let col = Math.max(center.X - radius, 0);
-                col <= Math.min(center.X + radius, DotnetHolder.RealScena.Size.Width);
+                col <= endCol;
                 col++
             ) {
                 action({X: col, Y: row});
