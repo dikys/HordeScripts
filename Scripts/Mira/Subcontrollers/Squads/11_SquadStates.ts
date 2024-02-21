@@ -340,47 +340,56 @@ class MiraSquadBattleState extends MiraSquadState {
                     continue;
                 }
                 
-                let mainAttackRange = unit.Cfg.MainArmament.Range;
-                let forestAttackRange = unit.Cfg.MainArmament.ForestRange;
-                let mainVisionRange = unit.Cfg.Sight;
-                let forestVisionRange = unit.Cfg.ForestVision;
+                let maxCol = enemy.Cell.X + enemy.Rect.Width;
+                let maxRow = enemy.Cell.Y + enemy.Rect.Height;
 
-                let atttackRadius = 0;
+                for (let row = enemy.Cell.Y; row < maxRow; row++) {
+                    for (let col = enemy.Cell.X; col < maxCol; col++) {
+                        let analyzedCell = {X: col, Y: row};
+                        
+                        let mainAttackRange = unit.Cfg.MainArmament.Range;
+                        let forestAttackRange = unit.Cfg.MainArmament.ForestRange;
+                        let mainVisionRange = unit.Cfg.Sight;
+                        let forestVisionRange = unit.Cfg.ForestVision;
 
-                //TODO: check if target is already visible
-                if (MiraUtils.GetTileType(enemy.Cell) == TileType.Forest) {
-                    atttackRadius = Math.min(forestAttackRange, forestVisionRange);
-                }
-                else {
-                    atttackRadius = Math.min(mainAttackRange, mainVisionRange);
-                }
+                        let atttackRadius = 0;
 
-                MiraUtils.ForEachCell(enemy.Cell, atttackRadius, (cell) => {
-                    if (!this.cellHeuristicsFlags.Get(cell)) {
-                        let heuristic = this.calcCellHeuristic(cell, unit);
-                        this.cellHeuristicsFlags.Set(cell, true);
-
-                        let targetData = {cell: cell, heuristic: heuristic, target: enemy};
-
-                        if (optimalTarget == null) {
-                            if (heuristic != Infinity) {
-                                optimalTarget = targetData;
-                            }
+                        //TODO: check if target is already visible
+                        if (MiraUtils.GetTileType(analyzedCell) == TileType.Forest) {
+                            atttackRadius = Math.min(forestAttackRange, forestVisionRange);
                         }
-                        else if (targetData.heuristic < optimalTarget.heuristic) {
-                            if (MiraUtils.IsCellReachable(cell, unit)) {
-                                optimalTarget = targetData;
-                            }
+                        else {
+                            atttackRadius = Math.min(mainAttackRange, mainVisionRange);
                         }
-                        else if (targetData.heuristic == optimalTarget.heuristic) {
-                            if (targetData.target.Health < optimalTarget.target.Health) {
-                                if (MiraUtils.IsCellReachable(cell, unit)) {
-                                    optimalTarget = targetData;
+
+                        MiraUtils.ForEachCell(analyzedCell, atttackRadius, (cell) => {
+                            if (!this.cellHeuristicsFlags.Get(cell)) {
+                                let heuristic = this.calcCellHeuristic(cell, unit);
+                                this.cellHeuristicsFlags.Set(cell, true);
+
+                                let targetData = {cell: cell, heuristic: heuristic, target: enemy};
+
+                                if (optimalTarget == null) {
+                                    if (heuristic != Infinity) {
+                                        optimalTarget = targetData;
+                                    }
+                                }
+                                else if (targetData.heuristic < optimalTarget.heuristic) {
+                                    if (MiraUtils.IsCellReachable(cell, unit)) {
+                                        optimalTarget = targetData;
+                                    }
+                                }
+                                else if (targetData.heuristic == optimalTarget.heuristic) {
+                                    if (targetData.target.Health < optimalTarget.target.Health) {
+                                        if (MiraUtils.IsCellReachable(cell, unit)) {
+                                            optimalTarget = targetData;
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        });
                     }
-                });
+                }
             }
 
             if (optimalTarget) {
