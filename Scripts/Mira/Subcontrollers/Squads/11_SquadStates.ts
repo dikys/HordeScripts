@@ -410,7 +410,7 @@ class MiraSquadBattleState extends MiraSquadState {
         }
     }
 
-    private calcCellHeuristic(targetCell: any, unit: any): number | null {
+    private calcCellHeuristic(targetCell: any, unit: any): number {
         let occupyingUnit = MiraUtils.GetUnit(targetCell);
         
         if (occupyingUnit && occupyingUnit != unit) {
