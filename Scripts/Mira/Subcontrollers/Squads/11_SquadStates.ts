@@ -237,7 +237,23 @@ class MiraThreatMap extends MiraCellDataHolder {
     }
 }
 
-class MiraHeuristicsCalcFlags extends MiraCellDataHolder {
+class MiraCellHeuristics extends MiraCellDataHolder {
+    constructor () {
+        super();
+    }
+
+    Get(cell: any): any {
+        let index = this.makeIndex(cell);
+        return this.data[index];
+    }
+
+    Set(cell: any, value: any) {
+        let index = this.makeIndex(cell);
+        this.data[index] = value;
+    }
+}
+
+class MiraReservedCellData extends MiraCellDataHolder {
     constructor () {
         super();
     }
@@ -257,8 +273,8 @@ class MiraSquadBattleState extends MiraSquadState {
     private enemySquads: Array<MiraSquad>;
     private enemyUnits: Array<any>;
     private threatMap: MiraThreatMap;
-    private cellHeuristicsFlags: MiraHeuristicsCalcFlags;
-    private reservedCells: Array<any>;
+    private cellHeuristics: MiraCellHeuristics;
+    private reservedCells: MiraReservedCellData;
     
     OnEntry(): void {
         this.updateThreats();
@@ -284,16 +300,22 @@ class MiraSquadBattleState extends MiraSquadState {
     private updateThreats(): void {
         let location = this.squad.GetLocation();
         
-        this.enemyUnits = MiraUtils.GetSettlementUnitsInArea(
+        let enemies = MiraUtils.GetSettlementUnitsInArea(
             location.Point, 
             ENEMY_SEARCH_RADIUS, 
             this.squad.Controller.EnemySettlements
         );
 
         this.enemySquads = MiraUtils.GetSettlementsSquadsFromUnits(
-            this.enemyUnits, 
+            enemies, 
             this.squad.Controller.EnemySettlements
         );
+
+        this.enemyUnits = [];
+
+        for (let squad of this.enemySquads) {
+            this.enemyUnits.push(...squad.Units);
+        }
 
         this.updateThreatMap();
     }
@@ -329,11 +351,11 @@ class MiraSquadBattleState extends MiraSquadState {
     }
 
     private distributeTargets(): void {
-        this.reservedCells = [];
+        this.reservedCells = new MiraReservedCellData();
         
         for (let unit of this.squad.Units) {
             let optimalTarget = null;
-            this.cellHeuristicsFlags = new MiraHeuristicsCalcFlags();
+            this.cellHeuristics = new MiraCellHeuristics();
             
             for (let enemy of this.enemyUnits) {
                 if (!unit.BattleMind.CanAttackTarget(enemy)) {
@@ -363,27 +385,29 @@ class MiraSquadBattleState extends MiraSquadState {
                         }
 
                         MiraUtils.ForEachCell(analyzedCell, atttackRadius, (cell) => {
-                            if (!this.cellHeuristicsFlags.Get(cell)) {
-                                let heuristic = this.calcCellHeuristic(cell, unit);
-                                this.cellHeuristicsFlags.Set(cell, true);
+                            let heuristic = this.cellHeuristics.Get(cell);
+                            
+                            if (heuristic == null) {
+                                heuristic = this.calcCellHeuristic(cell, unit);
+                                this.cellHeuristics.Set(cell, heuristic);
+                            }
 
-                                let targetData = {cell: cell, heuristic: heuristic, target: enemy};
+                            let targetData = {cell: cell, heuristic: heuristic, target: enemy};
 
-                                if (optimalTarget == null) {
-                                    if (heuristic != Infinity) {
-                                        optimalTarget = targetData;
-                                    }
+                            if (optimalTarget == null) {
+                                if (heuristic != Infinity) {
+                                    optimalTarget = targetData;
                                 }
-                                else if (targetData.heuristic < optimalTarget.heuristic) {
+                            }
+                            else if (targetData.heuristic < optimalTarget.heuristic) {
+                                if (MiraUtils.IsCellReachable(cell, unit)) {
+                                    optimalTarget = targetData;
+                                }
+                            }
+                            else if (targetData.heuristic == optimalTarget.heuristic) {
+                                if (targetData.target.Health < optimalTarget.target.Health) {
                                     if (MiraUtils.IsCellReachable(cell, unit)) {
                                         optimalTarget = targetData;
-                                    }
-                                }
-                                else if (targetData.heuristic == optimalTarget.heuristic) {
-                                    if (targetData.target.Health < optimalTarget.target.Health) {
-                                        if (MiraUtils.IsCellReachable(cell, unit)) {
-                                            optimalTarget = targetData;
-                                        }
                                     }
                                 }
                             }
@@ -395,10 +419,10 @@ class MiraSquadBattleState extends MiraSquadState {
             if (optimalTarget) {
                 let attackCell = optimalTarget.target.MoveToCell ?? optimalTarget.target.Cell;
 
-                if (unit.Cell != optimalTarget.cell) {
+                if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTarget.cell) > 0) {
                     MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
                     MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
-                    this.reservedCells.push(optimalTarget.cell);
+                    this.reservedCells.Set(optimalTarget.cell, true);
                 }
                 else {
                     MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
@@ -417,12 +441,12 @@ class MiraSquadBattleState extends MiraSquadState {
             return Infinity;
         }
         
-        if (this.reservedCells.indexOf(targetCell) >= 0) {
+        if (this.reservedCells.Get(targetCell)) {
             return Infinity;
         }
 
         let threat = this.threatMap.Get(targetCell);
 
-        return threat + MiraUtils.ChebyshevDistance(unit.Cell, targetCell);
+        return threat + 2 * MiraUtils.ChebyshevDistance(unit.Cell, targetCell);
     }
 }

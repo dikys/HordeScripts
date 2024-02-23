@@ -85,7 +85,7 @@ class MiraUtils {
                 processedUnitIds.add(enemy.Id);
 
                 let friends = MiraUtils.GetSettlementUnitsInArea(enemy.Cell, UNIT_SEARCH_RADIUS, settlements);
-                friends.filter((unit) => {return unit.Owner === unitSettlement && !processedUnitIds.has(unit.Id)});
+                friends = friends.filter((unit) => {return unit.Owner === unitSettlement && !processedUnitIds.has(unit.Id)});
 
                 newUnits.push(...friends);
             }
