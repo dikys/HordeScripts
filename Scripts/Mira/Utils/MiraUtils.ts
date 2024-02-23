@@ -42,6 +42,29 @@ class DotnetHolder {
     }
 }
 
+class MiraProfiler {
+    private message: string;
+    private callCount: number;
+    private executionTime: number;
+
+    constructor(message: string) {
+        this.message = message;
+        this.callCount = 0;
+        this.executionTime = 0;
+    }
+
+    public Print(): void {
+        Mira.Debug(this.message + ` took ${this.executionTime} ms, call count: ${this.callCount}`);
+    }
+
+    public Profile(call: () => void): void {
+        let startTime = Date.now();
+        call();
+        this.executionTime += Date.now() - startTime;
+        this.callCount++;
+    }
+}
+
 let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 type UnitComposition = Map<string, number>;
 
