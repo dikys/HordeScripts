@@ -11,7 +11,7 @@ function makeFlags(flagsType, flagsArray) {
 	var flags = 0;
 
 	for(var f of flagsArray) {
-		flags += xHost.cast(Int32, f);
+		flags |= xHost.cast(Int32, f);
 	}
 
 	return xHost.cast(flagsType, flags);
