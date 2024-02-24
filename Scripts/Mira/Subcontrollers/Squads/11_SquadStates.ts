@@ -337,7 +337,7 @@ class MiraSquadBattleState extends MiraSquadState {
         let target = MiraUtils.GetUnitTarget(unit);
 
         if (target) {
-            let unitDps = unit.Cfg.MainArmament.BulletCombatParams.Damage / unit.Cfg.MainArmament.ReloadTime;
+            let unitDps = unit.Cfg.MainArmament.BulletCombatParams.Damage;
 
             if (unit.Cfg.MainArmament.MaxDistanceDispersion > 0) {
                 MiraUtils.ForEachCell(target.Cell, 1, (cell) => {
@@ -368,6 +368,7 @@ class MiraSquadBattleState extends MiraSquadState {
                 for (let row = enemy.Cell.Y; row < maxRow; row++) {
                     for (let col = enemy.Cell.X; col < maxCol; col++) {
                         let analyzedCell = {X: col, Y: row};
+                        let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
                         
                         let mainAttackRange = unit.Cfg.MainArmament.Range;
                         let forestAttackRange = unit.Cfg.MainArmament.ForestRange;
@@ -385,6 +386,10 @@ class MiraSquadBattleState extends MiraSquadState {
                         }
 
                         MiraUtils.ForEachCell(analyzedCell, atttackRadius, (cell) => {
+                            if (MiraUtils.ChebyshevDistance(unit.Cell, cell) > analyzedCellDistance) {
+                                return;
+                            }
+                            
                             let heuristic = this.cellHeuristics.Get(cell);
                             
                             if (heuristic == null) {
@@ -447,6 +452,6 @@ class MiraSquadBattleState extends MiraSquadState {
 
         let threat = this.threatMap.Get(targetCell);
 
-        return threat + 2 * MiraUtils.ChebyshevDistance(unit.Cell, targetCell);
+        return threat + 6 * MiraUtils.ChebyshevDistance(unit.Cell, targetCell);
     }
 }

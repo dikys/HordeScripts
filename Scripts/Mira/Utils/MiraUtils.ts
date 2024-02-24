@@ -88,29 +88,40 @@ class MiraUtils {
     private static constructMiraSquad(unit: any, processedUnitIds: Set<number>, settlements: Array<any>): MiraSquad {
         const UNIT_SEARCH_RADIUS = 3;
         
-        let units = MiraUtils.GetSettlementUnitsInArea(unit.Cell, UNIT_SEARCH_RADIUS, settlements);
+        //let units = MiraUtils.GetSettlementUnitsInArea(unit.Cell, UNIT_SEARCH_RADIUS, settlements);
         let unitSettlement = unit.Owner;
         
-        let newUnits = units.filter((unit) => {return unit.Owner === unitSettlement});
-        let currentEnemies = [];
-        units = [];
+        let newUnits = [unit]; //units.filter((unit) => {return unit.Owner === unitSettlement});
+        let currentUnits = [];
+        let units = [];
 
         do {
             units.push(...newUnits);
-            currentEnemies = [...newUnits];
+            currentUnits = [...newUnits];
+            
             newUnits = [];
+            let newUnitIds = new Set<number>();
 
-            for (let enemy of currentEnemies) {
-                if (processedUnitIds.has(enemy.Id)) {
+            for (let curUnit of currentUnits) {
+                if (processedUnitIds.has(curUnit.Id)) {
                     continue;
                 }
 
-                processedUnitIds.add(enemy.Id);
+                processedUnitIds.add(curUnit.Id);
 
-                let friends = MiraUtils.GetSettlementUnitsInArea(enemy.Cell, UNIT_SEARCH_RADIUS, settlements);
-                friends = friends.filter((unit) => {return unit.Owner === unitSettlement && !processedUnitIds.has(unit.Id)});
+                let friends = MiraUtils.GetSettlementUnitsInArea(curUnit.Cell, UNIT_SEARCH_RADIUS, settlements);
+                friends = friends.filter((unit) => {
+                    return  unit.Owner === unitSettlement && 
+                        !processedUnitIds.has(unit.Id) &&
+                        currentUnits.indexOf(unit) == 0
+                });
 
-                newUnits.push(...friends);
+                for (let friend of friends) {
+                    if (!newUnitIds.has(friend.Id)) {
+                        newUnits.push(friend);
+                        newUnitIds.add(friend.Id);
+                    }
+                }
             }
         }
         while (newUnits.length > 0);
