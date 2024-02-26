@@ -4,9 +4,9 @@
  * 
  * Возвращает созданный снаряд.
  */
-function spawnBullet(sourceUnit, targetUnit, sourceArmament, bullCfg, bulletCombatParams, launchPos, targetPos, targetLayer) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Bullets.BulletEmittingArgs, HordeClassLibrary");
-    var emittingArgs = HordeUtils.CreateInstance(csType);
+export function spawnBullet(sourceUnit, targetUnit, sourceArmament, bullCfg, bulletCombatParams, launchPos, targetPos, targetLayer) {
+    const csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Bullets.BulletEmittingArgs, HordeClassLibrary");
+    let emittingArgs = HordeUtils.CreateInstance(csType);
     HordeUtils.setValue(emittingArgs, "SourceUnit", sourceUnit);
     HordeUtils.setValue(emittingArgs, "TargetUnit", targetUnit);
     HordeUtils.setValue(emittingArgs, "SourceArmament", sourceArmament);
@@ -16,10 +16,10 @@ function spawnBullet(sourceUnit, targetUnit, sourceArmament, bullCfg, bulletComb
     HordeUtils.setValue(emittingArgs, "TargetPosition", targetPos);
     HordeUtils.setValue(emittingArgs, "TargetLayer", targetLayer);
 
-    var emittingArgsVar = host.newVar(HCL.HordeClassLibrary.World.Objects.Bullets.BulletEmittingArgs);
+    let emittingArgsVar = host.newVar(HCL.HordeClassLibrary.World.Objects.Bullets.BulletEmittingArgs);
     emittingArgsVar.value = emittingArgs;
 
-    var bull = bullCfg.CreateInstance(emittingArgsVar.ref);
+    let bull = bullCfg.CreateInstance(emittingArgsVar.ref);
     sourceUnit.Scena.ObjectController.RegisterBullet(bull);
 
     return bull;

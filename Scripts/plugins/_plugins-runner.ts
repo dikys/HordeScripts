@@ -1,27 +1,43 @@
+import { logi } from "library/common/logging";
+import { AttentionOnSurfacePlugin } from "./attention-on-surface";
+
+// ===================================================
+// --- Service
 
 /**
- * Вызывается при первом запуске скрипта, а так же при hot-reload
+ * Инициализцаия
  */
-function pluginsFirstRun() {
+export function initializePlugins() {
+    // Объект для управления плагинами
     hordePlugins = new HordePluginsManager();
 
     // Регистрируем плагины
     hordePlugins.registerPlugin(new AttentionOnSurfacePlugin());
+}
 
-    // Плагины для отладки (раскомментировать необходимые)
-    // hordePlugins.registerPlugin(new SetResourcesPlugin());
+/**
+ * Регистрация плагина
+ */
+export function registerPlugin(plugin: HordePluginBase) {
+    hordePlugins.registerPlugin(plugin);
+}
 
-    // Запускаем плагины
+// ===================================================
+// --- Work
+
+/**
+ * Вызывается при первом запуске скрипта, а так же при hot-reload
+ */
+export function pluginsFirstRun() {
     hordePlugins.onFirstRun();
 }
 
 /**
  * Вызывается каждый игровой такт
  */
-function pluginsEveryTick(gameTickNum: number) {
+export function pluginsEveryTick(gameTickNum: number) {
     hordePlugins.onEveryTick(gameTickNum);
 }
-
 
 // ===================================================
 // --- Internal
@@ -38,42 +54,23 @@ class HordePluginsManager {
 
     public registerPlugin(plugin: HordePluginBase) {
         this._plugins.push(plugin);
-        logi('Plugin registered:', plugin.name);
+        logi('Plugin registered:', plugin.displayName);
     }
 
     public onFirstRun() {
-        for (var plugin of this._plugins) {
+        for (let plugin of this._plugins) {
             plugin.onFirstRun();
         }
     }
 
     public onEveryTick(gameTickNum: number) {
-        for (var plugin of this._plugins) {
+        for (let plugin of this._plugins) {
             plugin.onEveryTick(gameTickNum);
         }
     }
 }
 
 /**
- * Класс-заготовка для плагина.
- */
-class HordePluginBase {
-    private name: string;
-
-    public constructor(name: string) {
-        this.name = name;
-    }
-
-    public onFirstRun() {
-
-    }
-
-    public onEveryTick(gameTickNum: number) {
-
-    }
-}
-
-/**
  * Объект для работы с плагинами.
  */
-var hordePlugins: HordePluginsManager;
+let hordePlugins: HordePluginsManager;

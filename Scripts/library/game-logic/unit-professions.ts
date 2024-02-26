@@ -1,10 +1,11 @@
+import { logw } from "library/common/logging";
 
 // Перечисление профессий (enum)
-var UnitProfession = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitProfession;
+export const UnitProfession = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitProfession;
 
 // Параметры - это в конфиге, а данные - это в юните (т.е. на сцене)
-var UnitProducerProfessionParams = HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.UnitProducerProfessionParams;
-var UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.ProfessionData.UnitProducerProfessionData;
+export const UnitProducerProfessionParams = HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.UnitProducerProfessionParams;
+export const UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.ProfessionData.UnitProducerProfessionData;
 // ... позже тут будут добавлены остальные типы.
 
 /**
@@ -18,8 +19,8 @@ var UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.Profession
  * 
  * @return result - параметры профессии
  */
-function getUnitProfessionParams(uCfg, prof) {
-    var profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
+export function getUnitProfessionParams(uCfg, prof) {
+    let profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
     if (!uCfg.ProfessionParams.TryGetValue(prof, profParams.out)) {
         logw('Can\'t get profession params:', prof.ToString());
         return null;
@@ -27,5 +28,5 @@ function getUnitProfessionParams(uCfg, prof) {
     return profParams.value;
 
     // Так почему-то не вышло:
-    // var prof = uCfg.ProfessionParams.Item.get(prof);
+    // let prof = uCfg.ProfessionParams.Item.get(prof);
 }

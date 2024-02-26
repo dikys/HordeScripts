@@ -1,109 +1,151 @@
+import { createHordeColor } from "library/common/primitives";
+import { inspect } from "library/common/introspection";
+import { AllContent } from "library/game-logic/horde-types";
+import { UnitProducerProfessionParams, UnitProfession } from "library/game-logic/unit-professions";
+import HordeExampleBase from "./base-example";
 
 /**
- * Пример работы с конфигами
- * Здесь выполняется работа с реальными объектами (не API)
- * Внимание! Для сброса изменений требуется перезапуск игры.
+ * Пример работы с конфигами.
+ * 
+ * Внимание! Здесь выполняется работа с реальными объектами (не API)
+ * Поэтому для сброса изменений требуется полный перезапуск игры.
  */
-function example_configWorks() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_ConfigWorks extends HordeExampleBase {
 
-    logi("  Слепок контента:", HordeContent.ContentStamp);
-
-    // Перечисление всех доступных конфигов юнитов
-    logi("  Конфиги рыцарей:");
-    var unitConfigs = enumerate(AllContent.UnitConfigs.Configs);
-    while ((kv = eNext(unitConfigs)) !== undefined) {
-        var uid = kv.Key;
-        var uCfg = kv.Value;
-        if (uid.includes('men')) {
-            logi('  -', '"' + uid + '"', '-', uCfg.ToString());
-        }
+    public constructor() {
+        super("Работа с конфигами");
     }
 
-    // Получаем конфиг катапульты
-    var catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
-
-    // Здесь можно убрать if-false, чтобы отобразить поля конфига
-    // Здесь не следует копать более чем на 1 уровень в глубину, т.к. получается слишком много данных
-    if (false) inspect(catapultCfg, 1, "Конфиг катапульты:");
+    public onFirstRun() {
+        this.logMessageOnRun();
+        this._configWorks();
+    }
     
-    // Получаем значения из конфига
-    var rocks = catapultCfg.MainArmament.EmitBulletsCountMin;
-    logi("  Текущее количество камней при выстреле:", rocks);
+    private _configWorks() {
+        this.logi("Слепок контента:", HordeContent.ContentStamp);
 
-    // Устанавливаем значения в private-члены конфига
-    logi("  Делаем магию..");
-    rocks += 1;
-    if (rocks > 10)
-        rocks = 1;
-    HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMin", rocks);
-    HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMax", rocks);
-    
-    // Результат можно проверить в игре
-    logi("  Теперь катапульты кидают", catapultCfg.MainArmament.EmitBulletsCountMin, "камней за выстрел!");
+        // Перечисление всех доступных конфигов юнитов
+        this.logi("Конфиги рыцарей:");
+        ForEach(AllContent.UnitConfigs.Configs, kv => {
+            let uid = kv.Key;
+            let uCfg = kv.Value;
+            if (uid.includes('men')) {
+                this.logi('-', '"' + uid + '"', '-', uCfg.ToString());
+            }
+        })
+
+        // Получаем конфиг катапульты
+        let catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
+
+        // Здесь можно убрать if-false, чтобы отобразить поля конфига
+        // Здесь не следует копать более чем на 1 уровень в глубину, т.к. получается слишком много данных
+        if (false) inspect(catapultCfg, 1, "Конфиг катапульты:");
+        
+        // Получаем значения из конфига
+        let rocks = catapultCfg.MainArmament.EmitBulletsCountMin;
+        this.logi("Текущее количество камней при выстреле:", rocks);
+
+        // Устанавливаем значения в private-члены конфига
+        this.logi("Делаем магию..");
+        rocks += 1;
+        if (rocks > 10)
+            rocks = 1;
+        HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMin", rocks);
+        HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMax", rocks);
+        
+        // Результат можно проверить в игре
+        this.logi("Теперь катапульты кидают", catapultCfg.MainArmament.EmitBulletsCountMin, "камней за выстрел!");
+    }
 }
 
 
 /**
  * Пример добавления конфига
- * Внимание! Для сброса изменений требуется запуск "example_configRemoving()".
+ * 
+ * Внимание! Для сброса изменений требуется запуск "Example_ConfigRemoving".
  */
-function example_configCreation() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_ConfigCreation extends HordeExampleBase {
+    private remover: Example_ConfigRemoving;
 
-    // Берем исходные конфиги
-    var ballistaCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Balista");
-    var factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+    public constructor() {
+        super("Создание конфига");
+        this.remover = new Example_ConfigRemoving();
+    }
 
-    // Идентификатор для нового конфига
-    // Если установить null или существующий идентификатор, то будет при клонировании будет сгенерирован уникальный идентификатор
-    var newCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
-    // var newCfgUid = null;
 
-    // Чистим, если конфиг с таким идентификатором уже имеется (видимо пример запускается не первый раз)
-    example_configRemoving(noTitle=true);
+    public onFirstRun() {
+        this.logMessageOnRun();
+        this._createConfig();
+    }
 
-    // Клонируем конфиг и изменяем
-    var newBallistaCfg = HordeContent.CloneConfig(ballistaCfg, newCfgUid);
-    HordeUtils.setValue(newBallistaCfg, "Name", "Динамическая баллиста");
-    HordeUtils.setValue(newBallistaCfg, "ProductionTime", 50);
-    HordeUtils.setValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
-    logi('  Создан новый конфиг баллисты:', newBallistaCfg.Uid, `(${newBallistaCfg.Name})`);
 
-    // Добавляем новую баллисту в завод
-    var producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
-    var produceList = producerParams.CanProduceList;
-    logi('  Сейчас завод производит:', produceList.Count, 'вида техники');
-    logi('  Добавляем только что созданную баллисту в список производства..');
-    produceList.Add(newBallistaCfg);
-    logi('  Теперь завод производит:', produceList.Count, 'вида техники');
+    private _createConfig() {
+
+        // Берем исходные конфиги
+        let ballistaCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Balista");
+        let factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+
+        // Идентификатор для нового конфига
+        // Если установить null или существующий идентификатор, то будет при клонировании будет сгенерирован уникальный идентификатор
+        let newCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
+        // let newCfgUid = null;
+
+        // Чистим, если конфиг с таким идентификатором уже имеется (видимо пример запускается не первый раз)
+        this.remover.removeConfig();
+
+        // Клонируем конфиг и изменяем
+        let newBallistaCfg = HordeContent.CloneConfig(ballistaCfg, newCfgUid);
+        HordeUtils.setValue(newBallistaCfg, "Name", "Динамическая баллиста");
+        HordeUtils.setValue(newBallistaCfg, "ProductionTime", 50);
+        HordeUtils.setValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
+        this.logi('Создан новый конфиг баллисты:', newBallistaCfg.Uid, `(${newBallistaCfg.Name})`);
+
+        // Добавляем новую баллисту в завод
+        let producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+        let produceList = producerParams.CanProduceList;
+        this.logi('Сейчас завод производит:', produceList.Count, 'вида техники');
+        this.logi('Добавляем только что созданную баллисту в список производства..');
+        produceList.Add(newBallistaCfg);
+        this.logi('Теперь завод производит:', produceList.Count, 'вида техники');
+    }
 }
-
 
 /**
  * Пример удаления конфига
- * Внимание! Конфиг добавляется в примере "example_configCreation()".
+ * 
+ * Внимание! Конфиг добавляется в примере "Example_ConfigCreation".
  */
-function example_configRemoving(noTitle) {
-    if (!noTitle) {
-        logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_ConfigRemoving extends HordeExampleBase {
+
+    public constructor() {
+        super("Удаление конфига");
     }
-    
-    var targetCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
 
-    // Добавлен?
-    if (!HordeContent.HasUnitConfig(targetCfgUid)) {
-        logi('  Конфиг пока что не был добавлен:', targetCfgUid);
-        return;
+
+    public onFirstRun() {
+        this.logMessageOnRun();
+        this.removeConfig();
     }
-    var targetCfg = HordeContent.GetUnitConfig(targetCfgUid);
 
-    logi('  Удаление конфига из контента:', targetCfgUid);
-    HordeContent.RemoveConfig(targetCfg);
 
-    logi('  Удаление из завода ссылок на конфиг:', targetCfgUid);
-    var factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
-    var producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
-    var produceList = producerParams.CanProduceList;
-    ScriptExtensions.RemoveAll(produceList, targetCfg);
+    public removeConfig() {
+        let targetCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
+
+        // Добавлен?
+        if (!HordeContent.HasUnitConfig(targetCfgUid)) {
+            this.logi('Конфиг пока что не был добавлен:', "'" + targetCfgUid + "'");
+            this.logi("Сначала нужно запустить пример 'Example_ConfigCreation'");
+            return;
+        }
+        let targetCfg = HordeContent.GetUnitConfig(targetCfgUid);
+
+        this.logi('Удаление конфига из контента:', targetCfgUid);
+        HordeContent.RemoveConfig(targetCfg);
+
+        this.logi('Удаление из завода ссылок на конфиг:', targetCfgUid);
+        let factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+        let producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+        let produceList = producerParams.CanProduceList;
+        ScriptExtensions.RemoveAll(produceList, targetCfg);
+    }
 }

@@ -1,28 +1,39 @@
+import { createPoint } from "library/common/primitives";
+import { UnitDirection } from "library/game-logic/horde-types";
+import { spawnUnit } from "library/game-logic/unit-spawn";
+import HordeExampleBase from "./base-example";
 
 /**
  * Пример создания юнита
  */
-function example_spawnUnit() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_SpawnUnit extends HordeExampleBase {
 
-    var realScena = scena.GetRealScena();
-    var settlements = realScena.Settlements;
+    public constructor() {
+        super("Spawn unit");
+    }
 
-    var settlement_0 = settlements.Item.get('0');  // Олег
-    var archerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer");
-    var cell = createPoint(5, 5);
-    var dir = UnitDirection.RightDown;
+    public onFirstRun() {
+        this.logMessageOnRun();
+        
+        let realScena = scena.GetRealScena();
+        let settlements = realScena.Settlements;
 
-    var unit = spawnUnit(
-        settlement_0,
-        archerCfg,
-        cell,
-        dir
-    );
+        let settlement_0 = settlements.Item.get('0');  // Олег
+        let archerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer");
+        let cell = createPoint(5, 5);
+        let dir = UnitDirection.RightDown;
 
-    if (unit) {
-        logi(`  Создан юнит: ${unit.ToString()}`);
-    } else {
-        logi('  Юнита создать не удалось');
+        let unit = spawnUnit(
+            settlement_0,
+            archerCfg,
+            cell,
+            dir
+        );
+
+        if (unit) {
+            this.logi(`Создан юнит: ${unit.ToString()}`);
+        } else {
+            this.logi('Юнита создать не удалось');
+        }
     }
 }

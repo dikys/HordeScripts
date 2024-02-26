@@ -1,21 +1,33 @@
+import { broadcastMessage } from "library/common/messages";
+import { createHordeColor } from "library/common/primitives";
+import HordeExampleBase from "./base-example";
+
 
 // ===================================================
 // --- Отправка сообщений
 
-/**
- * Отправка игровых сообщений всем игрокам.
- */
-function example_sendMessageToAll() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
 
-    var unitsMap = scena.GetRealScena().UnitsMap;
-    var unit = unitsMap.GetUpperUnit(5, 5);
-    if (unit) {
-        var msgColor = createHordeColor(255, 255, 255, 255);
-        broadcastMessage("  Обнаружен юнит: " + unit.ToString(), msgColor);
-    } else {
-        var msgColor = createHordeColor(255, 200, 200, 200);
-        broadcastMessage("  Юнит не обнаружен в клетке (5, 5)", msgColor);
+/**
+ * Отправка игровых сообщений всем поселениям на сцене.
+ */
+export class Example_SendMessageToAll extends HordeExampleBase {
+
+    public constructor() {
+        super("Send message to all settlements");
+    }
+
+    public onFirstRun() {
+        this.logMessageOnRun();
+
+        let unitsMap = scena.GetRealScena().UnitsMap;
+        let unit = unitsMap.GetUpperUnit(5, 5);
+        if (unit) {
+            let msgColor = createHordeColor(255, 255, 255, 255);
+            broadcastMessage("Обнаружен юнит: " + unit.ToString(), msgColor);
+        } else {
+            let msgColor = createHordeColor(255, 200, 200, 200);
+            broadcastMessage("Юнит не обнаружен в клетке (5, 5)", msgColor);
+        }
     }
 }
 
@@ -26,112 +38,85 @@ function example_sendMessageToAll() {
 
 /**
  * Обработка отправляемых сообщений в чате.
+ * 
  * Так же это пример корректной обработки .net-событий.
  */
-function example_hookSentChatMessages_v1() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_HookSentChatMessages extends HordeExampleBase {
 
-    // Получаем UI-объект строки чата
-    var AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
-    var battleUI = ReflectionUtils.GetStaticProperty(AllUIModules, "BattleUI").GetValue(AllUIModules);
-    var chatPanel = HordeUtils.getValue(battleUI, "ChatPanel");
-    var chatInputLine = HordeUtils.getValue(chatPanel, "ChatInputLine");
-
-    // Удаляем предыдущий обработчик сообщений, если был закреплен
-    if (example_prevChatHook_v1) {
-        example_prevChatHook_v1.disconnect();
+    public constructor() {
+        super("Hook sent chat messages");
     }
 
-    // Устанавливаем обработчик сообщений
-    example_prevChatHook_v1 = chatInputLine.MessageSent.connect(function (sender, args) {
-        try {
-            var senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
-            var targets = HordeUtils.getValue(args, "Targets");
-            var message = HordeUtils.getValue(args, "Message");
-            logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
-        } catch (ex) {
-            logExc(ex);
+    public onFirstRun() {
+        this.logMessageOnRun();
+        
+        // Получаем UI-объект строки чата
+        let AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
+        let battleUI = ReflectionUtils.GetStaticProperty(AllUIModules, "BattleUI").GetValue(AllUIModules);
+        let chatPanel = HordeUtils.getValue(battleUI, "ChatPanel");
+        let chatInputLine = HordeUtils.getValue(chatPanel, "ChatInputLine");
+
+        // Удаляем предыдущий обработчик сообщений, если был закреплен
+        if (this.globalStorage.currentHandler) {
+            this.globalStorage.currentHandler.disconnect();
         }
-    });
 
-    logi('  Установлен хук на отправку сообщения');
-}
-var example_prevChatHook_v1;
+        // Устанавливаем обработчик сообщений
+        let that = this;
+        this.globalStorage.currentHandler = chatInputLine.MessageSent.connect(function (sender, args) {
+            try {
+                let senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
+                let targets = HordeUtils.getValue(args, "Targets");
+                let message = HordeUtils.getValue(args, "Message");
+                that.logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
+            } catch (ex) {
+                that.logExc(ex);
+            }
+        });
 
-
-/**
- * Обработка отправляемых сообщений в чате.
- * Здесь демонстрируется способ, который позволяет подключиться к internal и private событиям.
- * Внимание! Используется темная магия!
- */
-function example_hookSentChatMessages_v2() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
-
-    // Получаем UI-объект строки чата
-    var AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
-    var battleUI = ReflectionUtils.GetStaticProperty(AllUIModules, "BattleUI").GetValue(AllUIModules);
-    var chatPanel = HordeUtils.getValue(battleUI, "ChatPanel");
-    var chatInputLine = HordeUtils.getValue(chatPanel, "ChatInputLine");
-
-    // Удаляем предыдущий обработчик сообщений, если был закреплен
-    if (example_prevChatHook_v2) {
-        example_prevChatHook_v2.disconnect();
+        this.logi('Установлен хук на отправку сообщения');
     }
-
-    // Создаём EventSource-объект для MessageSent-события в internal-классе ChatInputLine
-    var sentEventArgsT = HordeUtils.GetTypeByName('HordeResurrection.Game.UI.MultiuseControls.ChatPanel.ChatInputLine+MessageSentEventArgs, HordeResurrection.Game');
-    var messageSentEvent = makePrivateEventSource(chatInputLine, "MessageSent", sentEventArgsT);
-    logi('  EventSource:', messageSentEvent.ToString());
-
-    // Устанавливаем обработчик сообщений
-    example_prevChatHook_v2 = messageSentEvent.connect(function (sender, args) {
-        try {
-            var senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
-            var targets = HordeUtils.getValue(args, "Targets");
-            var message = HordeUtils.getValue(args, "Message");
-            logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
-        } catch (ex) {
-            logExc(ex);
-        }
-    });
-
-    logi('  Установлен хук на отправку сообщения');
 }
-var example_prevChatHook_v2;
 
 
 /**
  * Обработка принимаемых сообщений в чате.
  * Работает только в сетевом режиме.
  */
-function example_hookReceivedChatMessages() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_HookReceivedChatMessages extends HordeExampleBase {
 
-    // NetworkController - центральный класс сетевого взаимодействия
-    var NetworkController = HordeEngine.HordeResurrection.Engine.Logic.Main.NetworkController;
-    if (NetworkController.NetWorker == null) {
-        logi('  Сетевой режим не активирован. Для этого примера необходимо начать сетевую игру.');
-        return;
+    public constructor() {
+        super("Hook received chat messages");
     }
 
-    // Удаляем предыдущий обработчик сообщений, если был закреплен
-    if (example_prevNetworkChatHook) {
-        example_prevNetworkChatHook.disconnect();
-    }
-
-    // Устанавливаем обработчик сообщений
-    example_prevNetworkChatHook = NetworkController.NetWorker.Events.ChatEvents.ChatItemPacketReceived.connect(function (sender, args) {
-        try {
-            var senderPlayer = HordeEngine.HordeResurrection.Engine.Logic.Main.PlayersController.GetNetElementMainPlayer(HordeUtils.getValue(args, "NetworkElement"));
-            var targets = host.cast(HordeEngine.HordeResurrection.Engine.Logic.Battle.Stuff.ChatTargets, HordeUtils.getValue(args, "Targets"));
-            var message = HordeUtils.getValue(args, "Message");
-            logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
-        } catch (ex) {
-            logExc(ex);
+    public onFirstRun() {
+        this.logMessageOnRun();
+        
+        // NetworkController - центральный класс сетевого взаимодействия
+        let NetworkController = HordeEngine.HordeResurrection.Engine.Logic.Main.NetworkController;
+        if (NetworkController.NetWorker == null) {
+            this.logi('Сетевой режим не активирован. Для этого примера необходимо начать сетевую игру.');
+            return;
         }
-    });
 
-    logi('  Установлен хук на приём сообщения');
+        // Удаляем предыдущий обработчик сообщений, если был закреплен
+        if (this.globalStorage.currentHandler) {
+            this.globalStorage.currentHandler.disconnect();
+        }
+
+        // Устанавливаем обработчик сообщений
+        let that = this;
+        this.globalStorage.currentHandler = NetworkController.NetWorker.Events.ChatEvents.ChatItemPacketReceived.connect(function (sender, args) {
+            try {
+                let senderPlayer = HordeEngine.HordeResurrection.Engine.Logic.Main.PlayersController.GetNetElementMainPlayer(HordeUtils.getValue(args, "NetworkElement"));
+                let targets = host.cast(HordeEngine.HordeResurrection.Engine.Logic.Battle.Stuff.ChatTargets, HordeUtils.getValue(args, "Targets"));
+                let message = HordeUtils.getValue(args, "Message");
+                that.logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
+            } catch (ex) {
+                that.logExc(ex);
+            }
+        });
+
+        this.logi('Установлен хук на приём сообщения');
+    }
 }
-var example_prevNetworkChatHook;
-
