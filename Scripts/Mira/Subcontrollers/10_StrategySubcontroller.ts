@@ -126,6 +126,10 @@ class TacticalSubcontroller extends MiraSubcontroller {
         return this.parentController.Player;
     }
 
+    public get Settlement(): any {
+        return this.parentController.Settlement;
+    }
+
     public get OffenseCombativityIndex(): number {
         var combativityIndex = 0;
 

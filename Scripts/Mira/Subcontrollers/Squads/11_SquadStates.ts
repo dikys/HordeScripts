@@ -356,10 +356,21 @@ class MiraSquadBattleState extends MiraSquadState {
         for (let unit of this.squad.Units) {
             let optimalTarget = null;
             this.cellHeuristics = new MiraCellHeuristics();
+
+            let mainAttackRange = unit.Cfg.MainArmament.Range;
+            let forestAttackRange = unit.Cfg.MainArmament.ForestRange;
+            
+            let mainVisionRange = unit.Cfg.Sight;
+            let forestVisionRange = unit.Cfg.ForestVision;
             
             for (let enemy of this.enemyUnits) {
                 if (!unit.BattleMind.CanAttackTarget(enemy)) {
                     continue;
+                }
+
+                if (this.squad.Controller.Settlement.Vision.CanSeeUnit(enemy)) {
+                    mainVisionRange = Infinity;
+                    forestVisionRange = Infinity;
                 }
                 
                 let maxCol = enemy.Cell.X + enemy.Rect.Width;
@@ -369,15 +380,8 @@ class MiraSquadBattleState extends MiraSquadState {
                     for (let col = enemy.Cell.X; col < maxCol; col++) {
                         let analyzedCell = {X: col, Y: row};
                         let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
-                        
-                        let mainAttackRange = unit.Cfg.MainArmament.Range;
-                        let forestAttackRange = unit.Cfg.MainArmament.ForestRange;
-                        let mainVisionRange = unit.Cfg.Sight;
-                        let forestVisionRange = unit.Cfg.ForestVision;
-
                         let atttackRadius = 0;
 
-                        //TODO: check if target is already visible
                         if (MiraUtils.GetTileType(analyzedCell) == TileType.Forest) {
                             atttackRadius = Math.min(forestAttackRange, forestVisionRange);
                         }
