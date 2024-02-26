@@ -173,7 +173,7 @@ class MiraUtils {
     }
     
     static GetUnitsInArea(cell: any, radius: number): Array<any> {
-        let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
+        let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius, cell.Y + radius, 2);
         let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox", box);
         let count = HordeUtils.getValue(unitsInBox, "Count");
         let units = HordeUtils.getValue(unitsInBox, "Units");
