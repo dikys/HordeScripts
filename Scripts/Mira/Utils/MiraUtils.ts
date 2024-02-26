@@ -113,7 +113,7 @@ class MiraUtils {
                 friends = friends.filter((unit) => {
                     return  unit.Owner === unitSettlement && 
                         !processedUnitIds.has(unit.Id) &&
-                        currentUnits.indexOf(unit) == 0
+                        currentUnits.indexOf(unit) == -1
                 });
 
                 for (let friend of friends) {
