@@ -79,15 +79,14 @@ function test_spawnUnits() {
  * Генератор позиций вокруг точки по спирале в рамках сцены
  */
 function* generatePositionInSpiral(centerX, centerY) {
-    var scenaWidth = scena.GetRealScena().Size.Width;
+    var scenaWidth  = scena.GetRealScena().Size.Width;
     var scenaHeight = scena.GetRealScena().Size.Height;
 
-    if (0 <= centerX && centerX < scenaWidth &&
-        0 <= centerY && centerY < scenaHeight) {
-        yield { X: centerX, Y: centerY };
-    } else {
-        return;
-    }
+    // проектируем точку на сцену
+    centerX = Math.min(Math.max(0, centerX), scenaWidth - 1);
+    centerY = Math.min(Math.max(0, centerY), scenaHeight - 1);
+
+    yield { X: centerX, Y: centerY };
 
     var x = 0;
     var y = 0;
