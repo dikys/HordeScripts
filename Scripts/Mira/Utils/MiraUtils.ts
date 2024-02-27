@@ -317,10 +317,24 @@ class MiraUtils {
         inputPointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
     }
 
-    static RequestMasterMindProduction(unitConfig: string, productionDepartment: any) {
-        var cfg = HordeContent.GetUnitConfig(unitConfig);
+    static GetUnitConfig(configId: string): any {
+        return HordeContent.GetUnitConfig(configId);
+    }
+
+    static RequestMasterMindProduction(configId: string, productionDepartment: any) {
+        var cfg = MiraUtils.GetUnitConfig(configId);
         
         return productionDepartment.AddRequestToProduce(cfg, 1);
+    }
+
+    static ConfigHasProfession(unitConfig: any, profession: any): boolean {
+        var profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
+        if (!unitConfig.ProfessionParams.TryGetValue(profession, profParams.out)) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
     static GetProduceList(unit: any) {

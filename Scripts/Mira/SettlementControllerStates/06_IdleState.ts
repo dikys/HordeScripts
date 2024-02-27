@@ -14,8 +14,11 @@ class IdleState extends MiraSettlementControllerState {
 }
 
 class DefendingState extends MiraSettlementControllerState {
+    private reinforcementsCfgIds: Array<string>;
+    
     OnEntry(): void {
         this.refreshAttackersList();
+        this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
         this.settlementController.TacticalController.Defend();
     }
 
@@ -24,7 +27,7 @@ class DefendingState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 50 !== 0) {
+        if (tickNumber % 50 == 0) {
             if (!this.settlementController.IsUnderAttack()) {
                 this.settlementController.Log(MiraLogLevel.Debug, `Attack countered`);
                 this.settlementController.State = new DevelopingState(this.settlementController);
@@ -32,7 +35,14 @@ class DefendingState extends MiraSettlementControllerState {
             }
             else {
                 this.refreshAttackersList();
+                this.requestReinforcementsProduction();
             }
+        }
+    }
+
+    private requestReinforcementsProduction() {
+        for (let cfgId of this.reinforcementsCfgIds) {
+            this.settlementController.ProductionController.RequestProduction(cfgId);
         }
     }
 

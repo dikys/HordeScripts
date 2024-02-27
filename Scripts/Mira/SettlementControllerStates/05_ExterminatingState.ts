@@ -2,9 +2,11 @@
 class ExterminatingState extends MiraSettlementControllerState {
     private readonly COMBATIVITY_THRESHOLD = 0.5;
     private currentTarget: any; //but actually Unit
+    private reinforcementsCfgIds: Array<string>;
     
     OnEntry(): void {
         this.settlementController.ProductionController.CancelAllProduction();
+        this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
         
         if (!this.selectAndAttackEnemy()) {
             this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
@@ -27,6 +29,8 @@ class ExterminatingState extends MiraSettlementControllerState {
                 this.settlementController.State = new DefendingState(this.settlementController);
                 return;
             }
+
+            this.requestReinforcementsProduction();
         }
 
         let combativityIndex = this.settlementController.TacticalController.OffenseCombativityIndex;
@@ -77,5 +81,11 @@ class ExterminatingState extends MiraSettlementControllerState {
         let target = this.settlementController.StrategyController.GetOffensiveTarget(enemy);
         this.currentTarget = target;
         this.settlementController.TacticalController.Attack(target);
+    }
+
+    private requestReinforcementsProduction() {
+        for (let cfgId of this.reinforcementsCfgIds) {
+            this.settlementController.ProductionController.RequestProduction(cfgId);
+        }
     }
 }

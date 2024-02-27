@@ -49,9 +49,9 @@ class ProductionSubcontroller extends MiraSubcontroller {
         return this.productionList;
     }
 
-    RequestProduction(buildingConfig: string): void {
-        this.productionList.push(buildingConfig);
-        this.parentController.Log(MiraLogLevel.Debug, "Added " + buildingConfig + " to target production list");
+    RequestProduction(unitConfig: string): void {
+        this.productionList.push(unitConfig);
+        this.parentController.Log(MiraLogLevel.Debug, "Added " + unitConfig + " to target production list");
     }
 
     CancelAllProduction(): void {
@@ -77,24 +77,26 @@ class ProductionSubcontroller extends MiraSubcontroller {
     private updateProductionIndex(): void {
         this.productionIndex.clear();
 
-        var units = enumerate(this.parentController.Settlement.Units);
-        var unit;
+        let units = enumerate(this.parentController.Settlement.Units);
+        let unit;
         
         while ((unit = eNext(units)) !== undefined) {
+            let producerParams;
+
             try {
-                var producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+                producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
             }
             catch (e) { //GetProfessionParams throws exception if there is no such profession
                 continue;
             }
             
             if (producerParams) {
-                var produceList = enumerate(producerParams.CanProduceList);
-                var produceListItem;
+                let produceList = enumerate(producerParams.CanProduceList);
+                let produceListItem;
 
                 while ((produceListItem = eNext(produceList)) !== undefined) {
                     if (this.productionIndex.has(produceListItem.Uid)) {
-                        var producers = this.productionIndex.get(produceListItem.Uid);
+                        let producers = this.productionIndex.get(produceListItem.Uid);
                         producers.push(unit);
                     }
                     else {

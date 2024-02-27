@@ -131,4 +131,11 @@ class MiraSettlementController {
 
         return null;
     }
+
+    IsCombatConfig(unitConfig: any): boolean {
+        let mainArmament = unitConfig.MainArmament;
+        let isHarvester = MiraUtils.ConfigHasProfession(unitConfig, UnitProfession.Harvester);
+
+        return mainArmament != null && !isHarvester;
+    }
 }

@@ -34,13 +34,34 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     GetArmyComposition(): UnitComposition {
-        //TODO: calculate army composition properly based on (discovered) enemy forces
+        //TODO: calculate army composition properly based on enemy forces
         var unitList: UnitComposition = new Map<string, number>();
 
         unitList.set("#UnitConfig_Slavyane_Swordmen", 5);
         unitList.set("#UnitConfig_Slavyane_Archer", 5);
         
         return unitList;
+    }
+
+    GetReinforcementCfgIds(): Array<string> {
+        let economyComposition = this.parentController.GetCurrentEconomyComposition();
+        let combatUnitCfgIds = new Array<string>();
+
+        economyComposition.forEach(
+            (val, key, map) => {
+                let config = MiraUtils.GetUnitConfig(key);
+                
+                if (this.parentController.IsCombatConfig(config)) {
+                    combatUnitCfgIds.push(key);
+                }
+            }
+        );
+
+        if (combatUnitCfgIds.length == 0) {
+            combatUnitCfgIds.push("#UnitConfig_Slavyane_Swordmen"); //maybe calculate this dynamically based on current configs
+        }
+        
+        return combatUnitCfgIds;
     }
 
     SelectEnemy(): any { //but actually Settlement
@@ -58,19 +79,6 @@ class StrategySubcontroller extends MiraSubcontroller {
 
     ResetEnemy(): void {
         this.currentEnemy = null;
-    }
-
-    private buildEnemyList(): void {
-        this.EnemySettlements = [];
-        var diplomacy = this.parentController.Settlement.Diplomacy;
-        
-        var settlements = MiraUtils.GetAllSettlements();
-        
-        for (var item of settlements) {
-            if (diplomacy.IsWarStatus(item)) {
-                this.EnemySettlements.push(item);
-            }
-        }
     }
 
     // Returns one of enemy's production buildings
@@ -106,6 +114,19 @@ class StrategySubcontroller extends MiraSubcontroller {
         }
         else {
             return this.parentController.AttackingSquads;
+        }
+    }
+
+    private buildEnemyList(): void {
+        this.EnemySettlements = [];
+        var diplomacy = this.parentController.Settlement.Diplomacy;
+        
+        var settlements = MiraUtils.GetAllSettlements();
+        
+        for (var item of settlements) {
+            if (diplomacy.IsWarStatus(item)) {
+                this.EnemySettlements.push(item);
+            }
         }
     }
 }
@@ -275,9 +296,8 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.parentController.AttackingSquads = this.parentController.AttackingSquads.filter((squad) => {return squad.Units.length > 0});
     }
 
-    //TODO: use more generic approach to detecting whether unit is combat or not
     private isCombatUnit(unit: any): boolean {
-        return ["#UnitConfig_Slavyane_Swordmen", "#UnitConfig_Slavyane_Archer"].indexOf(unit.Cfg.Uid) > -1
+        return this.parentController.IsCombatConfig(unit.Cfg);
     }
 
     private getPullbackCell(): any {
