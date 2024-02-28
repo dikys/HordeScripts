@@ -61,3 +61,31 @@ export default class HordePluginBase {
         logDbg(`[${this.name}]`, ...vars)
     }
 }
+
+
+/**
+ * Заготовка для создания плагина.
+ */
+export class PLUGIN_TEMPLATE extends HordePluginBase {
+
+    /**
+     * Конструктор.
+     */
+    public constructor() {
+        super("__PLUGIN_NAME__");
+    }
+
+    /**
+     * Метод вызывается при загрузке сцены и после hot-reload.
+     */
+    public onFirstRun() {
+        
+    }
+
+    /**
+     * Метод выполняется каждый игровой такт.
+     */
+    public onEveryTick(gameTickNum: number) {
+        
+    }
+}

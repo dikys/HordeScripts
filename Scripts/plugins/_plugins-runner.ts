@@ -26,7 +26,7 @@ export function registerPlugin(plugin: HordePluginBase) {
 // --- Work
 
 /**
- * Вызывается при первом запуске скрипта, а так же при hot-reload
+ * Вызывается при первом запуске скрипт-машины, а так же при hot-reload
  */
 export function pluginsFirstRun() {
     hordePlugins.onFirstRun();
@@ -54,7 +54,7 @@ class HordePluginsManager {
 
     public registerPlugin(plugin: HordePluginBase) {
         this._plugins.push(plugin);
-        logi('Plugin registered:', plugin.displayName);
+        logi(`Plugin registered: "${plugin.displayName}"`);
     }
 
     public onFirstRun() {
