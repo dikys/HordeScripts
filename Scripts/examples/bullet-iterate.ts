@@ -23,14 +23,14 @@ export class Example_IterateBullets extends HordeExampleBase {
         let realScena = scena.GetRealScena();
 
         this.bulletsRegistry = realScena.Bullets;
-        this.logi('Реестр снарядов:', this.bulletsRegistry.ToString());
-
         this.bulletsIdProvider = this._getIdProvider();
-        this.logi('IdProvider для снарядов:', this.bulletsIdProvider.ToString());
     }
 
     public onFirstRun() {
         this.logMessageOnRun();
+        
+        this.logi('Реестр снарядов:', this.bulletsRegistry.ToString());
+        this.logi('IdProvider для снарядов:', this.bulletsIdProvider.ToString());
     }
 
     public onEveryTick(gameTickNum: number) {
