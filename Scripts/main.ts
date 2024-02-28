@@ -1,7 +1,8 @@
 import "/library/dotnet/dotnet-utils.ts"
 import { logi } from "library/common/logging";
-import * as examples from "./examples/_examples-runner";
-import * as plugins from "./plugins/_plugins-runner";
+import * as examples from "examples/_examples-runner";
+import * as plugins from "plugins/_plugins-runner";
+
 
 /**
  * Этот блок выполняется только при первом запуске скрипт-машины, т.е. только один раз сразу после загрузки сцены.
@@ -16,13 +17,12 @@ if (DataStorage.initialized === undefined) {
 
 
 /**
- * Вызывается при первом запуске скрипта, а так же при hot-reload
+ * Вызывается до вызова "onFirstRun()" при первом запуске скрипт-машины, а так же при hot-reload
  */
-export function onFirstRun() {
+export function onInitialization() {
     // Setup globals
     DataStorage.reloadCounter = ++DataStorage.reloadCounter || 1;
     DataStorage.scriptWorkTicks = 0;
-    logi("Playground running... (Start number:", DataStorage.reloadCounter, ")");
 
     // Установка дебаг-параметров
     ScriptMachineDebugApi.SetHotReloadOnFileChanging(false);  // автоматическая перезагрузка скрипта при изменении файла
@@ -30,6 +30,14 @@ export function onFirstRun() {
     // Инициализация плагинов
     plugins.initializePlugins();
     examples.registerExamples();  // Настройка запускаемых примеров находится в файле "_examples-runner.ts"
+}
+
+
+/**
+ * Вызывается при первом запуске скрипт-машины, а так же при hot-reload
+ */
+export function onFirstRun() {
+    logi("Scripts running... (Start number:", DataStorage.reloadCounter, ")");
 
     // Запук плагинов
     plugins.pluginsFirstRun();
