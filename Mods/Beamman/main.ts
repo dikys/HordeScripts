@@ -1,4 +1,4 @@
-import * as plugins from "plugins/_plugins-runner";
+import { activePlugins } from "active-plugins";
 import { BeammanPlugin } from "./beamman";
 
 /**
@@ -6,5 +6,5 @@ import { BeammanPlugin } from "./beamman";
  */
 export function onInitialization() {
     // Инициализация плагинов
-    plugins.registerPlugin(new BeammanPlugin());
+    activePlugins.register(new BeammanPlugin());
 }

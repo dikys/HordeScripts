@@ -1,7 +1,7 @@
 import "/library/dotnet/dotnet-utils.ts"
 import { logi } from "library/common/logging";
-import * as examples from "examples/_examples-runner";
-import * as plugins from "plugins/_plugins-runner";
+import { activePlugins, initializeDefaultPlugins } from "active-plugins";
+import { registerExamples } from "examples-runner";
 
 
 /**
@@ -27,9 +27,11 @@ export function onInitialization() {
     // Установка дебаг-параметров
     ScriptMachineDebugApi.SetHotReloadOnFileChanging(false);  // автоматическая перезагрузка скрипта при изменении файла
     
-    // Инициализация плагинов
-    plugins.initializePlugins();
-    examples.registerExamples();  // Настройка запускаемых примеров находится в файле "_examples-runner.ts"
+    // Инициализация стандартных плагинов
+    initializeDefaultPlugins();
+
+    // Регистрация примеров. Настройка запускаемых примеров находится в файле "_examples-runner.ts"
+    registerExamples();
 }
 
 
@@ -40,7 +42,7 @@ export function onFirstRun() {
     logi("Scripts running... (Start number:", DataStorage.reloadCounter, ")");
 
     // Запук плагинов
-    plugins.pluginsFirstRun();
+    activePlugins.onFirstRun();
 }
 
 
@@ -52,7 +54,6 @@ export function onEveryTick(gameTickNum: number) {
     DataStorage.scriptWorkTicks += 1;
     DataStorage.gameTickNum = gameTickNum;
 
-    // Запук плагинов
-    plugins.pluginsEveryTick(gameTickNum);
+    // Работа плагинов
+    activePlugins.onEveryTick(gameTickNum);
 }
-
