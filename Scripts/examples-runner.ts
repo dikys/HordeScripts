@@ -75,6 +75,7 @@ function addExample(example: HordeExampleBase){
 }
 
 
+import HordeExampleBase from "examples/base-example";
 import { Example_IterateBullets } from "./examples/bullet-iterate";
 import { Example_SpawnOneBullet } from "./examples/bullet-spawn-one";
 import { Example_SpawnBulletsRain } from "./examples/bullet-spawn-rain";
@@ -92,5 +93,4 @@ import { Example_GetUnitsInArea_Bruteforce, Example_GetUnitsInArea_KdTree, Examp
 import { Example_SpawnUnit } from "./examples/unit-spawn-example";
 import { Example_CustomBullet } from "./examples/custom-bullet-example";
 import { Example_CustomUnit } from "./examples/custom-unit-example";
-import HordeExampleBase from "examples/base-example";
 

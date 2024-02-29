@@ -5,10 +5,10 @@ import { AttentionOnSurfacePlugin } from "plugins/attention-on-surface";
 
 
 /**
- * Инициализация стандартных плагинов.
+ * Здесь перечислены стандартные плагины, которые будут запущены автоматически.
  */
-export function initializeDefaultPlugins() {
-    activePlugins.register(new AttentionOnSurfacePlugin());
+function* getDefaultPlugins() {
+    yield new AttentionOnSurfacePlugin();
 }
 
 
@@ -35,6 +35,16 @@ export class HordePluginsCollection {
 
         this.plugins.push(scenaPlugin);
         logi(`Scena script registered: "${scenaPlugin.displayName}" ("${scenaName}")`);
+    }
+
+    public registerDefaultPlugins() {
+        for(let plugin of getDefaultPlugins()) {
+            this.register(plugin);
+        }
+    }
+
+    public clear() {
+        this.plugins = [];
     }
 
     public onFirstRun() {

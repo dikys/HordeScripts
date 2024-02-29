@@ -6,7 +6,7 @@ import { registerExamples } from "examples-runner";
 
 /**
  * Этот блок выполняется только при первом запуске скрипт-машины, т.е. только один раз сразу после загрузки сцены.
- * Здесь следует выполнять инициализацию глобальных переменных, которые НЕ будут очищаться при HotReload.
+ * Здесь следует выполнять инициализацию глобальных переменных, которые НЕ будут очищаться при hot-reload.
  */
 if (DataStorage.initialized === undefined) {
 
@@ -27,8 +27,9 @@ export function onInitialization() {
     // Установка дебаг-параметров
     ScriptMachineDebugApi.SetHotReloadOnFileChanging(false);  // автоматическая перезагрузка скрипта при изменении файла
     
-    // Инициализация стандартных плагинов
-    initializeDefaultPlugins();
+    // Инициализация плагинов
+    activePlugins.clear();
+    activePlugins.registerDefaultPlugins();
 
     // Регистрация примеров. Настройка запускаемых примеров находится в файле "_examples-runner.ts"
     registerExamples();
