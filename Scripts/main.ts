@@ -1,6 +1,6 @@
 import "/library/dotnet/dotnet-utils.ts"
 import { logi } from "library/common/logging";
-import { activePlugins, initializeDefaultPlugins } from "active-plugins";
+import { activePlugins } from "active-plugins";
 import { registerExamples } from "examples-runner";
 
 
