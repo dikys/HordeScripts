@@ -20,17 +20,18 @@ class ExterminatingState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 !== 0) {
+        if (tickNumber % 10 != 0) {
             return;
         }
 
-        if (tickNumber % 50 !== 0) {
+        if (tickNumber % 50 == 0) {
             if (this.settlementController.IsUnderAttack()) {
                 this.settlementController.State = new DefendingState(this.settlementController);
                 return;
             }
 
             this.requestReinforcementsProduction();
+            this.settlementController.TacticalController.ReinforceSquads();
         }
 
         let combativityIndex = this.settlementController.TacticalController.OffenseCombativityIndex;
@@ -85,7 +86,7 @@ class ExterminatingState extends MiraSettlementControllerState {
 
     private requestReinforcementsProduction() {
         for (let cfgId of this.reinforcementsCfgIds) {
-            this.settlementController.ProductionController.RequestProduction(cfgId);
+            this.settlementController.ProductionController.RequestSingleProduction(cfgId);
         }
     }
 }

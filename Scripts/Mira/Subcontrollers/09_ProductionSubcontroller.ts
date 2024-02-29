@@ -54,6 +54,12 @@ class ProductionSubcontroller extends MiraSubcontroller {
         this.parentController.Log(MiraLogLevel.Debug, "Added " + unitConfig + " to target production list");
     }
 
+    RequestSingleProduction(unitConfig: string): void {
+        if (this.productionList.indexOf(unitConfig) < 0) {
+            this.RequestProduction(unitConfig);
+        }
+    }
+
     CancelAllProduction(): void {
         this.productionList = [];
         this.parentController.Log(MiraLogLevel.Debug, "Cleared target production list");

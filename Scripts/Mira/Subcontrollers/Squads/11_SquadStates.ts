@@ -25,8 +25,7 @@ class MiraSquadIdleState extends MiraSquadState {
     }
     
     OnExit(): void {}
-    
-    //TODO: this needs better processing of too large spread, implement different gathering up state
+
     Tick(tickNumber: number): void {
         if (this.squad.IsEnemyNearby()) {
             this.squad.SetState(new MiraSquadBattleState(this.squad));
@@ -37,7 +36,8 @@ class MiraSquadIdleState extends MiraSquadState {
             this.squad.IsAllUnitsIdle() &&
             this.squad.GetLocation().Spread > this.squad.MinSpread * MIN_SPREAD_THRESHOLD_MULTIPLIER
         ) {
-            this.distributeUnits();
+            this.squad.SetState(new MiraSquadIdleGatheringUpState(this.squad));
+            return;
         }
     }
 
@@ -138,13 +138,13 @@ class MiraSquadAttackState extends MiraSquadState {
         }
 
         if (location.Spread > this.squad.MinSpread * MAX_SPREAD_THRESHOLD_MULTIPLIER) {
-            this.squad.SetState(new MiraSquadGatheringUpState(this.squad));
+            this.squad.SetState(new MiraSquadMotionGatheringUpState(this.squad));
             return;
         }
     }
 }
 
-class MiraSquadGatheringUpState extends MiraSquadState {
+abstract class MiraSquadGatheringUpState extends MiraSquadState {
     OnEntry(): void {
         if (this.squad.TargetCell) {
             let closestToTargetUnit = null;
@@ -176,23 +176,33 @@ class MiraSquadGatheringUpState extends MiraSquadState {
         let location = this.squad.GetLocation();
 
         if (location.Spread <= this.squad.MinSpread * MIN_SPREAD_THRESHOLD_MULTIPLIER) {
-            this.continueMotion();
+            this.onGatheredUp();
             return;
         }
 
         if (this.squad.IsAllUnitsIdle()) {
-            this.continueMotion();
+            this.onGatheredUp();
             return;
         }
     }
 
-    private continueMotion(): void {
+    protected abstract onGatheredUp(): void;
+}
+
+class MiraSquadMotionGatheringUpState extends MiraSquadGatheringUpState {
+    protected onGatheredUp(): void {
         if (this.squad.IsAttackMode) {
             this.squad.SetState(new MiraSquadAttackState(this.squad));
         }
         else {
             this.squad.SetState(new MiraSquadMoveState(this.squad));
         }
+    }
+}
+
+class MiraSquadIdleGatheringUpState  extends MiraSquadGatheringUpState {
+    protected onGatheredUp(): void {
+        this.squad.SetState(new MiraSquadIdleState(this.squad));
     }
 }
 

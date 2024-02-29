@@ -1,4 +1,6 @@
 
+const MIN_INITIAL_SQUAD_STRENGTH = 100;
+
 class MiraSquadLocation {
     Point: {
         X: number;
@@ -114,6 +116,11 @@ class MiraSquad {
 
         return true;
     }
+
+    AddUnits(units: Array<any>): void {
+        this.Units.push(...units);
+        this.location = null;
+    }
 }
 
 class MiraControllableSquad extends MiraSquad {
@@ -143,7 +150,7 @@ class MiraControllableSquad extends MiraSquad {
     constructor(units:Array<any>, controller: TacticalSubcontroller){
         super(units);
         this.controller = controller;
-        this.initialStrength = this.Strength;
+        this.initialStrength = Math.max(this.Strength, MIN_INITIAL_SQUAD_STRENGTH);
         this.recalcMinSpread();
 
         this.SetState(new MiraSquadIdleState(this));

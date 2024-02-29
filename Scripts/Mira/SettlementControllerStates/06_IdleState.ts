@@ -36,18 +36,19 @@ class DefendingState extends MiraSettlementControllerState {
             else {
                 this.refreshAttackersList();
                 this.requestReinforcementsProduction();
+                this.settlementController.TacticalController.ReinforceSquads();
             }
         }
     }
 
     private requestReinforcementsProduction() {
         for (let cfgId of this.reinforcementsCfgIds) {
-            this.settlementController.ProductionController.RequestProduction(cfgId);
+            this.settlementController.ProductionController.RequestSingleProduction(cfgId);
         }
     }
 
     private refreshAttackersList(): void {
-        this.settlementController.AttackingSquads = [];
+        this.settlementController.HostileAttackingSquads = [];
 
         //TODO: add enemy detection around expands
         let settlementCenter = this.settlementController.GetSettlementCenter();
@@ -58,6 +59,6 @@ class DefendingState extends MiraSettlementControllerState {
 
         let attackers = this.settlementController.GetEnemiesInArea(settlementCenter, this.settlementController.SETTLEMENT_RADIUS);
         let attackingSquads = MiraUtils.GetSettlementsSquadsFromUnits(attackers, this.settlementController.StrategyController.EnemySettlements);
-        this.settlementController.AttackingSquads.push(...attackingSquads);
+        this.settlementController.HostileAttackingSquads.push(...attackingSquads);
     }
 }
