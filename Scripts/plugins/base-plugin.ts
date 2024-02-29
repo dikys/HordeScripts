@@ -1,7 +1,7 @@
 import { logi, logw, loge, logDbg } from "library/common/logging";
 
 /**
- * Класс-заготовка для плагина.
+ * Базовый класс для плагина.
  */
 export default class HordePluginBase {
     
