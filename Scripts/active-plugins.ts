@@ -7,8 +7,10 @@ import { AttentionOnSurfacePlugin } from "plugins/attention-on-surface";
 /**
  * Здесь перечислены стандартные плагины, которые будут запущены автоматически.
  */
-function* getDefaultPlugins() {
-    yield new AttentionOnSurfacePlugin();
+function getDefaultPlugins() {
+    return [
+        new AttentionOnSurfacePlugin(),
+    ];
 }
 
 
@@ -38,7 +40,7 @@ export class HordePluginsCollection {
     }
 
     public registerDefaultPlugins() {
-        for(let plugin of getDefaultPlugins()) {
+        for (let plugin of getDefaultPlugins()) {
             this.register(plugin);
         }
     }
