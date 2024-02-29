@@ -40,6 +40,7 @@ export function allExamples() {
     addExample(new Example_SettlementResources());
     addExample(new Example_SettlementResources_2());
     addExample(new Example_SettlementUnitsInfo());
+    addExample(new Example_SettlementTaxAndSalary());
 
     // - Примеры перечисления юнитов в области
     addExample(new Example_GetUnitsInArea_Bruteforce());
@@ -93,4 +94,5 @@ import { Example_GetUnitsInArea_Bruteforce, Example_GetUnitsInArea_KdTree, Examp
 import { Example_SpawnUnit } from "./examples/unit-spawn-example";
 import { Example_CustomBullet } from "./examples/custom-bullet-example";
 import { Example_CustomUnit } from "./examples/custom-unit-example";
+import { Example_SettlementTaxAndSalary } from "examples/settlement-tax-and-salary";
 
