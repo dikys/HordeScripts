@@ -37,6 +37,6 @@ export function createUnitForTest(plugin) {
         return null;
     }
 
-    plugin.logi('Создан новый юнит для теста!', unit.ToString());
+    plugin.log.info('Создан новый юнит для теста!', unit.ToString());
     return unit;
 }

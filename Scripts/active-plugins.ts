@@ -1,4 +1,4 @@
-import { logi } from "library/common/logging";
+import { log } from "library/common/logging";
 import HordePluginBase from "plugins/base-plugin";
 import ScenaScriptBase from "plugins/base-scena-script";
 import { AttentionOnSurfacePlugin } from "plugins/attention-on-surface";
@@ -26,7 +26,7 @@ export class HordePluginsCollection {
 
     public register(plugin: HordePluginBase) {
         this.plugins.push(plugin);
-        logi(`Plugin registered: "${plugin.displayName}"`);
+        log.info(`Plugin registered: "${plugin.displayName}"`);
     }
     
     public registerScenaScript(scenaPlugin: ScenaScriptBase) {
@@ -36,7 +36,7 @@ export class HordePluginsCollection {
         }
 
         this.plugins.push(scenaPlugin);
-        logi(`Scena script registered: "${scenaPlugin.displayName}" ("${scenaName}")`);
+        log.info(`Scena script registered: "${scenaPlugin.displayName}" ("${scenaName}")`);
     }
 
     public registerDefaultPlugins() {

@@ -15,7 +15,7 @@ export class Example_PlayerWorks extends HordeExampleBase {
         this.logMessageOnRun();
             
         // Глобальная переменная "players" - это массив с API для доступа к каждому игроку
-        this.logi('Количество игроков:', '"' + players.length + '"');
+        this.log.info('Количество игроков:', '"' + players.length + '"');
 
         for(let i in players) {
             let player = players[i];
@@ -23,19 +23,19 @@ export class Example_PlayerWorks extends HordeExampleBase {
             // Т.к. API ещё не разработано, ВРЕМЕННО прокинул реальный объект игрока
             // Здесь и далее в функии выполняется работа с реальными объектами (не API)
             let realPlayer = player.GetRealPlayer();
-            this.logi(`Игрок ${i}:`, `${realPlayer.Nickname}`);
+            this.log.info(`Игрок ${i}:`, `${realPlayer.Nickname}`);
 
             // Поселение игрока
             let realSettlement = realPlayer.GetRealSettlement();
-            this.logi(`  Предводитель: ${realSettlement.LeaderName}`);
+            this.log.info(`  Предводитель: ${realSettlement.LeaderName}`);
             // Подробнее см. в примерах работы с поселением
 
             // Объект для бота
             let realMasterMind = HordeUtils.getValue(realPlayer, "MasterMind");
             if (realMasterMind){
-                this.logi(`  Характер:`, realMasterMind.Character.Description);
+                this.log.info(`  Характер:`, realMasterMind.Character.Description);
             } else {
-                this.logi(`  Управляется игроком`);
+                this.log.info(`  Управляется игроком`);
             }
             // Подробнее см. в примерах к MasterMind
 

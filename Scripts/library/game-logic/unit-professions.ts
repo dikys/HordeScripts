@@ -1,4 +1,4 @@
-import { logw } from "library/common/logging";
+import { log } from "library/common/logging";
 
 // Перечисление профессий (enum)
 export const UnitProfession = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitProfession;
@@ -22,7 +22,7 @@ export const UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.P
 export function getUnitProfessionParams(uCfg, prof) {
     let profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
     if (!uCfg.ProfessionParams.TryGetValue(prof, profParams.out)) {
-        logw('Can\'t get profession params:', prof.ToString());
+        log.warning('Can\'t get profession params:', prof.ToString());
         return null;
     }
     return profParams.value;

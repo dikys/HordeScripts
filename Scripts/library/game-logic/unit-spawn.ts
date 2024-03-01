@@ -1,4 +1,4 @@
-import { logi } from "library/common/logging";
+import { log } from "library/common/logging";
 import { generateRandomCellInRect } from "library/common/position-tools";
 import { createPoint } from "library/common/primitives";
 import { UnitDirection } from "./horde-types";
@@ -57,9 +57,9 @@ export function test_spawnUnits() {
 
     let spawnedUnits = spawnUnits(settlement_0, archerCfg, spawnCounts, dir, generateRandomCellInRect(0, 0, 176, 22));
 
-    logi('Созданные юниты:');
+    log.info('Созданные юниты:');
     for (let unit of spawnedUnits) {
-       logi('-', unit.ToString());
+        log.info('-', unit.ToString());
     }
 
     return;

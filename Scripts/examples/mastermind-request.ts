@@ -15,13 +15,13 @@ export class Example_MasterMindRequest extends HordeExampleBase {
         let realPlayer = players["1"].GetRealPlayer();
         let masterMind = HordeUtils.getValue(realPlayer, "MasterMind");
         if (!masterMind) {
-            this.logi('Выбранный игрок не управляется MasterMind.');
+            this.log.info('Выбранный игрок не управляется MasterMind.');
             return;
         }
 
         // Активация бота, если отключен
         if (!masterMind.IsWorkMode) {
-            this.logi('Включение режима работы MasterMind для', realPlayer.Nickname);
+            this.log.info('Включение режима работы MasterMind для', realPlayer.Nickname);
             masterMind.IsWorkMode = true;
         }
 
@@ -29,16 +29,16 @@ export class Example_MasterMindRequest extends HordeExampleBase {
         let productionDepartament = masterMind.ProductionDepartment;
         let catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
         if (!productionDepartament.AddRequestToProduce(catapultCfg, 1)) {
-            this.logi('Не удалось добавить запрос на создание катапульты.');
+            this.log.info('Не удалось добавить запрос на создание катапульты.');
         } else {
-            this.logi('Добавлен запрос на создание 1 катапульты.');
+            this.log.info('Добавлен запрос на создание 1 катапульты.');
         }
 
         // Проверяем запросы
         let requests = masterMind.Requests;
-        this.logi('Запросов в обработке:', requests.Count);
+        this.log.info('Запросов в обработке:', requests.Count);
         ForEach(requests, item => {
-            this.logi('-', item.ToString());
+            this.log.info('-', item.ToString());
         });
     }
 }

@@ -22,15 +22,15 @@ export class Example_ConfigWorks extends HordeExampleBase {
     }
     
     private _configWorks() {
-        this.logi("Слепок контента:", HordeContent.ContentStamp);
+        this.log.info("Слепок контента:", HordeContent.ContentStamp);
 
         // Перечисление всех доступных конфигов юнитов
-        this.logi("Конфиги рыцарей:");
+        this.log.info("Конфиги рыцарей:");
         ForEach(AllContent.UnitConfigs.Configs, kv => {
             let uid = kv.Key;
             let uCfg = kv.Value;
             if (uid.includes('men')) {
-                this.logi('-', '"' + uid + '"', '-', uCfg.ToString());
+                this.log.info('-', '"' + uid + '"', '-', uCfg.ToString());
             }
         })
 
@@ -43,10 +43,10 @@ export class Example_ConfigWorks extends HordeExampleBase {
         
         // Получаем значения из конфига
         let rocks = catapultCfg.MainArmament.EmitBulletsCountMin;
-        this.logi("Текущее количество камней при выстреле:", rocks);
+        this.log.info("Текущее количество камней при выстреле:", rocks);
 
         // Устанавливаем значения в private-члены конфига
-        this.logi("Делаем магию..");
+        this.log.info("Делаем магию..");
         rocks += 1;
         if (rocks > 10)
             rocks = 1;
@@ -54,7 +54,7 @@ export class Example_ConfigWorks extends HordeExampleBase {
         HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMax", rocks);
         
         // Результат можно проверить в игре
-        this.logi("Теперь катапульты кидают", catapultCfg.MainArmament.EmitBulletsCountMin, "камней за выстрел!");
+        this.log.info("Теперь катапульты кидают", catapultCfg.MainArmament.EmitBulletsCountMin, "камней за выстрел!");
     }
 }
 
@@ -98,15 +98,15 @@ export class Example_ConfigCreation extends HordeExampleBase {
         HordeUtils.setValue(newBallistaCfg, "Name", "Динамическая баллиста");
         HordeUtils.setValue(newBallistaCfg, "ProductionTime", 50);
         HordeUtils.setValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
-        this.logi('Создан новый конфиг баллисты:', newBallistaCfg.Uid, `(${newBallistaCfg.Name})`);
+        this.log.info('Создан новый конфиг баллисты:', newBallistaCfg.Uid, `(${newBallistaCfg.Name})`);
 
         // Добавляем новую баллисту в завод
         let producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
         let produceList = producerParams.CanProduceList;
-        this.logi('Сейчас завод производит:', produceList.Count, 'вида техники');
-        this.logi('Добавляем только что созданную баллисту в список производства..');
+        this.log.info('Сейчас завод производит:', produceList.Count, 'вида техники');
+        this.log.info('Добавляем только что созданную баллисту в список производства..');
         produceList.Add(newBallistaCfg);
-        this.logi('Теперь завод производит:', produceList.Count, 'вида техники');
+        this.log.info('Теперь завод производит:', produceList.Count, 'вида техники');
     }
 }
 
@@ -133,16 +133,16 @@ export class Example_ConfigRemoving extends HordeExampleBase {
 
         // Добавлен?
         if (!HordeContent.HasUnitConfig(targetCfgUid)) {
-            this.logi('Конфиг пока что не был добавлен:', "'" + targetCfgUid + "'");
-            this.logi("Сначала нужно запустить пример 'Example_ConfigCreation'");
+            this.log.info('Конфиг пока что не был добавлен:', "'" + targetCfgUid + "'");
+            this.log.info("Сначала нужно запустить пример 'Example_ConfigCreation'");
             return;
         }
         let targetCfg = HordeContent.GetUnitConfig(targetCfgUid);
 
-        this.logi('Удаление конфига из контента:', targetCfgUid);
+        this.log.info('Удаление конфига из контента:', targetCfgUid);
         HordeContent.RemoveConfig(targetCfg);
 
-        this.logi('Удаление из завода ссылок на конфиг:', targetCfgUid);
+        this.log.info('Удаление из завода ссылок на конфиг:', targetCfgUid);
         let factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
         let producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
         let produceList = producerParams.CanProduceList;

@@ -22,9 +22,9 @@ export class Example_SettlementWorks extends HordeExampleBase {
         let diplomacy = realSettlement.Diplomacy;
         let otherSettlement = players["1"].GetRealPlayer().GetRealSettlement();
         if (diplomacy.IsWarStatus(otherSettlement)) {
-            this.logi(`${realSettlement.LeaderName} ВОЮЕТ с ${otherSettlement.LeaderName}!`);
+            this.log.info(`${realSettlement.LeaderName} ВОЮЕТ с ${otherSettlement.LeaderName}!`);
         } else {
-            this.logi(`${realSettlement.LeaderName} НЕ воюет с ${otherSettlement.LeaderName}!`);
+            this.log.info(`${realSettlement.LeaderName} НЕ воюет с ${otherSettlement.LeaderName}!`);
         }
 
         // Модуль вИдения
@@ -33,17 +33,17 @@ export class Example_SettlementWorks extends HordeExampleBase {
 
         // Юниты поселения
         let units = realSettlement.Units;
-        this.logi(`Количество юнитов:`, units.Count);
+        this.log.info(`Количество юнитов:`, units.Count);
         // Здесь можно получать юнитов только по идентификатору, а по координатам см. через сцену.
         let unit = HordeUtils.call(units, "GetById", 0);
         if (unit) {
-            this.logi(`У ${realPlayer.Nickname} обнаружен юнит с id=0: ${unit.ToString()}`);
+            this.log.info(`У ${realPlayer.Nickname} обнаружен юнит с id=0: ${unit.ToString()}`);
         }
 
         // Перечисление юнитов этого поселения
         let enumerator = units.GetEnumerator();
         while(enumerator.MoveNext()) {
-            this.logi('Первый юнит:', enumerator.Current.ToString());
+            this.log.info('Первый юнит:', enumerator.Current.ToString());
             break;  // Через ForEach пока что нельзя делать break, а через использование enumerator'а можно
         }
         enumerator.Dispose();
@@ -73,7 +73,7 @@ export class Example_SettlementResources extends HordeExampleBase {
 
         // Высокоуровневый объект для управления ресурсами поселения
         let settlementResources = realSettlement.Resources;
-        this.logi("Ресурсы:", settlementResources.ToString());
+        this.log.info("Ресурсы:", settlementResources.ToString());
         // let resoucesAmount = HordeUtils.getValue(settlementResources, "Resources");
 
         // Прибавим ресурсы
@@ -83,9 +83,9 @@ export class Example_SettlementResources extends HordeExampleBase {
         // Отнимем ресуры
         let subRes = createResourcesAmount(90, 300, 90, 9);
         if(!settlementResources.TakeResourcesIfEnough(subRes)) {
-            this.logi("Ресурсов недостаточно!");
+            this.log.info("Ресурсов недостаточно!");
         }
-        this.logi("Теперь ресурсов:", settlementResources.ToString());
+        this.log.info("Теперь ресурсов:", settlementResources.ToString());
 
         // Ещё у settlementResources есть следующие методы:
         //   TakeResources - забрать без проверки количества
@@ -155,8 +155,8 @@ export class Example_SettlementUnitsInfo extends HordeExampleBase {
 
         // Юниты разных типов
         let professionCenter = realSettlement.Units.Professions;
-        this.logi('Выбор юнита по типу:');
-        let logUnit = function(str, u) { that.logi(str+':', u ? u.ToString() : '<None>') };
+        this.log.info('Выбор юнита по типу:');
+        let logUnit = function(str, u) { that.log.info(str+':', u ? u.ToString() : '<None>') };
         logUnit('- Первый в MainBuildings', professionCenter.MainBuildings.First());
         logUnit('- Первый в Barracks', professionCenter.Barracks.First());
         logUnit('- Первый в Factories', professionCenter.Factories.First());
@@ -176,7 +176,7 @@ export class Example_SettlementUnitsInfo extends HordeExampleBase {
         // Информация о производстве
         let settlementProduction = realSettlement.Production;
         let catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
-        this.logi('В данный момент катапульт имеется:', professionCenter.CountUnitsOfType(catapultCfg));
-        this.logi('В данный момент катапульт производится:', settlementProduction.CountProducingNowUnits(catapultCfg));
+        this.log.info('В данный момент катапульт имеется:', professionCenter.CountUnitsOfType(catapultCfg));
+        this.log.info('В данный момент катапульт производится:', settlementProduction.CountProducingNowUnits(catapultCfg));
     }
 }

@@ -16,33 +16,33 @@ export class Example_GameWorks extends HordeExampleBase {
         
         // Инфо по тактам
         let BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
-        this.logi('Текущий такт:', BattleController.GameTimer.GameFramesCounter);
-        this.logi('Текущий FPS:', BattleController.GameTimer.CurrentFpsLimit);
+        this.log.info('Текущий такт:', BattleController.GameTimer.GameFramesCounter);
+        this.log.info('Текущий FPS:', BattleController.GameTimer.CurrentFpsLimit);
 
         // Инфо по реплею (недоступно при инициализации сцены, т.е. в onFirstRun)
         let BattleControllerT = HordeUtils.GetTypeByName("HordeResurrection.Engine.Logic.Battle.BattleController, HordeResurrection.Engine")
         let repl = HordeUtils.getValue(ReflectionUtils.GetStaticProperty(BattleControllerT, "ReplayModule").GetValue(BattleControllerT), "_mode");
         if (repl.ToString() == "Play") {
-            this.logi('В данный момент запущено воспроизведение реплея');
+            this.log.info('В данный момент запущено воспроизведение реплея');
         } else if (repl.ToString() == "Record") {
-            this.logi('В данный момент запущена запись реплея');
+            this.log.info('В данный момент запущена запись реплея');
         } else {
-            this.logi('В данный момент невозможно определить статус реплея:', repl.ToString());
+            this.log.info('В данный момент невозможно определить статус реплея:', repl.ToString());
         }
 
         // Инфо по игрокам
-        this.logi('Происхождение игроков:');
+        this.log.info('Происхождение игроков:');
         for (let player of players) {
             let realPlayer = player.GetRealPlayer();
             let pOrigin = realPlayer.PlayerOrigin.ToString();
             if (pOrigin == "Replay") {
-                this.logi('- Реплей-игрок:', realPlayer.ToString());
+                this.log.info('- Реплей-игрок:', realPlayer.ToString());
             } else if (pOrigin == "Local") {
-                this.logi('- Локальный игрок:', realPlayer.ToString());
+                this.log.info('- Локальный игрок:', realPlayer.ToString());
             } else if (pOrigin == "Remote") {
-                this.logi('- Удаленный игрок:', realPlayer.ToString());
+                this.log.info('- Удаленный игрок:', realPlayer.ToString());
             } else {
-                this.logi('- Невозможно определить происхождение игрока:', realPlayer.ToString());
+                this.log.info('- Невозможно определить происхождение игрока:', realPlayer.ToString());
             }
         }
     }
@@ -96,6 +96,6 @@ export class Example_ImportDotNetTypes extends HordeExampleBase {
         let week = xHost.newObj(List(DayOfWeek), 7);
         week.Add(DayOfWeek.Sunday);
         
-        this.logi("DayOfWeek:", week[0].ToString());
+        this.log.info("DayOfWeek:", week[0].ToString());
     }
 }

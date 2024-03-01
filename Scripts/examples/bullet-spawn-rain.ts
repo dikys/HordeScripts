@@ -71,7 +71,7 @@ export class Example_SpawnBulletsRain extends HordeExampleBase {
         let n = this.spawnBulletsRain();
         this.waveNum++;
         
-        this.logi(`Волна ${this.waveNum}. Создано ${n} снаряда(ов)`);
+        this.log.info(`Волна ${this.waveNum}. Создано ${n} снаряда(ов)`);
     }
 
     /**

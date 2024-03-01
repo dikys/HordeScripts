@@ -68,13 +68,13 @@ export class Example_HookSentChatMessages extends HordeExampleBase {
                 let senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
                 let targets = HordeUtils.getValue(args, "Targets");
                 let message = HordeUtils.getValue(args, "Message");
-                that.logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
+                that.log.info(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
             } catch (ex) {
-                that.logExc(ex);
+                that.log.exception(ex);
             }
         });
 
-        this.logi('Установлен хук на отправку сообщения');
+        this.log.info('Установлен хук на отправку сообщения');
     }
 }
 
@@ -95,7 +95,7 @@ export class Example_HookReceivedChatMessages extends HordeExampleBase {
         // NetworkController - центральный класс сетевого взаимодействия
         let NetworkController = HordeEngine.HordeResurrection.Engine.Logic.Main.NetworkController;
         if (NetworkController.NetWorker == null) {
-            this.logi('Сетевой режим не активирован. Для этого примера необходимо начать сетевую игру.');
+            this.log.info('Сетевой режим не активирован. Для этого примера необходимо начать сетевую игру.');
             return;
         }
 
@@ -111,12 +111,12 @@ export class Example_HookReceivedChatMessages extends HordeExampleBase {
                 let senderPlayer = HordeEngine.HordeResurrection.Engine.Logic.Main.PlayersController.GetNetElementMainPlayer(HordeUtils.getValue(args, "NetworkElement"));
                 let targets = host.cast(HordeEngine.HordeResurrection.Engine.Logic.Battle.Stuff.ChatTargets, HordeUtils.getValue(args, "Targets"));
                 let message = HordeUtils.getValue(args, "Message");
-                that.logi(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
+                that.log.info(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
             } catch (ex) {
-                that.logExc(ex);
+                that.log.exception(ex);
             }
         });
 
-        this.logi('Установлен хук на приём сообщения');
+        this.log.info('Установлен хук на приём сообщения');
     }
 }

@@ -29,8 +29,8 @@ export class Example_IterateBullets extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        this.logi('Реестр снарядов:', this.bulletsRegistry.ToString());
-        this.logi('IdProvider для снарядов:', this.bulletsIdProvider.ToString());
+        this.log.info('Реестр снарядов:', this.bulletsRegistry.ToString());
+        this.log.info('IdProvider для снарядов:', this.bulletsIdProvider.ToString());
     }
 
     public onEveryTick(gameTickNum: number) {
@@ -44,7 +44,7 @@ export class Example_IterateBullets extends HordeExampleBase {
             if(!this.bulletsRegistry.TryGet(i, bullVar.out))
                 continue;
                 let bull = bullVar.value;
-            this.logi('- Новый снаряд:', '[' + bull.State.ToString() + ']', bull.ToString());
+            this.log.info('- Новый снаряд:', '[' + bull.State.ToString() + ']', bull.ToString());
     
             // Внимание! Здесь будут только те снаряды, которые имеются на сцене в данный момент.
             // Т.е. здесь не найти снаряды, которые уже завершили своё движение. Это актуально для снарядов ближнего боя.

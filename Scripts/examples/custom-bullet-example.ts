@@ -33,7 +33,7 @@ export class Example_CustomBullet extends HordeExampleBase {
         
         // Создаём конфиг снаряда
         this.customBullCfg = createBulletConfig();
-        this.logi('Конфиг снаряда для теста:', this.customBullCfg.ToString());
+        this.log.info('Конфиг снаряда для теста:', this.customBullCfg.ToString());
         
         // Установка функций-обработчиков для созданного снаряда
         setBulletInitializeWorker(this, this.customBullCfg, this.initializeWorker);
@@ -66,10 +66,10 @@ export class Example_CustomBullet extends HordeExampleBase {
         // Создание снаряда
         let bull = spawnBullet(someUnit, null, null, this.customBullCfg, this.combatParams, createPoint(250, 250), createPoint(500, 300), UnitMapLayer.Main);
         if (!bull) {
-            this.logw(`Ошибка! Не удалось создать снаряд.`);
+            this.log.warning(`Ошибка! Не удалось создать снаряд.`);
             return;
         }
-        this.logi(`Создан снаряд: ${bull.ToString()}`);
+        this.log.info(`Создан снаряд: ${bull.ToString()}`);
     }
 
     /**

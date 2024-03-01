@@ -20,27 +20,27 @@ export class Example_UnitWorks extends HordeExampleBase {
         
         let unit = getOrCreateTestUnit(this);
         if (unit == null) {
-            this.logi('Не удалось создать юнита для этого примера!');
+            this.log.info('Не удалось создать юнита для этого примера!');
             return;
         }
-        this.logi('Для этого примера выбран:', unit.ToString());
+        this.log.info('Для этого примера выбран:', unit.ToString());
 
         // В юните много разных методов (убрать false, чтобы отобразить названия методов)
         if (false) inspect(unit);
 
         // Здесь хранятся значения переменных юнита
         let unitDTO = HordeUtils.getValue(unit, "Model");
-        this.logi('Здоровье юнита:', unitDTO.Health);
-        this.logi('Направление юнита:', unitDTO.PositionModel.Direction.ToString());
+        this.log.info('Здоровье юнита:', unitDTO.Health);
+        this.log.info('Направление юнита:', unitDTO.PositionModel.Direction.ToString());
 
         // Устанавливаем направление "Вверх"
         unitDTO.PositionModel.Direction = UnitDirection.Up;
-        this.logi('Направление юнита после изменения:', unitDTO.PositionModel.Direction.ToString());
+        this.log.info('Направление юнита после изменения:', unitDTO.PositionModel.Direction.ToString());
 
         // Боевой отдел:
         let battleMind = unit.BattleMind;
 
-        this.logi(`Нанесем 1 ед. урона юниту с типом повреждения "ближний бой"`)
+        this.log.info(`Нанесем 1 ед. урона юниту с типом повреждения "ближний бой"`)
         battleMind.TakeDamage(null, 1, UnitDeathType.Mele);
 
         // Другие методы в BattleMind:
@@ -62,7 +62,7 @@ export class Example_UnitWorks extends HordeExampleBase {
         // Запретим/разрешим команду атаки
         if (!disallowedCommands.ContainsKey(UnitCommand.Attack)) {
             disallowedCommands.Add(UnitCommand.Attack, 1);  // 1 - это сколько раз команда была запрещена
-            this.logi('Команда атаки запрещена', disallowedCommands.Item.get(UnitCommand.Attack) ,'раз!');
+            this.log.info('Команда атаки запрещена', disallowedCommands.Item.get(UnitCommand.Attack) ,'раз!');
             
             // Внимание! Запрет будет действовать на уровне получения команды.
             // Т.е. непосредственно атаковать юнит все ещё сможет и даже будет получать приказ при автоатаке, но игрок не сможет выдать эту команду.
@@ -74,41 +74,41 @@ export class Example_UnitWorks extends HordeExampleBase {
             } else {
                 disallowedCommands.Item.set(UnitCommand.Attack, n - 1);
             }
-            this.logi('Команда атаки разрешена');
+            this.log.info('Команда атаки разрешена');
         }
 
         // Проверим, может ли юнит дойти до клетки?
         let cell = createPoint(55, 10);
         if (unitCheckPathTo(unit, cell)) {
-            this.logi('Юнит может пройти к', cell.ToString());
+            this.log.info('Юнит может пройти к', cell.ToString());
         } else {
-            this.logi('Юнит НЕ может пройти к', cell.ToString());
+            this.log.info('Юнит НЕ может пройти к', cell.ToString());
         }
 
         // Телепортация юнита (отключено, чтобы не сбивать другие примеры)
         if (false) {
             if (unitTeleport(unit, cell)) {
-                this.logi('Юнит телепортирован в', cell.ToString());
+                this.log.info('Юнит телепортирован в', cell.ToString());
             } else {
-                this.logi('Юнит НЕ может быть телепортирован в', cell.ToString());
+                this.log.info('Юнит НЕ может быть телепортирован в', cell.ToString());
             }
         }
 
         // Скорость юнита в клетке
-        this.logi('Скорость юнита в клетке', cell.ToString(), 'согласно реальной карте:', unitSpeedAtCellByRealMap(unit, cell));
+        this.log.info('Скорость юнита в клетке', cell.ToString(), 'согласно реальной карте:', unitSpeedAtCellByRealMap(unit, cell));
 
         // Скорость юнита в клетке с учетом тумана войны
-        this.logi('Скорость юнита в клетке', cell.ToString(), 'согласно известной карте:', unitSpeedAtCellByKnownMap(unit, cell));
+        this.log.info('Скорость юнита в клетке', cell.ToString(), 'согласно известной карте:', unitSpeedAtCellByKnownMap(unit, cell));
 
         // Можно ли разместить юнита с указанным конфигом в этой клетке?
         // Тут важно, что проверяется без наличия самого юнита
         let riderCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Raider");
         let settlement = unit.Owner;
-        this.logi('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
+        this.log.info('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
             'согласно известной карте:', unitCanBePlacedByKnownMap(riderCfg, settlement, cell.X, cell.Y));
 
         // Такая же проверка с учетом тумана войны
-        this.logi('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
+        this.log.info('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell.ToString(),
             'согласно реальной карте:', unitCanBePlacedByRealMap(riderCfg, cell.X, cell.Y));
     }
 }
@@ -128,21 +128,21 @@ export class Example_UnitOrders extends HordeExampleBase {
 
         let unit = getOrCreateTestUnit(this);
         if (unit == null) {
-            this.logi('Не удалось создать юнита для этого примера!');
+            this.log.info('Не удалось создать юнита для этого примера!');
             return;
         }
-        this.logi('Для этого примера выбран:', unit.ToString());
+        this.log.info('Для этого примера выбран:', unit.ToString());
 
         // Отдел приказов
         let ordersMind = unit.OrdersMind;
 
         // Проверка что юнит бездействует
-        this.logi('Юнит бездействует? Вариант 1:', ordersMind.IsIdle());
-        this.logi('Юнит бездействует? Вариант 2:', ordersMind.OrdersCount == 0);
+        this.log.info('Юнит бездействует? Вариант 1:', ordersMind.IsIdle());
+        this.log.info('Юнит бездействует? Вариант 2:', ordersMind.OrdersCount == 0);
 
         // Текущий приказ юнита (другой вариант)
         let activeOrder = ordersMind.ActiveOrder;
-        this.logi('Текущий приказ юнита:', activeOrder.ToString());
+        this.log.info('Текущий приказ юнита:', activeOrder.ToString());
 
         // Отменить приказы юнита кроме текущего
         ordersMind.CancelOrders(false);
@@ -154,30 +154,30 @@ export class Example_UnitOrders extends HordeExampleBase {
         let deactivateNotificationsTime = 600;  // отмена инстинктов на столько тактов
         let targetCell = createPoint(unit.Cell.X, unit.Cell.Y + 1);
         ordersMind.AssignSmartOrder(targetCell, AssignOrderMode.Replace, deactivateNotificationsTime);
-        this.logi('Юнит получил smart-приказ в', targetCell.ToString());
+        this.log.info('Юнит получил smart-приказ в', targetCell.ToString());
 
         // Создание разных команд для приказов
         let oneClickCommandArgs = new OneClickCommandArgs(UnitCommand.StepAway, AssignOrderMode.Queue);
-        this.logi('Простая команда:', '"' + oneClickCommandArgs.ToString() + '"');
+        this.log.info('Простая команда:', '"' + oneClickCommandArgs.ToString() + '"');
         let pointCommandArgs = new PointCommandArgs(createPoint(10, 10), UnitCommand.Attack, AssignOrderMode.Queue);
-        this.logi('Команда с целью в клетке:', '"' + pointCommandArgs.ToString()) + '"';
+        this.log.info('Команда с целью в клетке:', '"' + pointCommandArgs.ToString()) + '"';
         let produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Fence"), createPoint(2, 4), createPoint(3, 7), 1000);
-        this.logi('Команда строительства в клетке:', '"' + produceAtCommandArgs.ToString() + '"');
+        this.log.info('Команда строительства в клетке:', '"' + produceAtCommandArgs.ToString() + '"');
         let produceCommandArgs = new ProduceCommandArgs(AssignOrderMode.Queue, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Worker1"), 1);
-        this.logi('Команда тренировки:', '"' + produceCommandArgs.ToString() + '"');
+        this.log.info('Команда тренировки:', '"' + produceCommandArgs.ToString() + '"');
 
         // Выдача приказа согласно команде
         if (unit.Cfg.GetOrderDelegate(unit, oneClickCommandArgs)) {
-            this.logi('Добавлен приказ для команды:', '"' + oneClickCommandArgs.ToString() + '"');
+            this.log.info('Добавлен приказ для команды:', '"' + oneClickCommandArgs.ToString() + '"');
         } else {
-            this.logi('Не удалось добавить команду');
+            this.log.info('Не удалось добавить команду');
         }
 
         // Выдача приказа согласно команде
         if (unit.Cfg.GetOrderDelegate(unit, pointCommandArgs)) {
-            this.logi('Добавлен приказ для команды:', '"' + pointCommandArgs.ToString() + '"');
+            this.log.info('Добавлен приказ для команды:', '"' + pointCommandArgs.ToString() + '"');
         } else {
-            this.logi('Не удалось добавить команду');
+            this.log.info('Не удалось добавить команду');
         }
     }
 }
@@ -206,12 +206,12 @@ export class Example_UnitEnumerateEvents extends HordeExampleBase {
 
         let unit = getOrCreateTestUnit(this);
         if (!unit) {
-            this.logi('Не удалось создать юнита для этого примера!');
-            this.logi('Пример', '"' + arguments.callee.name + '"', 'отключен!');
+            this.log.info('Не удалось создать юнита для этого примера!');
+            this.log.info('Пример', '"' + arguments.callee.name + '"', 'отключен!');
             this.workFlag = false;
             return;
         } else if (this.workFlag === undefined) {
-            this.logi('Для этого примера выбран:', unit.ToString());
+            this.log.info('Для этого примера выбран:', unit.ToString());
             this.workFlag = true;
         }
     
@@ -224,9 +224,9 @@ export class Example_UnitEnumerateEvents extends HordeExampleBase {
     
             // Перечисление событий за такт
             ForEach(lastFrameEvents, e => {
-                this.logi('Tick:' + BattleController.GameTimer.GameFramesCounter, '-', e.ToString());
+                this.log.info('Tick:' + BattleController.GameTimer.GameFramesCounter, '-', e.ToString());
                 if (unit.Health <=0 && e.AttackerUnit) {
-                    this.logi('  Тестовый юнит был убит юнитом:', e.AttackerUnit.ToString());
+                    this.log.info('  Тестовый юнит был убит юнитом:', e.AttackerUnit.ToString());
                 }
     
                 // Внимание! Объект события может "жить" от 1 до 2 игровых тактов. Зависит от места проверки событий.
@@ -237,8 +237,8 @@ export class Example_UnitEnumerateEvents extends HordeExampleBase {
                 // Если требуется сохранить какие-то данные собятия, то для этого нужно переместить их в отдельную структуру.
             });
         } catch (ex) {
-            this.logExc(ex);
-            this.logi('Пример', '"' + arguments.callee.name + '"', 'отключен!');
+            this.log.exception(ex);
+            this.log.info('Пример', '"' + arguments.callee.name + '"', 'отключен!');
             this.workFlag = false;
         }
     }

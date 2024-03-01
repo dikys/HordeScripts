@@ -1,4 +1,4 @@
-import { logi, logw, loge, logDbg } from "library/common/logging";
+import { Logger } from "library/common/logging";
 
 /**
  * Базовый класс для плагина.
@@ -9,6 +9,7 @@ export default class HordePluginBase {
 
     public name: string;
     public displayName: string;
+    protected log: Logger;
     protected globalStorage: any;  // Хранилище переменных, которое не обнуляется при hot reload
 
     // --- Initialization -----------------------------------------------
@@ -17,7 +18,21 @@ export default class HordePluginBase {
         this.displayName = displayName;
         this.name = this.constructor.name;
 
-        this.globalStorage = this._getOrCreateStorage();
+        this.globalStorage = this.getOrCreateStorage();
+        this.log = this.createLogger();
+    }
+
+    private createLogger() {
+        let log = new Logger();
+        log.msgPrefix = `[${this.name}] `;
+        return log;
+    }
+
+    private getOrCreateStorage() {
+        if (DataStorage.plugins[this.name] === undefined) {
+            DataStorage.plugins[this.name] = {};
+        }
+        return DataStorage.plugins[this.name];
     }
 
     // --- Virtual Methods -----------------------------------------------
@@ -28,37 +43,6 @@ export default class HordePluginBase {
 
     public onEveryTick(gameTickNum: number) {
 
-    }
-
-    // --- Storage -----------------------------------------------
-
-    private _getOrCreateStorage() {
-        if (DataStorage.plugins[this.name] === undefined) {
-            DataStorage.plugins[this.name] = {};
-        }
-        return DataStorage.plugins[this.name];
-    }
-
-    // --- Logging -----------------------------------------------
-
-    protected logi(...vars: any[]){
-        logi(`[${this.name}]`, ...vars)
-    }
-    
-    protected logw(...vars: any[]){
-        logw(`[${this.name}]`, ...vars)
-    }
-    
-    protected loge(...vars: any[]){
-        loge(`[${this.name}]`, ...vars)
-    }
-    
-    protected logExc(ex){
-        loge(`[${this.name}]`, ex)
-    }
-    
-    protected logDbg(...vars: any[]){
-        logDbg(`[${this.name}]`, ...vars)
     }
 }
 

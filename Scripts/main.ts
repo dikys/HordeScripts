@@ -1,5 +1,5 @@
 import "/library/dotnet/dotnet-utils.ts"
-import { logi } from "library/common/logging";
+import { log } from "library/common/logging";
 import { activePlugins } from "active-plugins";
 import { registerExamples } from "examples-runner";
 
@@ -40,7 +40,7 @@ export function onInitialization() {
  * Вызывается при первом запуске скрипт-машины, а так же при hot-reload
  */
 export function onFirstRun() {
-    logi("Scripts running... (Start number:", DataStorage.reloadCounter, ")");
+    log.info("Scripts running... (Start number:", DataStorage.reloadCounter, ")");
 
     // Запук плагинов
     activePlugins.onFirstRun();

@@ -18,13 +18,13 @@ export class Example_GetUnitsInArea_Bruteforce extends HordeExampleBase {
         
         let unitsMap = scena.GetRealScena().UnitsMap;
 
-        this.logi('Юниты:');
+        this.log.info('Юниты:');
         for (let i = 0; i < 20; i++) {
             for (let j = 0; j < 20; j++) {
                 let unit = unitsMap.GetUpperUnit(i, j);
                 if (!unit)
                     continue;
-                this.logi('-', unit.ToString());
+                this.log.info('-', unit.ToString());
             }
         }
     }
@@ -55,9 +55,9 @@ export class Example_GetUnitsInArea_Squad extends HordeExampleBase {
         let rect = createRect(0,0,20,20);
         let squad = unitsMap.GetSquadFromRect(rect, filterCallback);
 
-        this.logi('Собрано юнитов:', squad.Count);
+        this.log.info('Собрано юнитов:', squad.Count);
         ForEach(squad, u => {
-            this.logi('-', u.ToString());
+            this.log.info('-', u.ToString());
         });
     }
 }
@@ -78,9 +78,9 @@ export class Example_GetUnitsInArea_KdTree extends HordeExampleBase {
 
         let unitsIter = iterateOverUnitsInBox(createPoint(10, 10), 10);
 
-        this.logi('Юниты:');
+        this.log.info('Юниты:');
         for (let u = unitsIter.next(); !u.done; u = unitsIter.next()) {
-            this.logi('-', u.value.ToString());
+            this.log.info('-', u.value.ToString());
         }
     }
 }

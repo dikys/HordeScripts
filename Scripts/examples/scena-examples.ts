@@ -18,7 +18,7 @@ export class Example_ScenaWorks extends HordeExampleBase {
         // Т.к. API ещё не разработано, ВРЕМЕННО прокинул объект реальной сцены
         // Здесь и далее в функии выполняется работа с реальными объектами (не API)
         let realScena = scena.GetRealScena();
-        this.logi('Сцена:', '"' + realScena.ScenaName + '"');
+        this.log.info('Сцена:', '"' + realScena.ScenaName + '"');
 
         // Карта юнитов, ландшафта и ресурсов
         let unitsMap = realScena.UnitsMap;
@@ -29,42 +29,42 @@ export class Example_ScenaWorks extends HordeExampleBase {
         let cell = createPoint(9, 9);
 
         // Получаем различные данные
-        this.logi(`Информация по клетке ${cell.ToString()}`);
+        this.log.info(`Информация по клетке ${cell.ToString()}`);
         let tile = landscapeMap.Item.get(cell);
-        this.logi(`  Тип тайла: ${tile.Cfg.Type.ToString()}`);
+        this.log.info(`  Тип тайла: ${tile.Cfg.Type.ToString()}`);
         let res = resourcesMap.Item.get(cell);
-        this.logi(`  Ресурс: ${res.ResourceType.ToString()}`);
-        this.logi(`  Количество деревьев: ${res.TreesCount}`);
+        this.log.info(`  Ресурс: ${res.ResourceType.ToString()}`);
+        this.log.info(`  Количество деревьев: ${res.TreesCount}`);
         let unit = unitsMap.GetUpperUnit(cell);
         if (unit) {
-            this.logi(`  Юнит: ${unit.ToString()}`);
+            this.log.info(`  Юнит: ${unit.ToString()}`);
         } else {
-            this.logi(`  Юнита нету`);
+            this.log.info(`  Юнита нету`);
         }
         let unitAtFloor = unitsMap.Item.get(cell, UnitMapLayer.Floor);
         if (unitAtFloor) {
             if (unitAtFloor.IsNotDead && unitAtFloor.EffectsMind.HasEffect(UnitEffectFlag.Walkable)) {
-                this.logi(`  Мост в клетке: ${unitAtFloor.ToString()}`);
+                this.log.info(`  Мост в клетке: ${unitAtFloor.ToString()}`);
             } else {
-                this.logi(`  Юнит на нижнем слое в клетке: ${unitAtFloor.ToString()}`);
+                this.log.info(`  Юнит на нижнем слое в клетке: ${unitAtFloor.ToString()}`);
             }
         } else {
-            this.logi(`  В этой клетке нет моста`);
+            this.log.info(`  В этой клетке нет моста`);
         }
 
         // Некоторые методы могут работать без Point2D
         let x = 25, y = 25;
-        this.logi(`Информация по клетке [${x}; ${y}]`);
+        this.log.info(`Информация по клетке [${x}; ${y}]`);
         let tile2 = landscapeMap.Item.get(x, y);
-        this.logi(`  Тип тайла: ${tile2.Cfg.Type.ToString()}`);
+        this.log.info(`  Тип тайла: ${tile2.Cfg.Type.ToString()}`);
         let res2 = resourcesMap.Item.get(x, y);
-        this.logi(`  Ресурс: ${res2.ResourceType.ToString()}`);
-        this.logi(`  Количество деревьев: ${res2.TreesCount}`);
+        this.log.info(`  Ресурс: ${res2.ResourceType.ToString()}`);
+        this.log.info(`  Количество деревьев: ${res2.TreesCount}`);
         let unit2 = unitsMap.GetUpperUnit(x, y);
         if (unit2) {
-            this.logi(`  В клетке обнаружен ${unit2.ToString()}`);
+            this.log.info(`  В клетке обнаружен ${unit2.ToString()}`);
         } else {
-            this.logi(`  В клетке пусто`);
+            this.log.info(`  В клетке пусто`);
         }
 
         // Поселения на сцене
@@ -77,12 +77,12 @@ export class Example_ScenaWorks extends HordeExampleBase {
         let enemyUnit = settlement_2.Units.GetCastleOrAnyUnit();
         if (enemyUnit) {
             if (vision_0.CanSeeUnit(enemyUnit)) {
-                this.logi(`${settlement_0.TownName} видит ${enemyUnit.ToString()}`);
+                this.log.info(`${settlement_0.TownName} видит ${enemyUnit.ToString()}`);
             } else {
-                this.logi(`${settlement_0.TownName} не видит ${enemyUnit.ToString()}`);
+                this.log.info(`${settlement_0.TownName} не видит ${enemyUnit.ToString()}`);
             }
         } else {
-            this.logi(`Для этого примера нужен юнит`);
+            this.log.info(`Для этого примера нужен юнит`);
         }
     }
 }

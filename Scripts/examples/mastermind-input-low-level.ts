@@ -18,34 +18,34 @@ export class Example_InputLowLevel extends HordeExampleBase {
             
         let oleg = players["0"].GetRealPlayer();
         
-        this.logi('Список всех команд юнитов');
+        this.log.info('Список всех команд юнитов');
         inspectEnum(UnitCommand);
 
-        this.logi('Выделить юнитов в области');
+        this.log.info('Выделить юнитов в области');
         VirtualInput.selectUnits(oleg, createPoint(0, 0), createPoint(15, 15));
 
-        this.logi('Добавить к выделению юнитов в области (shift)');
+        this.log.info('Добавить к выделению юнитов в области (shift)');
         VirtualInput.selectUnits(oleg, createPoint(18, 18), createPoint(20, 20), VirtualSelectUnitsMode.Include);
 
-        this.logi('Убрать из текущего выделения юнитов из области (ctrl)');
+        this.log.info('Убрать из текущего выделения юнитов из области (ctrl)');
         VirtualInput.selectUnits(oleg, createPoint(18, 18), createPoint(18, 18), VirtualSelectUnitsMode.Exclude);
 
-        this.logi('Клик правой кнопкой');
+        this.log.info('Клик правой кнопкой');
         VirtualInput.smartClick(oleg, createPoint(9, 9));
 
-        this.logi('Команда атаки (в очередь)');
+        this.log.info('Команда атаки (в очередь)');
         VirtualInput.pointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack, AssignOrderMode.Queue);
 
-        this.logi('Выбор по id');
+        this.log.info('Выбор по id');
         VirtualInput.selectUnitsById(oleg, [42]);
 
-        this.logi('Команда атаки');
+        this.log.info('Команда атаки');
         VirtualInput.pointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack);
 
-        this.logi('Команда держать позицию');
+        this.log.info('Команда держать позицию');
         VirtualInput.oneClickCommand(oleg, UnitCommand.HoldPosition);
 
-        this.logi('Выделить замок и заказать производство рабочего');
+        this.log.info('Выделить замок и заказать производство рабочего');
         let castle = oleg.GetRealSettlement().Units.GetCastleOrAnyUnit();
         VirtualInput.selectUnitsById(oleg, [castle.Id]);
         VirtualInput.produceUnitCommand(oleg, "#UnitConfig_Slavyane_Worker1", 1);
@@ -53,28 +53,28 @@ export class Example_InputLowLevel extends HordeExampleBase {
         // Отправить свободного рабочего строить здание
         let someFreeWorker = oleg.GetRealSettlement().Units.Professions.FreeWorkers.First();
         if (someFreeWorker) {
-            this.logi('Выделить свободного рабочего');
+            this.log.info('Выделить свободного рабочего');
             VirtualInput.selectUnitsById(oleg, [someFreeWorker.Id]);
 
-            this.logi('Построить забор');
+            this.log.info('Построить забор');
             VirtualInput.produceBuildingCommand(oleg, "#UnitConfig_Slavyane_Fence", createPoint(1, 5), createPoint(7, 7));
 
-            this.logi('Построить ферму (в очередь)');
+            this.log.info('Построить ферму (в очередь)');
             VirtualInput.produceBuildingCommand(oleg, "#UnitConfig_Slavyane_Farm", createPoint(1, 8), null, AssignOrderMode.Queue);
         } else {
-            this.logi('Свободный рабочий не найден');
+            this.log.info('Свободный рабочий не найден');
         }
 
         // Показать выделенных в предыдущем такте юнитов
         // Внимание! Здесь не учитываются команды выданные в этом такте! Т.е. это выделение с прошлого такта.
         let selectedSquad = oleg.SelectedSquadVirtual;
         if (selectedSquad.Count > 0) {
-            this.logi('У', oleg.Nickname, 'выделены следующие юниты:');
+            this.log.info('У', oleg.Nickname, 'выделены следующие юниты:');
             ForEach(selectedSquad, u => {
-                this.logi('- ', u.ToString());
+                this.log.info('- ', u.ToString());
             });
         } else {
-            this.logi('У', oleg.Nickname, 'нет выделенных юнитов в данный момент');
+            this.log.info('У', oleg.Nickname, 'нет выделенных юнитов в данный момент');
         }
     }
 }

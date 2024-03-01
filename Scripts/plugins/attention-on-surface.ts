@@ -70,7 +70,7 @@ export class AttentionOnSurfacePlugin extends HordePluginBase {
 
             this._createDecoration(info);
         } catch (ex) {
-            this.logExc(ex);
+            this.log.exception(ex);
         }
     }
 

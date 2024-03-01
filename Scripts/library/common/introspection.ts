@@ -1,4 +1,4 @@
-import { logi } from "./logging";
+import { log } from "./logging";
 
 /**
  * Function digs through a Javascript object
@@ -46,9 +46,9 @@ export function inspectToStr(object, maxDepth, result) {
 export function inspect(object, maxDepth=undefined, msg: string|null=null) {
     msg = msg ?? 'Object introspection result:';
     if (object.constructor) {
-        logi(msg, '\nType:', typeof object, '-', object.constructor.name, '\n' + inspectToStr(object, maxDepth, undefined));
+        log.info(msg, '\nType:', typeof object, '-', object.constructor.name, '\n' + inspectToStr(object, maxDepth, undefined));
     } else {
-        logi(msg, '\nType:', typeof object, '\n' + inspectToStr(object, maxDepth, undefined));
+        log.info(msg, '\nType:', typeof object, '\n' + inspectToStr(object, maxDepth, undefined));
     }
 }
 
@@ -57,7 +57,7 @@ export function inspect(object, maxDepth=undefined, msg: string|null=null) {
  */
 export function inspectEnum(enumType, n=10) {
     for (let i = 0; i < n; i++) {
-        logi(`${i}`, '-', host.cast(enumType, i).ToString());
+        log.info(`${i}`, '-', host.cast(enumType, i).ToString());
     }
 }
 
@@ -66,9 +66,9 @@ export function inspectEnum(enumType, n=10) {
  */
 export function inspectFlagEnum(enumType, n=31) {
     let end = 1 << n >>>0;
-    logi('0'.padStart(n, '0'), '-', host.cast(enumType, 0).ToString());
+    log.info('0'.padStart(n, '0'), '-', host.cast(enumType, 0).ToString());
     for (let i = 1; i < end; i = (i << 1 >>>0)) {
-        logi(i.toString(2).padStart(n, '0'), '-', host.cast(enumType, i).ToString());
+        log.info(i.toString(2).padStart(n, '0'), '-', host.cast(enumType, i).ToString());
     }
 }
 
@@ -81,7 +81,7 @@ export function printObjectItems(object, depth = 1, shift = "") {
     }
 
     for (let item in object) {
-        logi(shift, item, " = ", object[item]);
+        log.info(shift, item, " = ", object[item]);
         printObjectItems(object[item], depth - 1, shift + "\t");
     }
 }

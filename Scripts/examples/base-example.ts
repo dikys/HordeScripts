@@ -15,7 +15,7 @@ export default class HordeExampleBase extends HordePluginBase {
      * Отображает сообщение, что пример запущен.
      */
     protected logMessageOnRun() {
-        this.logi('> Запущен пример', '"' + this.exampleDisplayName + '"');
+        this.log.info('> Запущен пример', '"' + this.exampleDisplayName + '"');
     }
 }
 
