@@ -14,19 +14,45 @@ abstract class MiraSquadState extends FsmState {
     IsIdle(): boolean {
         return false;
     }
+
+    protected initiateMovement() {
+        this.squad.CurrentTargetCell = this.squad.MovementTargetCell;
+        this.squad.MovementTargetCell = null;
+        
+        for (let unit of this.squad.Units) {
+            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);
+        }
+    }
+
+    protected initiateAttack() {
+        this.squad.CurrentTargetCell = this.squad.MovementTargetCell;
+        this.squad.MovementTargetCell = null;
+        
+        for (let unit of this.squad.Units) {
+            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);
+        }
+    }
 }
 
 class MiraSquadIdleState extends MiraSquadState {
     OnEntry(): void {
-        this.squad.TargetCell = this.squad.GetLocation().Point;
+        this.squad.CurrentTargetCell = this.squad.GetLocation().Point;
         this.distributeUnits();
-
-        // this.squad.IsAttackMode = false;
     }
     
     OnExit(): void {}
 
     Tick(tickNumber: number): void {
+        if (this.squad.MovementTargetCell != null) {
+            this.squad.SetState(new MiraSquadMoveState(this.squad));
+            return;
+        }
+
+        if (this.squad.AttackTargetCell != null) {
+            this.squad.SetState(new MiraSquadAttackState(this.squad));
+            return;
+        }
+        
         if (this.squad.IsEnemyNearby()) {
             this.squad.SetState(new MiraSquadBattleState(this.squad));
             return;
@@ -61,12 +87,12 @@ class MiraSquadIdleState extends MiraSquadState {
         }
 
         let searchRadius = this.squad.MinSpread * (MAX_SPREAD_THRESHOLD_MULTIPLIER + MIN_SPREAD_THRESHOLD_MULTIPLIER) / 2;
-        let forestCells = MiraUtils.FindCells(this.squad.TargetCell, searchRadius, MiraUtils.ForestCellFilter);
+        let forestCells = MiraUtils.FindCells(this.squad.CurrentTargetCell, searchRadius, MiraUtils.ForestCellFilter);
         let cellIndex = 0;
 
         for (let unit of unitsToDistribute) {
             if (cellIndex >= forestCells.length) {
-                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.TargetCell);
+                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);
             }
             else {
                 MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, forestCells[cellIndex]);
@@ -80,17 +106,24 @@ class MiraSquadMoveState extends MiraSquadState {
     private timeoutTick: number;
     
     OnEntry(): void {
-        for (let unit of this.squad.Units) {
-            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.TargetCell);
-        }
+        this.initiateMovement();
     }
     
     OnExit(): void {}
     
     Tick(tickNumber: number): void {
+        if (this.squad.MovementTargetCell != null) {
+            this.initiateMovement();
+        }
+
+        if (this.squad.AttackTargetCell != null) {
+            this.squad.SetState(new MiraSquadAttackState(this.squad));
+            return;
+        }
+        
         let location = this.squad.GetLocation();
         let distance = MiraUtils.ChebyshevDistance(
-            this.squad.TargetCell, 
+            this.squad.CurrentTargetCell, 
             location.Point
         );
         
@@ -112,14 +145,22 @@ class MiraSquadMoveState extends MiraSquadState {
 
 class MiraSquadAttackState extends MiraSquadState {
     OnEntry(): void {
-        for (let unit of this.squad.Units) {
-            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.TargetCell);
-        }
+        this.initiateAttack();
     }
 
     OnExit(): void {}
 
     Tick(tickNumber: number): void {
+        if (this.squad.MovementTargetCell != null) {
+            this.squad.SetState(new MiraSquadMoveState(this.squad));
+            return;
+        }
+
+        if (this.squad.AttackTargetCell != null) {
+            this.initiateAttack();
+            return;
+        }
+        
         if (this.squad.IsEnemyNearby()) {
             this.squad.SetState(new MiraSquadBattleState(this.squad));
             return;
@@ -128,7 +169,7 @@ class MiraSquadAttackState extends MiraSquadState {
         let location = this.squad.GetLocation();
         
         let distance = MiraUtils.ChebyshevDistance(
-            this.squad.TargetCell, 
+            this.squad.CurrentTargetCell, 
             location.Point
         );
 
@@ -138,7 +179,7 @@ class MiraSquadAttackState extends MiraSquadState {
         }
 
         if (location.Spread > this.squad.MinSpread * MAX_SPREAD_THRESHOLD_MULTIPLIER) {
-            this.squad.SetState(new MiraSquadMotionGatheringUpState(this.squad));
+            this.squad.SetState(new MiraSquadAttackGatheringUpState(this.squad));
             return;
         }
     }
@@ -146,12 +187,12 @@ class MiraSquadAttackState extends MiraSquadState {
 
 abstract class MiraSquadGatheringUpState extends MiraSquadState {
     OnEntry(): void {
-        if (this.squad.TargetCell) {
+        if (this.squad.CurrentTargetCell) {
             let closestToTargetUnit = null;
             let minDistance = Infinity;
 
             for (let unit of this.squad.Units) {
-                let unitDistance = MiraUtils.ChebyshevDistance(unit.Cell, this.squad.TargetCell);
+                let unitDistance = MiraUtils.ChebyshevDistance(unit.Cell, this.squad.CurrentTargetCell);
                 
                 if (unitDistance < minDistance) {
                     minDistance = unitDistance;
@@ -189,20 +230,19 @@ abstract class MiraSquadGatheringUpState extends MiraSquadState {
     protected abstract onGatheredUp(): void;
 }
 
-class MiraSquadMotionGatheringUpState extends MiraSquadGatheringUpState {
+class MiraSquadAttackGatheringUpState extends MiraSquadGatheringUpState {
     protected onGatheredUp(): void {
-        if (this.squad.IsAttackMode) {
-            this.squad.SetState(new MiraSquadAttackState(this.squad));
-        }
-        else {
-            this.squad.SetState(new MiraSquadMoveState(this.squad));
-        }
+        this.squad.SetState(new MiraSquadMoveState(this.squad));
     }
 }
 
 class MiraSquadIdleGatheringUpState  extends MiraSquadGatheringUpState {
     protected onGatheredUp(): void {
         this.squad.SetState(new MiraSquadIdleState(this.squad));
+    }
+
+    IsIdle(): boolean {
+        return true;
     }
 }
 
@@ -294,6 +334,11 @@ class MiraSquadBattleState extends MiraSquadState {
     
     Tick(tickNumber: number): void {
         if (tickNumber % 10 != 0) {
+            return;
+        }
+
+        if (this.squad.MovementTargetCell != null) {
+            this.squad.SetState(new MiraSquadMoveState(this.squad));
             return;
         }
 

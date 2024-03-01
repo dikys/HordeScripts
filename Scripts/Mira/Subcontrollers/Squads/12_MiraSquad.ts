@@ -141,11 +141,11 @@ class MiraControllableSquad extends MiraSquad {
         return this.Strength / this.initialStrength;
     }
 
-    TargetCell: any;
+    AttackTargetCell: any; //but actually cell
+    MovementTargetCell: any; //but actually cell
+    CurrentTargetCell: any; //but actually cell
     MovementPrecision: number;
     public readonly DEFAULT_MOVEMENT_PRECISION = 3;
-
-    IsAttackMode: boolean;
 
     constructor(units:Array<any>, controller: TacticalSubcontroller){
         super(units);
@@ -163,19 +163,15 @@ class MiraControllableSquad extends MiraSquad {
     }
 
     Attack(targetLocation: any, precision?: number): void {
-        this.TargetCell = targetLocation;
+        this.AttackTargetCell = targetLocation;
+        this.MovementTargetCell = null;
         this.MovementPrecision = precision ? precision : this.DEFAULT_MOVEMENT_PRECISION;
-
-        this.IsAttackMode = true;
-        this.SetState(new MiraSquadAttackState(this));
     }
 
     Move(location: any, precision?: number): void {
-        this.TargetCell = location;
+        this.MovementTargetCell = location;
+        this.AttackTargetCell = null;
         this.MovementPrecision = precision ? precision : this.DEFAULT_MOVEMENT_PRECISION;
-
-        this.IsAttackMode = false;
-        this.SetState(new MiraSquadMoveState(this));
     }
 
     SetState(newState: MiraSquadState): void {
