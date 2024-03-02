@@ -6,6 +6,10 @@ import { spawnDecoration, spawnSound } from "library/game-logic/decoration-spawn
 import { setBulletInitializeWorker, setBulletProcessWorker } from "library/game-logic/workers-tools";
 import { positionToCell } from "library/common/position-tools";
 
+
+const WAVES_MAX = 5;
+
+
 /**
  * Пример создания снаряда с кастомным обработчиком.
  * 
@@ -18,6 +22,7 @@ export class Example_CustomBullet extends HordeExampleBase {
     private hitSoundCatalog: any;
     private customBullCfg: any;
     private combatParams: any;
+    private waveNum: number = 0;
 
     public constructor() {
         super("Custom bullet");
@@ -47,10 +52,11 @@ export class Example_CustomBullet extends HordeExampleBase {
      * Демонстрация. Запуск снаряда каждые 50 тактов
      */
     public onEveryTick(gameTickNum: number) {
-        if (gameTickNum % 50 != 0)
+        if (this.waveNum >= WAVES_MAX || gameTickNum % 50 != 0)
             return;
             
         this.createBullet();
+        this.waveNum++;
     }
 
     /**

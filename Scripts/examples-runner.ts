@@ -9,6 +9,7 @@ export function registerExamples() {
 
     // Например:
     //addExample(new Example_SpawnBulletsRain());
+    //addExample(new Example_CustomUnit());
 
     // Так же можно запустить сразу все примеры:
     //allExamples();
