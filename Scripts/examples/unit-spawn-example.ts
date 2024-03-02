@@ -19,7 +19,7 @@ export class Example_SpawnUnit extends HordeExampleBase {
         let settlements = realScena.Settlements;
 
         let settlement_0 = settlements.Item.get('0');  // Олег
-        let archerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer");
+        let archerCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Archer");
         let cell = createPoint(5, 5);
         let dir = UnitDirection.RightDown;
 

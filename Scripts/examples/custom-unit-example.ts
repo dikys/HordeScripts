@@ -44,17 +44,17 @@ export class Example_CustomUnit extends HordeExampleBase {
     private getOrCreateUnitConfig() {
         let exampleCfgUid = "#UnitConfig_Slavyane_Araider_EXAMPLE";
         let unitCfg;
-        if (HordeContent.HasUnitConfig(exampleCfgUid)) {
+        if (HordeContentApi.HasUnitConfig(exampleCfgUid)) {
             // Конфиг уже был создан, берем предыдущий
-            unitCfg = HordeContent.GetUnitConfig(exampleCfgUid);
+            unitCfg = HordeContentApi.GetUnitConfig(exampleCfgUid);
             this.log.info('Конфиг воина для теста:', unitCfg);
         } else {
             // Создание нового конфига
-            let unitCfgOrig = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Araider");
-            unitCfg = HordeContent.CloneConfig(unitCfgOrig, exampleCfgUid);
+            let unitCfgOrig = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Araider");
+            unitCfg = HordeContentApi.CloneConfig(unitCfgOrig, exampleCfgUid);
 
             // Добавление юнита в конюшню
-            let producerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Stables");
+            let producerCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Stables");
             let producerParams = producerCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
             let produceList = producerParams.CanProduceList;
             produceList.Add(unitCfg);
@@ -152,7 +152,7 @@ function createArmamament() {
     gunCoord.Add(UnitDirection.LeftUp, createPoint(-10, -10));
 
     // Снаряд
-    let arrowCfg = HordeContent.GetBulletConfig("#BulletConfig_Arrow");
+    let arrowCfg = HordeContentApi.GetBulletConfig("#BulletConfig_Arrow");
 
     // Вооружение
     let armament = UnitArmament.CreateArmament(arrowCfg);

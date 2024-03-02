@@ -4,7 +4,7 @@ import { log } from "library/common/logging";
 export const UnitProfession = HCL.HordeClassLibrary.UnitComponents.Enumerations.UnitProfession;
 
 // Параметры - это в конфиге, а данные - это в юните (т.е. на сцене)
-export const UnitProducerProfessionParams = HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.UnitProducerProfessionParams;
+export const UnitProducerProfessionParams = HCL.HordeClassLibrary.HordeContentApi.Configs.Units.ProfessionParams.UnitProducerProfessionParams;
 export const UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.ProfessionData.UnitProducerProfessionData;
 // ... позже тут будут добавлены остальные типы.
 
@@ -20,7 +20,7 @@ export const UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.P
  * @return result - параметры профессии
  */
 export function getUnitProfessionParams(uCfg, prof) {
-    let profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
+    let profParams = host.newVar(HCL.HordeClassLibrary.HordeContentApi.Configs.Units.ProfessionParams.AUnitProfessionParams);
     if (!uCfg.ProfessionParams.TryGetValue(prof, profParams.out)) {
         log.warning('Can\'t get profession params:', prof);
         return null;

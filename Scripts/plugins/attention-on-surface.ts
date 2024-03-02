@@ -14,7 +14,7 @@ export class AttentionOnSurfacePlugin extends HordePluginBase {
 
     public constructor() {
         super("Attention on Surface");
-        this.smokeDecorationCfg = HordeContent.GetVisualEffectConfig("#VisualEffectConfig_AttentionMark");
+        this.smokeDecorationCfg = HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_AttentionMark");
         this.realScena = ActiveScena.GetRealScena();
     }
 

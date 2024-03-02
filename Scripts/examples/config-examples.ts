@@ -22,7 +22,7 @@ export class Example_ConfigWorks extends HordeExampleBase {
     }
     
     private _configWorks() {
-        this.log.info("Слепок контента:", HordeContent.ContentStamp);
+        this.log.info("Слепок контента:", HordeContentApi.ContentStamp);
 
         // Перечисление всех доступных конфигов юнитов
         this.log.info("Конфиги рыцарей:");
@@ -35,7 +35,7 @@ export class Example_ConfigWorks extends HordeExampleBase {
         })
 
         // Получаем конфиг катапульты
-        let catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
+        let catapultCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
 
         // Здесь можно убрать if-false, чтобы отобразить поля конфига
         // Здесь не следует копать более чем на 1 уровень в глубину, т.к. получается слишком много данных
@@ -82,8 +82,8 @@ export class Example_ConfigCreation extends HordeExampleBase {
     private _createConfig() {
 
         // Берем исходные конфиги
-        let ballistaCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Balista");
-        let factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+        let ballistaCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Balista");
+        let factoryCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Factory");
 
         // Идентификатор для нового конфига
         // Если установить null или существующий идентификатор, то будет при клонировании будет сгенерирован уникальный идентификатор
@@ -94,7 +94,7 @@ export class Example_ConfigCreation extends HordeExampleBase {
         this.remover.removeConfig();
 
         // Клонируем конфиг и изменяем
-        let newBallistaCfg = HordeContent.CloneConfig(ballistaCfg, newCfgUid);
+        let newBallistaCfg = HordeContentApi.CloneConfig(ballistaCfg, newCfgUid);
         ScriptUtils.SetValue(newBallistaCfg, "Name", "Динамическая баллиста");
         ScriptUtils.SetValue(newBallistaCfg, "ProductionTime", 50);
         ScriptUtils.SetValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
@@ -132,18 +132,18 @@ export class Example_ConfigRemoving extends HordeExampleBase {
         let targetCfgUid = "#UnitConfig_Slavyane_DynamicBallista";
 
         // Добавлен?
-        if (!HordeContent.HasUnitConfig(targetCfgUid)) {
+        if (!HordeContentApi.HasUnitConfig(targetCfgUid)) {
             this.log.info('Конфиг пока что не был добавлен:', "'" + targetCfgUid + "'");
             this.log.info("Сначала нужно запустить пример 'Example_ConfigCreation'");
             return;
         }
-        let targetCfg = HordeContent.GetUnitConfig(targetCfgUid);
+        let targetCfg = HordeContentApi.GetUnitConfig(targetCfgUid);
 
         this.log.info('Удаление конфига из контента:', targetCfgUid);
-        HordeContent.RemoveConfig(targetCfg);
+        HordeContentApi.RemoveConfig(targetCfg);
 
         this.log.info('Удаление из завода ссылок на конфиг:', targetCfgUid);
-        let factoryCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Factory");
+        let factoryCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Factory");
         let producerParams = factoryCfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
         let produceList = producerParams.CanProduceList;
         ScriptExtensions.RemoveAll(produceList, targetCfg);

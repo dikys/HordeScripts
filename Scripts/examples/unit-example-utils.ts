@@ -31,7 +31,7 @@ export function createUnitForTest(plugin) {
     }
 
     let oleg = realScena.Settlements.Item.get('0');  // Олег
-    unit = spawnUnit(oleg, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer"), testCell, UnitDirection.RightDown);
+    unit = spawnUnit(oleg, HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Archer"), testCell, UnitDirection.RightDown);
     plugin.globalStorage.unitForExample = unit;
     if (!unit) {
         return null;

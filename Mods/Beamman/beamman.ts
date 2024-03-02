@@ -24,10 +24,10 @@ export class BeammanPlugin extends HordePluginBase {
      */
     public onFirstRun() {
         this.hitTable = createHitTable();
-        this.hitSounds = HordeContent.GetSoundsCatalog("#SoundsCatalog_Hits_Mele_Dubina_02eb130f59b6");
+        this.hitSounds = HordeContentApi.GetSoundsCatalog("#SoundsCatalog_Hits_Mele_Dubina_02eb130f59b6");
         
         // Установка обработчика удара
-        let unitCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Beamman");
+        let unitCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Beamman");
         setUnitStateWorker(this, unitCfg, UnitState.Hit, this.stateWorker_Hit);
     }
 

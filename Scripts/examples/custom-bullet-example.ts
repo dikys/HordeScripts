@@ -21,8 +21,8 @@ export class Example_CustomBullet extends HordeExampleBase {
 
     public constructor() {
         super("Custom bullet");
-        this.smokeDecorationCfg = HordeContent.GetVisualEffectConfig("#VisualEffectConfig_ArrowSmoke");
-        this.hitSoundCatalog = HordeContent.GetSoundsCatalog("#SoundsCatalog_Hits_Mele_Axe");
+        this.smokeDecorationCfg = HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_ArrowSmoke");
+        this.hitSoundCatalog = HordeContentApi.GetSoundsCatalog("#SoundsCatalog_Hits_Mele_Axe");
     }
 
     /**
@@ -140,13 +140,13 @@ export class Example_CustomBullet extends HordeExampleBase {
 function createBulletConfig() {
     const exampleCfgUid = "#BulletConfig_ExampleScriptBullet";
     let customBullCfg;
-    if (HordeContent.HasBulletConfig(exampleCfgUid)) {
+    if (HordeContentApi.HasBulletConfig(exampleCfgUid)) {
         // Конфиг уже был создан, берем предыдущий
-        customBullCfg = HordeContent.GetBulletConfig(exampleCfgUid);
+        customBullCfg = HordeContentApi.GetBulletConfig(exampleCfgUid);
     } else {
         // Создание нового конфига
-        const bullCfgTemplate = HordeContent.GetBulletConfig("#BulletConfig_ScriptBullet_Template");
-        customBullCfg = HordeContent.CloneConfig(bullCfgTemplate, "#BulletConfig_ExampleScriptBullet");
+        const bullCfgTemplate = HordeContentApi.GetBulletConfig("#BulletConfig_ScriptBullet_Template");
+        customBullCfg = HordeContentApi.CloneConfig(bullCfgTemplate, "#BulletConfig_ExampleScriptBullet");
     }
 
     // Установка параметров конфига

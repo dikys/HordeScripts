@@ -102,7 +102,7 @@ export class Example_UnitWorks extends HordeExampleBase {
 
         // Можно ли разместить юнита с указанным конфигом в этой клетке?
         // Тут важно, что проверяется без наличия самого юнита
-        let riderCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Raider");
+        let riderCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Raider");
         let settlement = unit.Owner;
         this.log.info('Можно ли поместить юнита', '"' + riderCfg.Name + '"', 'в клетке', cell,
             'согласно известной карте:', unitCanBePlacedByKnownMap(riderCfg, settlement, cell.X, cell.Y));
@@ -161,9 +161,9 @@ export class Example_UnitOrders extends HordeExampleBase {
         this.log.info('Простая команда:', '"' + oneClickCommandArgs + '"');
         let pointCommandArgs = new PointCommandArgs(createPoint(10, 10), UnitCommand.Attack, AssignOrderMode.Queue);
         this.log.info('Команда с целью в клетке:', '"' + pointCommandArgs) + '"';
-        let produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Fence"), createPoint(2, 4), createPoint(3, 7), 1000);
+        let produceAtCommandArgs = new ProduceAtCommandArgs(AssignOrderMode.Queue, HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Fence"), createPoint(2, 4), createPoint(3, 7), 1000);
         this.log.info('Команда строительства в клетке:', '"' + produceAtCommandArgs + '"');
-        let produceCommandArgs = new ProduceCommandArgs(AssignOrderMode.Queue, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Worker1"), 1);
+        let produceCommandArgs = new ProduceCommandArgs(AssignOrderMode.Queue, HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Worker1"), 1);
         this.log.info('Команда тренировки:', '"' + produceCommandArgs + '"');
 
         // Выдача приказа согласно команде

@@ -175,7 +175,7 @@ export class Example_SettlementUnitsInfo extends HordeExampleBase {
 
         // Информация о производстве
         let settlementProduction = realSettlement.Production;
-        let catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
+        let catapultCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
         this.log.info('В данный момент катапульт имеется:', professionCenter.CountUnitsOfType(catapultCfg));
         this.log.info('В данный момент катапульт производится:', settlementProduction.CountProducingNowUnits(catapultCfg));
     }

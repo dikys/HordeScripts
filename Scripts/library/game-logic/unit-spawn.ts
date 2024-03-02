@@ -51,7 +51,7 @@ export function test_spawnUnits() {
     let settlements = realScena.Settlements;
 
     let settlement_0 = settlements.Item.get('0');  // Олег
-    let archerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer");
+    let archerCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Archer");
     let spawnCounts = 100;
     let dir = UnitDirection.RightDown;
 

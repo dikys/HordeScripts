@@ -41,8 +41,8 @@ export class Example_SpawnBulletsRain extends HordeExampleBase {
         this.someUnit = settlement_0.Units.GetCastleOrAnyUnit();
 
         // Конфиги снарядов
-        this.arrowCfg = HordeContent.GetBulletConfig("#BulletConfig_Arrow");
-        this.bombCfg = HordeContent.GetBulletConfig("#BulletConfig_CatapultBomb");
+        this.arrowCfg = HordeContentApi.GetBulletConfig("#BulletConfig_Arrow");
+        this.bombCfg = HordeContentApi.GetBulletConfig("#BulletConfig_CatapultBomb");
 
         // Характеристики выстрела стрелы
         this.arrowCombatParams = BulletCombatParams.CreateInstance();

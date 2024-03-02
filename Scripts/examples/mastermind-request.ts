@@ -27,7 +27,7 @@ export class Example_MasterMindRequest extends HordeExampleBase {
 
         // Создадим запрос на производство катапульты
         let productionDepartament = masterMind.ProductionDepartment;
-        let catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
+        let catapultCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
         if (!productionDepartament.AddRequestToProduce(catapultCfg, 1)) {
             this.log.info('Не удалось добавить запрос на создание катапульты.');
         } else {

@@ -27,7 +27,7 @@ export class Example_SpawnOneBullet extends HordeExampleBase {
         let someUnit = settlement_0.Units.GetCastleOrAnyUnit();
     
         // Конфиг снаряда
-        let arrowCfg = HordeContent.GetBulletConfig("#BulletConfig_Arrow");
+        let arrowCfg = HordeContentApi.GetBulletConfig("#BulletConfig_Arrow");
     
         // Характеристики выстрела
         let combatParams = BulletCombatParams.CreateInstance();
