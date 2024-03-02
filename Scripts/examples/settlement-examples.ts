@@ -35,7 +35,7 @@ export class Example_SettlementWorks extends HordeExampleBase {
         let units = realSettlement.Units;
         this.log.info(`Количество юнитов:`, units.Count);
         // Здесь можно получать юнитов только по идентификатору, а по координатам см. через сцену.
-        let unit = HordeUtils.call(units, "GetById", 0);
+        let unit = ScriptUtils.Invoke(units, "GetById", 0);
         if (unit) {
             this.log.info(`У ${realPlayer.Nickname} обнаружен юнит с id=0: ${unit}`);
         }
@@ -74,7 +74,7 @@ export class Example_SettlementResources extends HordeExampleBase {
         // Высокоуровневый объект для управления ресурсами поселения
         let settlementResources = realSettlement.Resources;
         this.log.info("Ресурсы:", settlementResources);
-        // let resoucesAmount = HordeUtils.getValue(settlementResources, "Resources");
+        // let resoucesAmount = ScriptUtils.GetValue(settlementResources, "Resources");
 
         // Прибавим ресурсы
         let addRes = createResourcesAmount(100, 100, 100, 10);

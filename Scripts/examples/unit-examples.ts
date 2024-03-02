@@ -29,7 +29,7 @@ export class Example_UnitWorks extends HordeExampleBase {
         if (false) inspect(unit);
 
         // Здесь хранятся значения переменных юнита
-        let unitDTO = HordeUtils.getValue(unit, "Model");
+        let unitDTO = ScriptUtils.GetValue(unit, "Model");
         this.log.info('Здоровье юнита:', unitDTO.Health);
         this.log.info('Направление юнита:', unitDTO.PositionModel.Direction);
 
@@ -57,7 +57,7 @@ export class Example_UnitWorks extends HordeExampleBase {
         let commandsMind = unit.CommandsMind;
 
         //  Словарь с запрещенными командами
-        let disallowedCommands = HordeUtils.getValue(commandsMind, "DisallowedCommands");
+        let disallowedCommands = ScriptUtils.GetValue(commandsMind, "DisallowedCommands");
 
         // Запретим/разрешим команду атаки
         if (!disallowedCommands.ContainsKey(UnitCommand.Attack)) {
@@ -220,7 +220,7 @@ export class Example_UnitEnumerateEvents extends HordeExampleBase {
             let eventsMind = unit.EventsMind;
     
             // События за последний такт
-            let lastFrameEvents = HordeUtils.getValue(eventsMind, "LastFrameEvents");
+            let lastFrameEvents = ScriptUtils.GetValue(eventsMind, "LastFrameEvents");
     
             // Перечисление событий за такт
             ForEach(lastFrameEvents, e => {

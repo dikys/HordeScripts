@@ -46,13 +46,13 @@ export class Example_SpawnBulletsRain extends HordeExampleBase {
 
         // Характеристики выстрела стрелы
         this.arrowCombatParams = BulletCombatParams.CreateInstance();
-        HordeUtils.setValue(this.arrowCombatParams, "Damage", 4);
-        HordeUtils.setValue(this.arrowCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
+        ScriptUtils.SetValue(this.arrowCombatParams, "Damage", 4);
+        ScriptUtils.SetValue(this.arrowCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
 
         // Характеристики выстрела бомбы
         this.bombCombatParams = BulletCombatParams.CreateInstance();
-        HordeUtils.setValue(this.bombCombatParams, "Damage", 12);
-        HordeUtils.setValue(this.bombCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
+        ScriptUtils.SetValue(this.bombCombatParams, "Damage", 12);
+        ScriptUtils.SetValue(this.bombCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
         
         // А теперь развлекаемся!
         broadcastMessage("Внимание! По прогнозу дождь из стрел, местами град! O_O", createHordeColor(255, 255, 50, 10));

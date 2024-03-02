@@ -115,7 +115,7 @@ export class Example_CustomBullet extends HordeExampleBase {
         // Обработка достижения цели или завершения lifetime (для примера)
         if (bull.ScriptData.ExampleCustomCounter >= 1000 || bull.IsTargetReached) {
             // Любое состояние кроме Flying ведет к удалению объекта
-            HordeUtils.setValue(bull, "State", BulletState.ReachedTheGoal);
+            ScriptUtils.SetValue(bull, "State", BulletState.ReachedTheGoal);
 
             // Снаряд успел долететь?
             if (bull.IsTargetReached) {
@@ -150,8 +150,8 @@ function createBulletConfig() {
     }
 
     // Установка параметров конфига
-    HordeUtils.setValue(customBullCfg, "BaseBulletSpeed", createPF(8, 0));
-    HordeUtils.setValue(customBullCfg, "IsBallistic", true);
+    ScriptUtils.SetValue(customBullCfg, "BaseBulletSpeed", createPF(8, 0));
+    ScriptUtils.SetValue(customBullCfg, "IsBallistic", true);
 
     return customBullCfg;
 }
@@ -161,8 +161,8 @@ function createBulletConfig() {
  */
 function createCombatParams() {
     let combatParams = BulletCombatParams.CreateInstance();
-    HordeUtils.setValue(combatParams, "Damage", 4);
-    HordeUtils.setValue(combatParams, "AdditiveBulletSpeed", createPF(0, 0));
+    ScriptUtils.SetValue(combatParams, "Damage", 4);
+    ScriptUtils.SetValue(combatParams, "AdditiveBulletSpeed", createPF(0, 0));
 
     return combatParams;
 }

@@ -63,8 +63,8 @@ export class Example_CustomUnit extends HordeExampleBase {
         }
 
         // Настройка
-        HordeUtils.setValue(unitCfg, "ProductionTime", 50); // Быстрое производство для теста
-        HordeUtils.setValue(unitCfg, "CostResources", createResourcesAmount(150, 200, 50 ,1));
+        ScriptUtils.SetValue(unitCfg, "ProductionTime", 50); // Быстрое производство для теста
+        ScriptUtils.SetValue(unitCfg, "CostResources", createResourcesAmount(150, 200, 50 ,1));
 
         return unitCfg;
     }
@@ -98,7 +98,7 @@ export class Example_CustomUnit extends HordeExampleBase {
     private oneHit(u: Unit) {
         // Временно устанавливаем другое вооружение, для корректного поиска врага
         let prevArmament = u.BattleMind.SelectedArmament;
-        HordeUtils.setValue(u.BattleMind, "SelectedArmament", this.armament);
+        ScriptUtils.SetValue(u.BattleMind, "SelectedArmament", this.armament);
 
         // Поиск ближайшего врага
         let allowedQueryFlags = mergeFlags(UnitQueryFlag, UnitQueryFlag.CanAttackTarget, UnitQueryFlag.Harmless, UnitQueryFlag.NearDeathUnits);
@@ -107,7 +107,7 @@ export class Example_CustomUnit extends HordeExampleBase {
         // Был ли найден враг?
         if (!nearestEnemy) {
             // Возвращаем вооружение юнита
-            HordeUtils.setValue(u.BattleMind, "SelectedArmament", prevArmament);
+            ScriptUtils.SetValue(u.BattleMind, "SelectedArmament", prevArmament);
 
             return false;
         }
@@ -119,7 +119,7 @@ export class Example_CustomUnit extends HordeExampleBase {
         //spawnBullet(u, nearestEnemy, araiderArmament, araiderArmament.BulletConfig, araiderArmament.BulletCombatParams, launchPos, targetPos, nearestEnemy.MapLayer);
 
         // Возвращаем вооружение юнита
-        HordeUtils.setValue(u.BattleMind, "SelectedArmament", prevArmament);
+        ScriptUtils.SetValue(u.BattleMind, "SelectedArmament", prevArmament);
 
         return true;
     }
@@ -156,19 +156,19 @@ function createArmamament() {
 
     // Вооружение
     let armament = UnitArmament.CreateArmament(arrowCfg);
-    HordeUtils.setValue(armament.BulletCombatParams, "Damage", 4);
-    HordeUtils.setValue(armament.BulletCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
-    HordeUtils.setValue(armament, "Range", 7);
-    HordeUtils.setValue(armament, "ForestRange", 1);
-    HordeUtils.setValue(armament, "RangeMin", 0);
-    HordeUtils.setValue(armament, "Levels", 6);
-    HordeUtils.setValue(armament, "ReloadTime", 15);
-    HordeUtils.setValue(armament, "BaseAccuracy", 8);
-    HordeUtils.setValue(armament, "MaxDistanceDispersion", 63);
-    HordeUtils.setValue(armament, "DisableDispersion", false);
-    HordeUtils.setValue(armament, "GunCoord", gunCoord);
-    HordeUtils.setValue(armament, "EmitBulletsCountMin", 1);
-    HordeUtils.setValue(armament, "EmitBulletsCountMax", 1);
+    ScriptUtils.SetValue(armament.BulletCombatParams, "Damage", 4);
+    ScriptUtils.SetValue(armament.BulletCombatParams, "AdditiveBulletSpeed", createPF(0, 0));
+    ScriptUtils.SetValue(armament, "Range", 7);
+    ScriptUtils.SetValue(armament, "ForestRange", 1);
+    ScriptUtils.SetValue(armament, "RangeMin", 0);
+    ScriptUtils.SetValue(armament, "Levels", 6);
+    ScriptUtils.SetValue(armament, "ReloadTime", 15);
+    ScriptUtils.SetValue(armament, "BaseAccuracy", 8);
+    ScriptUtils.SetValue(armament, "MaxDistanceDispersion", 63);
+    ScriptUtils.SetValue(armament, "DisableDispersion", false);
+    ScriptUtils.SetValue(armament, "GunCoord", gunCoord);
+    ScriptUtils.SetValue(armament, "EmitBulletsCountMin", 1);
+    ScriptUtils.SetValue(armament, "EmitBulletsCountMax", 1);
 
     return armament;
 }

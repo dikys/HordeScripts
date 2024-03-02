@@ -20,8 +20,8 @@ export class Example_GameWorks extends HordeExampleBase {
         this.log.info('Текущий FPS:', BattleController.GameTimer.CurrentFpsLimit);
 
         // Инфо по реплею (недоступно при инициализации сцены, т.е. в onFirstRun)
-        let BattleControllerT = HordeUtils.GetTypeByName("HordeResurrection.Engine.Logic.Battle.BattleController, HordeResurrection.Engine")
-        let repl = HordeUtils.getValue(ReflectionUtils.GetStaticProperty(BattleControllerT, "ReplayModule").GetValue(BattleControllerT), "_mode");
+        let BattleControllerT = ScriptUtils.GetTypeByName("HordeResurrection.Engine.Logic.Battle.BattleController, HordeResurrection.Engine")
+        let repl = ScriptUtils.GetValue(ReflectionUtils.GetStaticProperty(BattleControllerT, "ReplayModule").GetValue(BattleControllerT), "_mode");
         if (repl.ToString() == "Play") {
             this.log.info('В данный момент запущено воспроизведение реплея');
         } else if (repl.ToString() == "Record") {

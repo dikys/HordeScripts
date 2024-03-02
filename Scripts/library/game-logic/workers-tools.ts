@@ -34,7 +34,7 @@ export function setBulletWorker(bulletCfg, workerTypeName: string, workerName: s
     BulletWorkersRegistry.Register(workerName, workerFunc);
     
     // Установка функции-обработчика в конфиг
-    HordeUtils.setValue(bulletCfg.SpecialParams, workerTypeName, workerName);
+    ScriptUtils.SetValue(bulletCfg.SpecialParams, workerTypeName, workerName);
 }
 
 
@@ -57,9 +57,9 @@ export function setUnitStateWorker(plugin, unitCfg, unitState, workerFunc) {
     const workerObject = host.newObj(ScriptUnitWorkerState);
     
     // Установка функции-обработчика
-    HordeUtils.setValue(workerObject, "FuncName", workerName);
+    ScriptUtils.SetValue(workerObject, "FuncName", workerName);
 
     // Установка обработчика в конфиг
-    const stateWorkers = HordeUtils.getValue(unitCfg, "StateWorkers");
+    const stateWorkers = ScriptUtils.GetValue(unitCfg, "StateWorkers");
     stateWorkers.Item.set(unitState, workerObject);
 }

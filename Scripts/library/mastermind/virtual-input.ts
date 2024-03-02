@@ -86,6 +86,6 @@ export class VirtualInput {
 	}
 
 	private static _inputPush(vii) {
-		HordeUtils.call(vii.InitiatorPlayer.VirtualInput, "AddLocalInput", vii);
+		ScriptUtils.Invoke(vii.InitiatorPlayer.VirtualInput, "AddLocalInput", vii);
 	}
 }

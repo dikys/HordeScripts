@@ -35,8 +35,8 @@ export class AttentionOnSurfacePlugin extends HordePluginBase {
             this.globalStorage.attentionClickHandler.disconnect();
         }
 
-        let AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
-        let MouseScript = HordeUtils.getValue(AllUIModules, 'MouseScript');
+        let AllUIModules = ScriptUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
+        let MouseScript = ScriptUtils.GetValue(AllUIModules, 'MouseScript');
 
         let that = this;
         let handler = MouseScript.AttentionClick.connect((sender, args) => that._attentionHandler(sender, args));
@@ -51,8 +51,8 @@ export class AttentionOnSurfacePlugin extends HordePluginBase {
             this.globalStorage.attentionReceivedHandler.disconnect();
         }
 
-        let AllUIModules = HordeUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
-        let BattleUI = HordeUtils.getValue(AllUIModules, 'BattleUI');
+        let AllUIModules = ScriptUtils.GetTypeByName("HordeResurrection.Game.UI.AllUIModules, HordeResurrection.Game");
+        let BattleUI = ScriptUtils.GetValue(AllUIModules, 'BattleUI');
 
         let that = this;
         let handler = BattleUI.AttentionReceived.connect((sender, args) => that._attentionHandler(sender, args));

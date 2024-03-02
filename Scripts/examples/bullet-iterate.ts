@@ -36,7 +36,7 @@ export class Example_IterateBullets extends HordeExampleBase {
     public onEveryTick(gameTickNum: number) {
     
         // Следующий ID снаряда
-        let currentNextId = HordeUtils.getValue(this.bulletsIdProvider, "TotalIds");
+        let currentNextId = ScriptUtils.GetValue(this.bulletsIdProvider, "TotalIds");
     
         // Итерируем новые снаряды на сцене
         let bullVar = host.newVar(BaseBullet);
@@ -58,8 +58,8 @@ export class Example_IterateBullets extends HordeExampleBase {
      * Магия рефлексии для получения доступа к IdProvider 
      */
     private _getIdProvider() {
-        let BaseBulletT = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Bullets.BaseBullet, HordeClassLibrary");
-        let ScenaObjectsRegistryT = HordeUtils.GetTypeByName("HordeClassLibrary.World.ScenaComponents.Intrinsics.ScenaObjectsRegistry`1").MakeGenericType(BaseBulletT);
+        let BaseBulletT = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Bullets.BaseBullet, HordeClassLibrary");
+        let ScenaObjectsRegistryT = ScriptUtils.GetTypeByName("HordeClassLibrary.World.ScenaComponents.Intrinsics.ScenaObjectsRegistry`1").MakeGenericType(BaseBulletT);
         let propIdProvider = ScenaObjectsRegistryT.GetProperty("IdProvider", mergeFlags(BindingFlags, BindingFlags.Instance, BindingFlags.Public, BindingFlags.NonPublic));
         let bulletsIdProvider = propIdProvider.GetValue(this.bulletsRegistry);
         return bulletsIdProvider;

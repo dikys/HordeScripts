@@ -31,7 +31,7 @@ export class Example_PlayerWorks extends HordeExampleBase {
             // Подробнее см. в примерах работы с поселением
 
             // Объект для бота
-            let realMasterMind = HordeUtils.getValue(realPlayer, "MasterMind");
+            let realMasterMind = ScriptUtils.GetValue(realPlayer, "MasterMind");
             if (realMasterMind){
                 this.log.info(`  Характер:`, realMasterMind.Character.Description);
             } else {

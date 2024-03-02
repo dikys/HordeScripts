@@ -73,15 +73,15 @@ export function unitTeleport(unit, cell) {
  */
 export function* iterateOverUnitsInBox(cell, radius) {
     let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
-    let unitsInBox = HordeUtils.call(ActiveScena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
+    let unitsInBox = ScriptUtils.Invoke(ActiveScena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
     
-    let count = HordeUtils.getValue(unitsInBox, "Count");
+    let count = ScriptUtils.GetValue(unitsInBox, "Count");
     if (count == 0) {
         return;
     }
 
-    let units = HordeUtils.getValue(unitsInBox, "Units");
-    // let positions = HordeUtils.getValue(unitsInBox, "Positions");
+    let units = ScriptUtils.GetValue(unitsInBox, "Units");
+    // let positions = ScriptUtils.GetValue(unitsInBox, "Positions");
 
     for (let index = 0; index < count; ++index) {
         let unit = units[index];

@@ -10,11 +10,11 @@ import { unitCanBePlacedByRealMap } from "./unit-and-map";
  * Возвращает созданного юнита.
  */
 export function spawnUnit(settlement, uCfg, cell, direction) {
-    let csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    let spawnParams = HordeUtils.CreateInstance(csType);
-    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
-    HordeUtils.setValue(spawnParams, "Cell", cell);
-    HordeUtils.setValue(spawnParams, "Direction", direction);
+    let csType = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    let spawnParams = ScriptUtils.CreateInstance(csType);
+    ScriptUtils.SetValue(spawnParams, "ProductUnitConfig", uCfg);
+    ScriptUtils.SetValue(spawnParams, "Cell", cell);
+    ScriptUtils.SetValue(spawnParams, "Direction", direction);
 
     let unit = settlement.Units.SpawnUnit(spawnParams);
     return unit;
@@ -26,15 +26,15 @@ export function spawnUnit(settlement, uCfg, cell, direction) {
  * Возвращает список созданных юнитов.
  */
 export function spawnUnits(settlement, uCfg, uCount, direction, generator) {
-    let csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    let spawnParams = HordeUtils.CreateInstance(csType);
-    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
-    HordeUtils.setValue(spawnParams, "Direction", direction);
+    let csType = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    let spawnParams = ScriptUtils.CreateInstance(csType);
+    ScriptUtils.SetValue(spawnParams, "ProductUnitConfig", uCfg);
+    ScriptUtils.SetValue(spawnParams, "Direction", direction);
 
     let outSpawnedUnits: any[] = [];
     for (let position = generator.next(); !position.done && outSpawnedUnits.length < uCount; position = generator.next()) {
         if (unitCanBePlacedByRealMap(uCfg, position.value.X, position.value.Y)) {
-            HordeUtils.setValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
+            ScriptUtils.SetValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
             outSpawnedUnits.push(settlement.Units.SpawnUnit(spawnParams));
         }
     }

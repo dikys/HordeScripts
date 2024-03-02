@@ -50,8 +50,8 @@ export class Example_ConfigWorks extends HordeExampleBase {
         rocks += 1;
         if (rocks > 10)
             rocks = 1;
-        HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMin", rocks);
-        HordeUtils.setValue(catapultCfg.MainArmament, "EmitBulletsCountMax", rocks);
+        ScriptUtils.SetValue(catapultCfg.MainArmament, "EmitBulletsCountMin", rocks);
+        ScriptUtils.SetValue(catapultCfg.MainArmament, "EmitBulletsCountMax", rocks);
         
         // Результат можно проверить в игре
         this.log.info("Теперь катапульты кидают", catapultCfg.MainArmament.EmitBulletsCountMin, "камней за выстрел!");
@@ -95,9 +95,9 @@ export class Example_ConfigCreation extends HordeExampleBase {
 
         // Клонируем конфиг и изменяем
         let newBallistaCfg = HordeContent.CloneConfig(ballistaCfg, newCfgUid);
-        HordeUtils.setValue(newBallistaCfg, "Name", "Динамическая баллиста");
-        HordeUtils.setValue(newBallistaCfg, "ProductionTime", 50);
-        HordeUtils.setValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
+        ScriptUtils.SetValue(newBallistaCfg, "Name", "Динамическая баллиста");
+        ScriptUtils.SetValue(newBallistaCfg, "ProductionTime", 50);
+        ScriptUtils.SetValue(newBallistaCfg, "TintColor", createHordeColor(255, 255, 150, 150));
         this.log.info('Создан новый конфиг баллисты:', newBallistaCfg.Uid, `(${newBallistaCfg.Name})`);
 
         // Добавляем новую баллисту в завод

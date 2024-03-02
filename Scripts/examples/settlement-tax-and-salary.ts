@@ -28,7 +28,7 @@ export class Example_SettlementTaxAndSalary extends HordeExampleBase {
         for (let settlementId of this.settlements) {
             let settlement = scenaSettlements.GetByUid(settlementId);
 
-            let censusModel = HordeUtils.getValue(settlement.Census, "Model");
+            let censusModel = ScriptUtils.GetValue(settlement.Census, "Model");
             
             // Установить размер одной зарплаты
             censusModel.OneSalarySize = createResourcesAmount(4, 0, 0, 0);
