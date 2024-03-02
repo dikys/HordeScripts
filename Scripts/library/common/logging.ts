@@ -26,41 +26,41 @@ export class Logger {
     /**
      * Сделать отладочную запись.
      */
-    public debug(msg: string, ...vars: any[]) {
+    public debug(...vars: any[]) {
         if (this.logLevel > LogLevel.Debug) {
             return;
         }
-        this.write(this.prepareMsg("DBG", msg, ...vars));
+        this.write(this.prepareMsg("DBG", ...vars));
     }
     
     /**
      * Сделать info-запись.
      */
-    public info(msg: string, ...vars: any[]) {
+    public info(...vars: any[]) {
         if (this.logLevel > LogLevel.Info) {
             return;
         }
-        this.write(this.prepareMsg("Info", msg, ...vars));
+        this.write(this.prepareMsg("Info", ...vars));
     }
     
     /**
      * Сделать warning-запись.
      */
-    public warning(msg: string, ...vars: any[]) {
+    public warning(...vars: any[]) {
         if (this.logLevel > LogLevel.Warning) {
             return;
         }
-        this.write(this.prepareMsg("WARN", msg, ...vars));
+        this.write(this.prepareMsg("WARN", ...vars));
     }
     
     /**
      * Сделать error-запись.
      */
-    public error(msg: string, ...vars: any[]) {
+    public error(...vars: any[]) {
         if (this.logLevel > LogLevel.Error) {
             return;
         }
-        this.write(this.prepareMsg("ERR", msg, ...vars));
+        this.write(this.prepareMsg("ERR", ...vars));
     }
     
     /**
@@ -82,9 +82,11 @@ export class Logger {
     /**
      * Составляет строку для записи в лог.
      */
-    private prepareMsg(level: string, msg: string, ...vars: any[]) {
-        if (vars.length > 0)
-            msg = msg + ' ' + vars.join(' ');
+    private prepareMsg(level: string, ...vars: any[]) {
+        if (vars.length == 0)
+            return;
+
+        let msg = vars.join(' ');
         return `[JS: ${level}] ${this.msgPrefix}${msg}`;
     }
 }

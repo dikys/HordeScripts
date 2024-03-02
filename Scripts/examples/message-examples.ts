@@ -23,7 +23,7 @@ export class Example_SendMessageToAll extends HordeExampleBase {
         let unit = unitsMap.GetUpperUnit(5, 5);
         if (unit) {
             let msgColor = createHordeColor(255, 255, 255, 255);
-            broadcastMessage("Обнаружен юнит: " + unit.ToString(), msgColor);
+            broadcastMessage("Обнаружен юнит: " + unit, msgColor);
         } else {
             let msgColor = createHordeColor(255, 200, 200, 200);
             broadcastMessage("Юнит не обнаружен в клетке (5, 5)", msgColor);
@@ -68,7 +68,7 @@ export class Example_HookSentChatMessages extends HordeExampleBase {
                 let senderPlayer = HordeUtils.getValue(args, "InitiatorPlayer");
                 let targets = HordeUtils.getValue(args, "Targets");
                 let message = HordeUtils.getValue(args, "Message");
-                that.log.info(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
+                that.log.info(`[${senderPlayer.Nickname} -> ${targets}] ${message}`);
             } catch (ex) {
                 that.log.exception(ex);
             }
@@ -111,7 +111,7 @@ export class Example_HookReceivedChatMessages extends HordeExampleBase {
                 let senderPlayer = HordeEngine.HordeResurrection.Engine.Logic.Main.PlayersController.GetNetElementMainPlayer(HordeUtils.getValue(args, "NetworkElement"));
                 let targets = host.cast(HordeEngine.HordeResurrection.Engine.Logic.Battle.Stuff.ChatTargets, HordeUtils.getValue(args, "Targets"));
                 let message = HordeUtils.getValue(args, "Message");
-                that.log.info(`[${senderPlayer.Nickname} -> ${targets.ToString()}] ${message}`);
+                that.log.info(`[${senderPlayer.Nickname} -> ${targets}] ${message}`);
             } catch (ex) {
                 that.log.exception(ex);
             }

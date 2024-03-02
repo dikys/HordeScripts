@@ -31,11 +31,11 @@ export function mergeFlags(flagsType, ...flagsArray: any[]) {
  * Примеры:
 ```
 ForEach(someList, item => {
-    log.info('-', item.ToString());
+    log.info('-', item);
 });
 
 ForEach(someList, (item, i, source) => {
-    log.info('#' + i, item.ToString(), 'from', source);
+    log.info('#' + i, item, 'from', source);
 });
 ```
  */

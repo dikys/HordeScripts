@@ -45,7 +45,7 @@ export function setBulletWorker(bulletCfg, workerTypeName: string, workerName: s
  * Установить обработчик состояния юнита на основе метода из плагина.
  */
 export function setUnitStateWorker(plugin, unitCfg, unitState, workerFunc) {
-    const workerName = plugin.name + '_' + unitState.ToString() + 'Worker'
+    const workerName = `${plugin.name}_${unitState}Worker`
 
     // Обертка для метода из плагина, чтобы работал "this"
     const workerWrapper = (u) => workerFunc.call(plugin, u);

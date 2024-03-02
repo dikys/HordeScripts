@@ -10,22 +10,22 @@ export function makePrivateEventSource(targetObject, eventName, eventArgsType) {
 	// Получение дескриптора события (EventInfo)
     let bindingFlags = mergeFlags(BindingFlags, BindingFlags.Public, BindingFlags.NonPublic, BindingFlags.Instance)
     let eventInfo = targetObject.GetType().GetEvent(eventName, bindingFlags);
-    // log.info('  EventInfo:', eventInfo.ToString());
+    // log.info('  EventInfo:', eventInfo);
 
     // Составление типа для EventSource
     let eventHandlerT = HordeUtils.GetTypeByName('System.EventHandler`1, System.Private.CoreLib');
     let eventSourceT = HordeUtils.GetTypeByName('Microsoft.ClearScript.EventSource`1, ClearScript.Core');
     eventSourceT = eventSourceT.MakeGenericType(eventHandlerT.MakeGenericType(eventArgsType));
-    // log.info('  EventSource type:', eventSourceT.ToString());
+    // log.info('  EventSource type:', eventSourceT);
 
     // Объект JS-движка
     let scriptEngine = getCurrentJsEngine();
-    // log.info('  ScriptEngine:', scriptEngine.ToString());
+    // log.info('  ScriptEngine:', scriptEngine);
 
     // Создание EventSource-объекта
     let eventSourceCtor = eventSourceT.GetConstructors(mergeFlags(BindingFlags, BindingFlags.Public, BindingFlags.NonPublic, BindingFlags.Instance))[0];
     let eventSource = eventSourceCtor.Invoke(createArray(ObjectT, [scriptEngine, targetObject, eventInfo]));
-    // log.info('  EventSource:', eventSource.ToString());
+    // log.info('  EventSource:', eventSource);
 
     return eventSource;
 }

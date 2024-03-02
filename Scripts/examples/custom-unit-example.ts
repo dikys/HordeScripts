@@ -47,7 +47,7 @@ export class Example_CustomUnit extends HordeExampleBase {
         if (HordeContent.HasUnitConfig(exampleCfgUid)) {
             // Конфиг уже был создан, берем предыдущий
             unitCfg = HordeContent.GetUnitConfig(exampleCfgUid);
-            this.log.info('Конфиг воина для теста:', unitCfg.ToString());
+            this.log.info('Конфиг воина для теста:', unitCfg);
         } else {
             // Создание нового конфига
             let unitCfgOrig = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Araider");
@@ -59,7 +59,7 @@ export class Example_CustomUnit extends HordeExampleBase {
             let produceList = producerParams.CanProduceList;
             produceList.Add(unitCfg);
 
-            this.log.info('Создан новый конфиг воина для теста:', unitCfg.ToString());
+            this.log.info('Создан новый конфиг воина для теста:', unitCfg);
         }
 
         // Настройка

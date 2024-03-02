@@ -38,7 +38,7 @@ export class Example_MasterMindRequest extends HordeExampleBase {
         let requests = masterMind.Requests;
         this.log.info('Запросов в обработке:', requests.Count);
         ForEach(requests, item => {
-            this.log.info('-', item.ToString());
+            this.log.info('-', item);
         });
     }
 }

@@ -36,7 +36,7 @@ export class Example_SpawnOneBullet extends HordeExampleBase {
     
         // Создание снаряда
         let bull = spawnBullet(someUnit, null, null, arrowCfg, combatParams, createPoint(10, 100), createPoint(1000, 800), UnitMapLayer.Main);
-        this.log.info(`Создан снаряд: ${bull.ToString()}`);
+        this.log.info(`Создан снаряд: ${bull}`);
     }
 }
 

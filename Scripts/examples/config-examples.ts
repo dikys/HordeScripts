@@ -30,7 +30,7 @@ export class Example_ConfigWorks extends HordeExampleBase {
             let uid = kv.Key;
             let uCfg = kv.Value;
             if (uid.includes('men')) {
-                this.log.info('-', '"' + uid + '"', '-', uCfg.ToString());
+                this.log.info('-', '"' + uid + '"', '-', uCfg);
             }
         })
 

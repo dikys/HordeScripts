@@ -57,7 +57,7 @@ export function inspect(object, maxDepth=undefined, msg: string|null=null) {
  */
 export function inspectEnum(enumType, n=10) {
     for (let i = 0; i < n; i++) {
-        log.info(`${i}`, '-', host.cast(enumType, i).ToString());
+        log.info(`${i}`, '-', host.cast(enumType, i));
     }
 }
 
@@ -66,9 +66,9 @@ export function inspectEnum(enumType, n=10) {
  */
 export function inspectFlagEnum(enumType, n=31) {
     let end = 1 << n >>>0;
-    log.info('0'.padStart(n, '0'), '-', host.cast(enumType, 0).ToString());
+    log.info('0'.padStart(n, '0'), '-', host.cast(enumType, 0));
     for (let i = 1; i < end; i = (i << 1 >>>0)) {
-        log.info(i.toString(2).padStart(n, '0'), '-', host.cast(enumType, i).ToString());
+        log.info(i.toString(2).padStart(n, '0'), '-', host.cast(enumType, i));
     }
 }
 

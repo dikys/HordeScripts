@@ -31,7 +31,7 @@ export class Example_SpawnUnit extends HordeExampleBase {
         );
 
         if (unit) {
-            this.log.info(`Создан юнит: ${unit.ToString()}`);
+            this.log.info(`Создан юнит: ${unit}`);
         } else {
             this.log.info('Юнита создать не удалось');
         }

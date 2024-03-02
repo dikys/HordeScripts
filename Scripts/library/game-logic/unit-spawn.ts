@@ -59,7 +59,7 @@ export function test_spawnUnits() {
 
     log.info('Созданные юниты:');
     for (let unit of spawnedUnits) {
-        log.info('-', unit.ToString());
+        log.info('-', unit);
     }
 
     return;

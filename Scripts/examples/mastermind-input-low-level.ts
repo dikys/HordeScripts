@@ -71,7 +71,7 @@ export class Example_InputLowLevel extends HordeExampleBase {
         if (selectedSquad.Count > 0) {
             this.log.info('У', oleg.Nickname, 'выделены следующие юниты:');
             ForEach(selectedSquad, u => {
-                this.log.info('- ', u.ToString());
+                this.log.info('- ', u);
             });
         } else {
             this.log.info('У', oleg.Nickname, 'нет выделенных юнитов в данный момент');

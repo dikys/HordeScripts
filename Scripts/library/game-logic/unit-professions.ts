@@ -22,7 +22,7 @@ export const UnitProducerProfessionData = HCL.HordeClassLibrary.UnitComponents.P
 export function getUnitProfessionParams(uCfg, prof) {
     let profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
     if (!uCfg.ProfessionParams.TryGetValue(prof, profParams.out)) {
-        log.warning('Can\'t get profession params:', prof.ToString());
+        log.warning('Can\'t get profession params:', prof);
         return null;
     }
     return profParams.value;

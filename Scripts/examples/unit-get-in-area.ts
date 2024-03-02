@@ -24,7 +24,7 @@ export class Example_GetUnitsInArea_Bruteforce extends HordeExampleBase {
                 let unit = unitsMap.GetUpperUnit(i, j);
                 if (!unit)
                     continue;
-                this.log.info('-', unit.ToString());
+                this.log.info('-', unit);
             }
         }
     }
@@ -57,7 +57,7 @@ export class Example_GetUnitsInArea_Squad extends HordeExampleBase {
 
         this.log.info('Собрано юнитов:', squad.Count);
         ForEach(squad, u => {
-            this.log.info('-', u.ToString());
+            this.log.info('-', u);
         });
     }
 }
@@ -80,7 +80,7 @@ export class Example_GetUnitsInArea_KdTree extends HordeExampleBase {
 
         this.log.info('Юниты:');
         for (let u = unitsIter.next(); !u.done; u = unitsIter.next()) {
-            this.log.info('-', u.value.ToString());
+            this.log.info('-', u.value);
         }
     }
 }

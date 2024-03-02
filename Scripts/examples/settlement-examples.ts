@@ -37,13 +37,13 @@ export class Example_SettlementWorks extends HordeExampleBase {
         // Здесь можно получать юнитов только по идентификатору, а по координатам см. через сцену.
         let unit = HordeUtils.call(units, "GetById", 0);
         if (unit) {
-            this.log.info(`У ${realPlayer.Nickname} обнаружен юнит с id=0: ${unit.ToString()}`);
+            this.log.info(`У ${realPlayer.Nickname} обнаружен юнит с id=0: ${unit}`);
         }
 
         // Перечисление юнитов этого поселения
         let enumerator = units.GetEnumerator();
         while(enumerator.MoveNext()) {
-            this.log.info('Первый юнит:', enumerator.Current.ToString());
+            this.log.info('Первый юнит:', enumerator.Current);
             break;  // Через ForEach пока что нельзя делать break, а через использование enumerator'а можно
         }
         enumerator.Dispose();
@@ -73,7 +73,7 @@ export class Example_SettlementResources extends HordeExampleBase {
 
         // Высокоуровневый объект для управления ресурсами поселения
         let settlementResources = realSettlement.Resources;
-        this.log.info("Ресурсы:", settlementResources.ToString());
+        this.log.info("Ресурсы:", settlementResources);
         // let resoucesAmount = HordeUtils.getValue(settlementResources, "Resources");
 
         // Прибавим ресурсы
@@ -85,7 +85,7 @@ export class Example_SettlementResources extends HordeExampleBase {
         if(!settlementResources.TakeResourcesIfEnough(subRes)) {
             this.log.info("Ресурсов недостаточно!");
         }
-        this.log.info("Теперь ресурсов:", settlementResources.ToString());
+        this.log.info("Теперь ресурсов:", settlementResources);
 
         // Ещё у settlementResources есть следующие методы:
         //   TakeResources - забрать без проверки количества
@@ -126,7 +126,7 @@ export class Example_SettlementResources_2 extends HordeExampleBase {
             let amount = createResourcesAmount(this.gold, this.metal, this.lumber, this.people);
             settlement.Resources.SetResources(amount);
 
-            let msg = createGameMessageWithSound(`[${this.exampleDisplayName}] Установлены ресуры: ${amount.ToString()}`);
+            let msg = createGameMessageWithSound(`[${this.exampleDisplayName}] Установлены ресуры: ${amount}`);
             settlement.Messages.AddMessage(msg);
         }
     }
@@ -156,7 +156,7 @@ export class Example_SettlementUnitsInfo extends HordeExampleBase {
         // Юниты разных типов
         let professionCenter = realSettlement.Units.Professions;
         this.log.info('Выбор юнита по типу:');
-        let logUnit = function(str, u) { that.log.info(str+':', u ? u.ToString() : '<None>') };
+        let logUnit = function(str, u) { that.log.info(str+':', u ? u : '<None>') };
         logUnit('- Первый в MainBuildings', professionCenter.MainBuildings.First());
         logUnit('- Первый в Barracks', professionCenter.Barracks.First());
         logUnit('- Первый в Factories', professionCenter.Factories.First());

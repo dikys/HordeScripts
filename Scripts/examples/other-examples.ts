@@ -27,7 +27,7 @@ export class Example_GameWorks extends HordeExampleBase {
         } else if (repl.ToString() == "Record") {
             this.log.info('В данный момент запущена запись реплея');
         } else {
-            this.log.info('В данный момент невозможно определить статус реплея:', repl.ToString());
+            this.log.info('В данный момент невозможно определить статус реплея:', repl);
         }
 
         // Инфо по игрокам
@@ -36,13 +36,13 @@ export class Example_GameWorks extends HordeExampleBase {
             let realPlayer = player.GetRealPlayer();
             let pOrigin = realPlayer.PlayerOrigin.ToString();
             if (pOrigin == "Replay") {
-                this.log.info('- Реплей-игрок:', realPlayer.ToString());
+                this.log.info('- Реплей-игрок:', realPlayer);
             } else if (pOrigin == "Local") {
-                this.log.info('- Локальный игрок:', realPlayer.ToString());
+                this.log.info('- Локальный игрок:', realPlayer);
             } else if (pOrigin == "Remote") {
-                this.log.info('- Удаленный игрок:', realPlayer.ToString());
+                this.log.info('- Удаленный игрок:', realPlayer);
             } else {
-                this.log.info('- Невозможно определить происхождение игрока:', realPlayer.ToString());
+                this.log.info('- Невозможно определить происхождение игрока:', realPlayer);
             }
         }
     }
@@ -96,6 +96,6 @@ export class Example_ImportDotNetTypes extends HordeExampleBase {
         let week = xHost.newObj(List(DayOfWeek), 7);
         week.Add(DayOfWeek.Sunday);
         
-        this.log.info("DayOfWeek:", week[0].ToString());
+        this.log.info("DayOfWeek:", week[0]);
     }
 }
