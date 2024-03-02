@@ -16,7 +16,7 @@ export class Example_InputLowLevel extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
             
-        let oleg = players["0"].GetRealPlayer();
+        let oleg = Players["0"].GetRealPlayer();
         
         this.log.info('Список всех команд юнитов');
         inspectEnum(UnitCommand);

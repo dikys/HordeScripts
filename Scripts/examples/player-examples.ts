@@ -14,11 +14,11 @@ export class Example_PlayerWorks extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
             
-        // Глобальная переменная "players" - это массив с API для доступа к каждому игроку
-        this.log.info('Количество игроков:', '"' + players.length + '"');
+        // Глобальная переменная "Players" - это массив с API для доступа к каждому игроку
+        this.log.info('Количество игроков:', '"' + Players.length + '"');
 
-        for(let i in players) {
-            let player = players[i];
+        for(let i in Players) {
+            let player = Players[i];
 
             // Т.к. API ещё не разработано, ВРЕМЕННО прокинул реальный объект игрока
             // Здесь и далее в функии выполняется работа с реальными объектами (не API)

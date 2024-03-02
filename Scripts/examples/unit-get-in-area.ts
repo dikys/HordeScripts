@@ -16,7 +16,7 @@ export class Example_GetUnitsInArea_Bruteforce extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let unitsMap = scena.GetRealScena().UnitsMap;
+        let unitsMap = ActiveScena.GetRealScena().UnitsMap;
 
         this.log.info('Юниты:');
         for (let i = 0; i < 20; i++) {
@@ -51,7 +51,7 @@ export class Example_GetUnitsInArea_Squad extends HordeExampleBase {
             return !unit.Cfg.IsBuilding;
         });
 
-        let unitsMap = scena.GetRealScena().UnitsMap;
+        let unitsMap = ActiveScena.GetRealScena().UnitsMap;
         let rect = createRect(0,0,20,20);
         let squad = unitsMap.GetSquadFromRect(rect, filterCallback);
 

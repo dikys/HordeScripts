@@ -31,7 +31,7 @@ export class Example_SpawnBulletsRain extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
 
-        let realScena = scena.GetRealScena();
+        let realScena = ActiveScena.GetRealScena();
         let settlement_0 = realScena.Settlements.Item.get('0');  // Олег
 
         // Игровой рандомизатор

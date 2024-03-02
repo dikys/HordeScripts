@@ -24,7 +24,7 @@ export function getOrCreateTestUnit(plugin) {
 export function createUnitForTest(plugin) {
     let testCell = createPoint(5, 5);
 
-    let realScena = scena.GetRealScena();
+    let realScena = ActiveScena.GetRealScena();
     let unit = realScena.UnitsMap.GetUpperUnit(testCell);
     if (unit) {
         return unit;

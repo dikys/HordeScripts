@@ -10,7 +10,7 @@ import { KnownUnit, Unit } from "./horde-types";
  * (Тут используется актуальные данные карты)
  */
 export function unitCanBePlacedByRealMap(uCfg, x, y) {
-    return uCfg.CanBePlaced(scena.GetRealScena(), x, y);
+    return uCfg.CanBePlaced(ActiveScena.GetRealScena(), x, y);
 }
 
 /**
@@ -73,7 +73,7 @@ export function unitTeleport(unit, cell) {
  */
 export function* iterateOverUnitsInBox(cell, radius) {
     let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
-    let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
+    let unitsInBox = HordeUtils.call(ActiveScena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
     
     let count = HordeUtils.getValue(unitsInBox, "Count");
     if (count == 0) {

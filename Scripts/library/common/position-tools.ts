@@ -21,8 +21,8 @@ export function cellToCenterPosition(cell) {
  * Генератор позиций вокруг точки по спирале в рамках сцены
  */
 export function* generateCellInSpiral(centerX, centerY) {
-    let scenaWidth = scena.GetRealScena().Size.Width;
-    let scenaHeight = scena.GetRealScena().Size.Height;
+    let scenaWidth = ActiveScena.GetRealScena().Size.Width;
+    let scenaHeight = ActiveScena.GetRealScena().Size.Height;
 
     // проецируем точку внутрь сцены
     centerX = Math.min(Math.max(0, centerX), scenaWidth - 1);
@@ -93,10 +93,10 @@ export function* generateCellInSpiral(centerX, centerY) {
  * Генератор рандомных позиций в прямоугольнике в рамках сцены
  */
 export function* generateRandomCellInRect(rectX, rectY, rectW, rectH) {
-    let scenaWidth = scena.GetRealScena().Size.Width;
-    let scenaHeight = scena.GetRealScena().Size.Height;
+    let scenaWidth = ActiveScena.GetRealScena().Size.Width;
+    let scenaHeight = ActiveScena.GetRealScena().Size.Height;
     // Рандомизатор
-    let rnd = scena.GetRealScena().Context.Randomizer;
+    let rnd = ActiveScena.GetRealScena().Context.Randomizer;
 
     rectX = Math.max(0, rectX);
     rectY = Math.max(0, rectY);

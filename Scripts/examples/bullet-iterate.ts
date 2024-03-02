@@ -20,7 +20,7 @@ export class Example_IterateBullets extends HordeExampleBase {
     public constructor() {
         super("Iterate bullets");
         
-        let realScena = scena.GetRealScena();
+        let realScena = ActiveScena.GetRealScena();
 
         this.bulletsRegistry = realScena.Bullets;
         this.bulletsIdProvider = this._getIdProvider();

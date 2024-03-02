@@ -15,12 +15,12 @@ export class Example_SettlementWorks extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let realPlayer = players["0"].GetRealPlayer();
+        let realPlayer = Players["0"].GetRealPlayer();
         let realSettlement = realPlayer.GetRealSettlement();
 
         // Дипломатия
         let diplomacy = realSettlement.Diplomacy;
-        let otherSettlement = players["1"].GetRealPlayer().GetRealSettlement();
+        let otherSettlement = Players["1"].GetRealPlayer().GetRealSettlement();
         if (diplomacy.IsWarStatus(otherSettlement)) {
             this.log.info(`${realSettlement.LeaderName} ВОЮЕТ с ${otherSettlement.LeaderName}!`);
         } else {
@@ -68,7 +68,7 @@ export class Example_SettlementResources extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let realPlayer = players["0"].GetRealPlayer();
+        let realPlayer = Players["0"].GetRealPlayer();
         let realSettlement = realPlayer.GetRealSettlement();
 
         // Высокоуровневый объект для управления ресурсами поселения
@@ -120,7 +120,7 @@ export class Example_SettlementResources_2 extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let scenaSettlements = scena.GetRealScena().Settlements;
+        let scenaSettlements = ActiveScena.GetRealScena().Settlements;
         for (let settlementId of this.settlements) {
             let settlement = scenaSettlements.GetByUid(settlementId);
             let amount = createResourcesAmount(this.gold, this.metal, this.lumber, this.people);
@@ -149,7 +149,7 @@ export class Example_SettlementUnitsInfo extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let realPlayer = players["0"].GetRealPlayer();
+        let realPlayer = Players["0"].GetRealPlayer();
         let realSettlement = realPlayer.GetRealSettlement();
         let that = this;
 

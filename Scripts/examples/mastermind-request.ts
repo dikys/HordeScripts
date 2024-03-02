@@ -12,7 +12,7 @@ export class Example_MasterMindRequest extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let realPlayer = players["1"].GetRealPlayer();
+        let realPlayer = Players["1"].GetRealPlayer();
         let masterMind = HordeUtils.getValue(realPlayer, "MasterMind");
         if (!masterMind) {
             this.log.info('Выбранный игрок не управляется MasterMind.');

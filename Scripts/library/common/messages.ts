@@ -19,7 +19,7 @@ export function createGameMessageWithSound(text: string, color=null) {
  * Отобразить сообщение для всех поселений на карте.
  */
 export function broadcastMessage(text: string, color: HordeColor) {
-    ForEach(scena.GetRealScena().Settlements, (settlement: Settlement) => {
+    ForEach(ActiveScena.GetRealScena().Settlements, (settlement: Settlement) => {
         let msg = createGameMessageWithSound(text, color);
         settlement.Messages.AddMessage(msg);
     });

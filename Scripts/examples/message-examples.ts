@@ -19,7 +19,7 @@ export class Example_SendMessageToAll extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
 
-        let unitsMap = scena.GetRealScena().UnitsMap;
+        let unitsMap = ActiveScena.GetRealScena().UnitsMap;
         let unit = unitsMap.GetUpperUnit(5, 5);
         if (unit) {
             let msgColor = createHordeColor(255, 255, 255, 255);

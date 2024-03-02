@@ -24,7 +24,7 @@ export class Example_SettlementTaxAndSalary extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let scenaSettlements = scena.GetRealScena().Settlements;
+        let scenaSettlements = ActiveScena.GetRealScena().Settlements;
         for (let settlementId of this.settlements) {
             let settlement = scenaSettlements.GetByUid(settlementId);
 

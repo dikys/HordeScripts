@@ -32,7 +32,7 @@ export class Example_GameWorks extends HordeExampleBase {
 
         // Инфо по игрокам
         this.log.info('Происхождение игроков:');
-        for (let player of players) {
+        for (let player of Players) {
             let realPlayer = player.GetRealPlayer();
             let pOrigin = realPlayer.PlayerOrigin.ToString();
             if (pOrigin == "Replay") {
@@ -64,7 +64,7 @@ export class Example_Introspection extends HordeExampleBase {
         // Remove false-condition to reveal the Horde API structure
         if (false) inspect(HordeAPI, 1, "Horde API structure (в разработке)");
         if (false) inspect(HCL, 5, "HordeClassLibrary (полный доступ)");
-        if (true) inspect(players["0"].GetRealPlayer().GetRealSettlement().Units, 1, ".Net объект с юнитами игрока");
+        if (true) inspect(Players["0"].GetRealPlayer().GetRealSettlement().Units, 1, ".Net объект с юнитами игрока");
 
         // Пример получения содержимого в enum-типах
         if (true) inspectEnum(UnitAnimState);

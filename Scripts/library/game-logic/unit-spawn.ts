@@ -47,7 +47,7 @@ export function spawnUnits(settlement, uCfg, uCount, direction, generator) {
 // --- Test
 
 export function test_spawnUnits() {
-    let realScena = scena.GetRealScena();
+    let realScena = ActiveScena.GetRealScena();
     let settlements = realScena.Settlements;
 
     let settlement_0 = settlements.Item.get('0');  // Олег
