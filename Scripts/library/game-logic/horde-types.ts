@@ -3,7 +3,7 @@
 // --- Глобальные переменные
 
 export const BattleController = HordeEngine.HordeResurrection.Engine.Logic.Battle.BattleController;
-export const AllContent = HCL.HordeClassLibrary.HordeContentApi.AllContent;
+export const AllContent = HCL.HordeClassLibrary.HordeContent.AllContent;
 export const WorldConstants = HCL.HordeClassLibrary.World.Const.WorldConstants;
 
 
@@ -17,13 +17,13 @@ export const Scena = HCL.HordeClassLibrary.World.ScenaComponents.Scena;
 // --- Тайлы
 
 // Unknown, Grass, Forest, Water, Marsh, Sand, Mounts, Road, Ice
-export const TileType = HCL.HordeClassLibrary.HordeContentApi.Configs.Tiles.Stuff.TileType;
+export const TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 
 // None, Gold, Metal
 export const ResourceTileType = HCL.HordeClassLibrary.World.Objects.Tiles.ResourceTileType;
 
 // None, Scorched, Chopped, Exploded, ...
-export const TilePayload = HCL.HordeClassLibrary.HordeContentApi.Configs.Tiles.Stuff.TilePayload;
+export const TilePayload = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TilePayload;
 
 // ===================================================
 // --- Снаряды
@@ -36,10 +36,10 @@ export const ScriptBullet = HCL.HordeClassLibrary.World.Objects.Bullets.Implemen
 // ===================================================
 // --- Конфиг юнита
 
-export const UnitConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.Units.UnitConfig;
+export const UnitConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitConfig;
 
-export const BuildingConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.Units.BuildingConfig;
-export const UnitTechConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.Units.UnitTechConfig;
+export const BuildingConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.BuildingConfig;
+export const UnitTechConfig = HCL.HordeClassLibrary.HordeContent.Configs.Units.UnitTechConfig;
 
 
 // ===================================================
@@ -130,25 +130,25 @@ export const ScriptUnitWorkerEveryTick = HCL.HordeClassLibrary.UnitComponents.Wo
 // ===================================================
 // --- Конфиги
 
-export const BulletConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.Bullets.BulletConfig;
-export const Force = HCL.HordeClassLibrary.HordeContentApi.Configs.Army.Force;
-export const RuleConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.Rules.RuleConfig;
-export const SoundEffectConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.SoundEffects.SoundEffectConfig;
-export const SoundsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Audio.SoundsCatalog;
-export const BackgroundAnimationsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.BackgroundAnimationsCatalog;
-export const BulletAnimationsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.BulletAnimationsCatalog;
-export const ButtonAnimationsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.ButtonAnimationsCatalog;
-export const DecayAnimationsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.DecayAnimationsCatalog;
-export const FontCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.FontCatalog;
-export const SimpleAnimationsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.SimpleAnimationsCatalog;
-export const UnitAnimationsCatalog = HCL.HordeClassLibrary.HordeContentApi.Configs.ViewResourceCatalogs.Graphics.Specialization.UnitAnimationsCatalog;
-export const VisualEffectConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.VisualEffects.VisualEffectConfig;
-export const UnitCommandConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.UnitCommandConfig;
-export const MindCharacterConfig = HCL.HordeClassLibrary.HordeContentApi.Configs.MasterMind.MindCharacterConfig;
+export const BulletConfig = HCL.HordeClassLibrary.HordeContent.Configs.Bullets.BulletConfig;
+export const Force = HCL.HordeClassLibrary.HordeContent.Configs.Army.Force;
+export const RuleConfig = HCL.HordeClassLibrary.HordeContent.Configs.Rules.RuleConfig;
+export const SoundEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.SoundEffects.SoundEffectConfig;
+export const SoundsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Audio.SoundsCatalog;
+export const BackgroundAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.BackgroundAnimationsCatalog;
+export const BulletAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.BulletAnimationsCatalog;
+export const ButtonAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.ButtonAnimationsCatalog;
+export const DecayAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.DecayAnimationsCatalog;
+export const FontCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.FontCatalog;
+export const SimpleAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.SimpleAnimationsCatalog;
+export const UnitAnimationsCatalog = HCL.HordeClassLibrary.HordeContent.Configs.ViewResourceCatalogs.Graphics.Specialization.UnitAnimationsCatalog;
+export const VisualEffectConfig = HCL.HordeClassLibrary.HordeContent.Configs.VisualEffects.VisualEffectConfig;
+export const UnitCommandConfig = HCL.HordeClassLibrary.HordeContent.Configs.UnitCommandConfig;
+export const MindCharacterConfig = HCL.HordeClassLibrary.HordeContent.Configs.MasterMind.MindCharacterConfig;
 
 
 // ===================================================
 // --- Прочее
 
-export const AnimatorScriptTasks = HCL.HordeClassLibrary.HordeContentApi.ViewResources.Graphics.InternalLogic.Tasks.AnimatorScriptTasks;
+export const AnimatorScriptTasks = HCL.HordeClassLibrary.HordeContent.ViewResources.Graphics.InternalLogic.Tasks.AnimatorScriptTasks;
 

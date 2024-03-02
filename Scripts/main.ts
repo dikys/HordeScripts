@@ -31,7 +31,7 @@ export function onInitialization() {
     activePlugins.clear();
     activePlugins.registerDefaultPlugins();
 
-    // Регистрация примеров. Настройка запускаемых примеров находится в файле "_examples-runner.ts"
+    // Регистрация примеров. Настройка запускаемых примеров находится в файле "examples-runner.ts"
     registerExamples();
 }
 
