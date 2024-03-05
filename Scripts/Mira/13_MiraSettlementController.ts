@@ -59,6 +59,10 @@ class MiraSettlementController {
     
     Tick(tickNumber: number): void {
         this.currentUnitComposition = null;
+
+        for (var subcontroller of this.subcontrollers) {
+            subcontroller.Tick(tickNumber);
+        }
         
         if (this.nextState) {
             if (this.state) {
@@ -70,10 +74,6 @@ class MiraSettlementController {
             this.nextState = null;
             this.Log(MiraLogLevel.Debug, "Entering state " + this.state.constructor.name);
             this.state.OnEntry();
-        }
-        
-        for (var subcontroller of this.subcontrollers) {
-            subcontroller.Tick(tickNumber);
         }
 
         this.state.Tick(tickNumber);

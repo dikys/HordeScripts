@@ -1,7 +1,20 @@
 
 class BuildingUpState extends ProductionState {
     protected getTargetUnitsComposition(): UnitComposition {
-        return this.settlementController.StrategyController.GetArmyComposition();
+        let enemy = this.settlementController.StrategyController.CurrentEnemy
+        
+        if (!enemy) {
+            enemy = this.settlementController.StrategyController.SelectEnemy();
+            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy.`);
+        }
+
+        if (enemy) {
+            this.settlementController.Log(MiraLogLevel.Debug, `Proceeding to build-up against '${enemy.TownName}'.`);
+            return this.settlementController.StrategyController.GetArmyComposition();
+        }
+        else {
+            return new Map<string, number>();
+        }
     }
 
     protected onTargetCompositionReached(): void {

@@ -25,8 +25,8 @@ abstract class MiraSquadState extends FsmState {
     }
 
     protected initiateAttack() {
-        this.squad.CurrentTargetCell = this.squad.MovementTargetCell;
-        this.squad.MovementTargetCell = null;
+        this.squad.CurrentTargetCell = this.squad.AttackTargetCell;
+        this.squad.AttackTargetCell = null;
         
         for (let unit of this.squad.Units) {
             MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);

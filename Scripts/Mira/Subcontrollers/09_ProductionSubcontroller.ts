@@ -4,7 +4,7 @@
 
 class ProductionSubcontroller extends MiraSubcontroller {
     private productionList: Array<string> = [];
-    private productionIndex: Map<string, Array<any>> = new Map<string, Array<any>>();
+    private productionIndex: Map<string, Array<any>> = null;
 
     constructor (parent: MiraSettlementController) {
         super(parent);
@@ -65,6 +65,14 @@ class ProductionSubcontroller extends MiraSubcontroller {
         this.parentController.Log(MiraLogLevel.Debug, "Cleared target production list");
     }
 
+    GetProducableCfgIds(): Array<string> {
+        if (!this.productionIndex) {
+            this.updateProductionIndex();
+        }
+        
+        return Array.from(this.productionIndex.keys());
+    }
+
     private getProducer(unitConfig: string): any {
         //TODO: implement engagement of workers that are busy gathering resources
         var producers = this.productionIndex.get(unitConfig);
@@ -81,7 +89,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
     }
 
     private updateProductionIndex(): void {
-        this.productionIndex.clear();
+        this.productionIndex = new Map<string, Array<any>>();
 
         let units = enumerate(this.parentController.Settlement.Units);
         let unit;
@@ -97,10 +105,18 @@ class ProductionSubcontroller extends MiraSubcontroller {
             }
             
             if (producerParams) {
+                if (unit.EffectsMind.BuildingInProgress || unit.IsNearDeath) {
+                    continue;
+                }
+                
                 let produceList = enumerate(producerParams.CanProduceList);
                 let produceListItem;
 
                 while ((produceListItem = eNext(produceList)) !== undefined) {
+                    if (!this.configProductionRequirementsMet(produceListItem)) {
+                        continue;
+                    }
+                    
                     if (this.productionIndex.has(produceListItem.Uid)) {
                         let producers = this.productionIndex.get(produceListItem.Uid);
                         producers.push(unit);
@@ -111,5 +127,34 @@ class ProductionSubcontroller extends MiraSubcontroller {
                 }
             }
         }
+    }
+
+    private configProductionRequirementsMet(config: any): boolean {
+        let productionRequirements = enumerate(config.TechConfig?.Requirements);
+        let requirementConfig;
+
+        while ((requirementConfig = eNext(productionRequirements)) !== undefined) {
+            let atLeastOneUnitFound = false;
+
+            let units = enumerate(this.parentController.Settlement.Units);
+            let unit;
+            
+            while ((unit = eNext(units)) !== undefined) {
+                if (
+                    unit.Cfg.Uid == requirementConfig.Uid &&
+                    !unit.EffectsMind.BuildingInProgress &&
+                    !unit.IsNearDeath
+                ) {
+                    atLeastOneUnitFound = true;
+                    break;
+                }
+            }
+
+            if (!atLeastOneUnitFound) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

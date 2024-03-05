@@ -34,11 +34,43 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     GetArmyComposition(): UnitComposition {
-        //TODO: calculate army composition properly based on enemy forces
-        var unitList: UnitComposition = new Map<string, number>();
+        let requiredOffensiveStrength = Math.max(this.calcCurrentEnemyStrength(), 100);
+        this.parentController.Log(MiraLogLevel.Debug, `Calculated required offensive strength: ${requiredOffensiveStrength}`);
 
-        unitList.set("#UnitConfig_Slavyane_Swordmen", 5);
-        unitList.set("#UnitConfig_Slavyane_Archer", 5);
+        let producableCfgIds = this.parentController.ProductionController.GetProducableCfgIds();
+        
+        let offensiveCfgIds = producableCfgIds.filter(
+            (value, index, array) => {
+                let config = MiraUtils.GetUnitConfig(value)
+                return this.parentController.IsCombatConfig(config) &&
+                    config.BuildingConfig == null;
+            }
+        );
+        this.parentController.Log(MiraLogLevel.Debug, `Offensive Cfg IDs: ${offensiveCfgIds}`);
+
+        let unitList = this.makeCombatUnitComposition(offensiveCfgIds, requiredOffensiveStrength);
+        
+        let unitListStr: string = "";
+        unitList.forEach((value, key, map) => {unitListStr += `${key}: ${value}, `});
+        this.parentController.Log(MiraLogLevel.Debug, `Offensive unit composition: ${unitListStr}`);
+
+        let requiredDefensiveStrength = 0.15 * requiredOffensiveStrength; //add a bit more for defense purposes
+        this.parentController.Log(MiraLogLevel.Debug, `Calculated required defensive strength: ${requiredDefensiveStrength}`);
+        
+        let defensiveCfgIds = producableCfgIds.filter(
+            (value, index, array) => {
+                let config = MiraUtils.GetUnitConfig(value)
+                return this.parentController.IsCombatConfig(config);
+            }
+        );
+        this.parentController.Log(MiraLogLevel.Debug, `Defensive Cfg IDs: ${defensiveCfgIds}`);
+        
+        let defensiveUnitList = this.makeCombatUnitComposition(defensiveCfgIds, requiredDefensiveStrength);
+        unitListStr = "";
+        defensiveUnitList.forEach((value, key, map) => {unitListStr += `${key}: ${value}, `});
+        this.parentController.Log(MiraLogLevel.Debug, `Defensive unit composition: ${unitListStr}`);
+
+        defensiveUnitList.forEach((value, key, map) => MiraUtils.IncreaseMapItem(unitList, key, value));
         
         return unitList;
     }
@@ -128,6 +160,52 @@ class StrategySubcontroller extends MiraSubcontroller {
                 this.EnemySettlements.push(item);
             }
         }
+    }
+
+    private getConfigStrength(unitConfig: any): number {
+        if (this.parentController.IsCombatConfig(unitConfig)) {
+            return unitConfig.MaxHealth;
+        }
+    }
+
+    private getUnitStrength(unit: any): number {
+        if (this.isCombatUnit(unit)) {
+            return unit.Health
+        }
+        else {
+            return 0;
+        }
+    }
+
+    private isCombatUnit(unit: any): boolean {
+        return this.parentController.IsCombatConfig(unit.Cfg);
+    }
+
+    private calcCurrentEnemyStrength(): number {
+        let units = enumerate(this.currentEnemy.Units);
+        let unit;
+        let enemyStrength = 0;
+        
+        while ((unit = eNext(units)) !== undefined) {
+            enemyStrength += this.getUnitStrength(unit);
+        }
+
+        return enemyStrength;
+    }
+
+    private makeCombatUnitComposition(allowedConfigs: Array<string>, requiredStrength: any): UnitComposition {
+        let unitComposition: UnitComposition = new Map<string, number>();
+        let currentStrength = 0;
+
+        while (currentStrength < requiredStrength) {
+            let index = MiraUtils.Random(allowedConfigs.length - 1);
+            let configId = allowedConfigs[index];
+
+            MiraUtils.IncrementMapItem(unitComposition, configId);
+            currentStrength += this.getConfigStrength(MiraUtils.GetUnitConfig(configId));
+        }
+
+        return unitComposition;
     }
 }
 

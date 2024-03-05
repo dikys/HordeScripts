@@ -208,11 +208,15 @@ class MiraUtils {
     }
     
     static IncrementMapItem(map: UnitComposition, key: string): void {
+        MiraUtils.IncreaseMapItem(map, key, 1);
+    }
+
+    static IncreaseMapItem(map: UnitComposition, key: string, value: number): void {
         if (map.has(key)) {
-            map.set(key, map.get(key) + 1);
+            map.set(key, map.get(key) + value);
         }
         else {
-            map.set(key, 1);
+            map.set(key, value);
         }
     }
 
@@ -315,6 +319,11 @@ class MiraUtils {
         let mode = isReplaceMode ? AssignOrderMode.Replace : AssignOrderMode.Queue;
         inputSelectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
         inputPointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
+    }
+
+    static Random(max: number, min: number = 0) {
+        let rnd = DotnetHolder.RealScena.Context.Randomizer;
+        return rnd.RandomNumber(min, max);
     }
 
     static GetUnitConfig(configId: string): any {
