@@ -88,10 +88,9 @@ class MiraUtils {
     private static constructMiraSquad(unit: any, processedUnitIds: Set<number>, settlements: Array<any>): MiraSquad {
         const UNIT_SEARCH_RADIUS = 3;
         
-        //let units = MiraUtils.GetSettlementUnitsInArea(unit.Cell, UNIT_SEARCH_RADIUS, settlements);
         let unitSettlement = unit.Owner;
         
-        let newUnits = [unit]; //units.filter((unit) => {return unit.Owner === unitSettlement});
+        let newUnits = [unit];
         let currentUnits = [];
         let units = [];
 
@@ -129,9 +128,11 @@ class MiraUtils {
         return new MiraSquad(units);
     }
     
-    static GetSettlementUnitsInArea(cell: any, radius: number, enemySettelemnts: Array<any>): Array<any> {
+    static GetSettlementUnitsInArea(cell: any, radius: number, enemySettelemnts: Array<any>, includePassive: boolean = false): Array<any> {
         let units = MiraUtils.GetUnitsInArea(cell, radius);
-        let enemies = units.filter((unit) => {return enemySettelemnts.indexOf(unit.Owner) > -1});
+        let enemies = units.filter((unit) => {
+            return enemySettelemnts.indexOf(unit.Owner) > -1 && (unit.Cfg.HasNotFlags(UnitFlags.Passive) || includePassive)
+        });
 
         return enemies;
     }
