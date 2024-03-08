@@ -35,7 +35,8 @@ class StrategySubcontroller extends MiraSubcontroller {
 
     GetArmyComposition(): UnitComposition {
         let requiredOffensiveStrength = this.calcSettlementStrength(this.currentEnemy, true);
-        requiredOffensiveStrength = Math.max(1.5 * requiredOffensiveStrength, 100);
+        requiredOffensiveStrength = 1.5 * requiredOffensiveStrength;
+        requiredOffensiveStrength = Math.ceil(Math.max(requiredOffensiveStrength / 100, 1)) * 100;
         this.parentController.Log(MiraLogLevel.Debug, `Calculated required offensive strength: ${requiredOffensiveStrength}`);
 
         let currentStrength = this.calcSettlementStrength(this.parentController.Settlement, false);
