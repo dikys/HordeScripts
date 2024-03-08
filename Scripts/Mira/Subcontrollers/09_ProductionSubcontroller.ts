@@ -137,8 +137,14 @@ class ProductionSubcontroller extends MiraSubcontroller {
         let productionRequirements = enumerate(config.TechConfig?.Requirements);
         let requirementConfig;
 
+        let economyComposition = this.parentController.GetCurrentEconomyComposition();
+
         while ((requirementConfig = eNext(productionRequirements)) !== undefined) {
             let atLeastOneUnitFound = false;
+
+            if (!economyComposition.has(requirementConfig.Uid)) {
+                return false;
+            }
 
             let units = enumerate(this.parentController.Settlement.Units);
             let unit;
