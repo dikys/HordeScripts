@@ -215,6 +215,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
 
     private offensiveSquads: Array<MiraControllableSquad> = [];
     private defensiveSquads: Array<MiraControllableSquad> = [];
+    private reinforcementSquads: Array<MiraControllableSquad> = [];
     private initialOffensiveSquadCount: number;
     private unitsInSquads: Map<string, any> = new Map<string, any>();
 
@@ -389,7 +390,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.parentController.Log(MiraLogLevel.Debug, `${this.defensiveSquads.length} defensive squads composed`);
         
         combatUnits.splice(0, unitIndex);
-        combatUnits.filter((value, index, array) => {return !this.isBuilding(value)});
+        combatUnits = combatUnits.filter((value, index, array) => {return !this.isBuilding(value)});
         this.offensiveSquads = this.createSquadsFromUnits(combatUnits);
         this.initialOffensiveSquadCount = this.offensiveSquads.length;
 
@@ -412,9 +413,34 @@ class TacticalSubcontroller extends MiraSubcontroller {
             return;
         }
 
+        let weakestSquad = this.getWeakestReinforceableSquad(this.defensiveSquads);
+
+        if (weakestSquad == null) {
+            weakestSquad = this.getWeakestReinforceableSquad(this.reinforcementSquads);
+        }
+
+        if (weakestSquad != null) {
+            weakestSquad.AddUnits(freeUnits);
+        
+            for (let unit of freeUnits) {
+                this.unitsInSquads.set(unit.Id, unit);
+            }
+        }
+        else {
+            let newSquad = this.createSquad(freeUnits);
+            this.reinforcementSquads.push(newSquad);
+        }
+
+        let reinforcements = this.reinforcementSquads.filter((value, index, array) => {return value.CombativityIndex >= 1});
+        this.offensiveSquads.push(...reinforcements);
+
+        this.reinforcementSquads = this.reinforcementSquads.filter((value, index, array) => {return value.CombativityIndex < 1});
+    }
+
+    private getWeakestReinforceableSquad(squads: Array<MiraControllableSquad>): MiraControllableSquad {
         let weakestSquad: MiraControllableSquad = null;
 
-        for (let squad of this.AllSquads) {
+        for (let squad of squads) {
             if (squad.CombativityIndex >= 1) {
                 continue;
             }
@@ -428,17 +454,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
             }
         }
 
-        if (weakestSquad != null) {
-            weakestSquad.AddUnits(freeUnits);
-        
-            for (let unit of freeUnits) {
-                this.unitsInSquads.set(unit.Id, unit);
-            }
-        }
-        else {
-            let newSquad = this.createSquad(freeUnits);
-            this.offensiveSquads.push(newSquad);
-        }
+        return weakestSquad;
     }
 
     private calcTotalUnitsStrength(units: Array<any>): number {
