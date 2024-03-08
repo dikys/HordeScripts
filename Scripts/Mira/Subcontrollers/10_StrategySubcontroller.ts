@@ -263,8 +263,12 @@ class TacticalSubcontroller extends MiraSubcontroller {
             for (var squad of this.offensiveSquads) {
                 if (pullbackLocation) {
                     if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                        if (squad.MovementTargetCell !== pullbackLocation) {
-                            squad.Move(pullbackLocation);
+                        if (squad.CurrentTargetCell !== pullbackLocation) {
+                            let squadLocation = squad.GetLocation();
+
+                            if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation) > this.parentController.SETTLEMENT_RADIUS) {
+                                squad.Move(pullbackLocation, this.parentController.SETTLEMENT_RADIUS);
+                            }
                         }
                     }
                 }
