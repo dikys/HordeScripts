@@ -15,10 +15,10 @@ class ProductionSubcontroller extends MiraSubcontroller {
             return;
         }
 
-        this.updateProductionIndex();
+        this.productionIndex = null;
         
         var mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
-        var producedUnits:Array<string> = []
+        var producedUnits:Array<string> = [];
 
         for (var unitConfig of this.productionList) {
             var freeProducer = this.getProducer(unitConfig);
@@ -74,6 +74,10 @@ class ProductionSubcontroller extends MiraSubcontroller {
     }
 
     private getProducer(unitConfig: string): any {
+        if (!this.productionIndex) {
+            this.updateProductionIndex();
+        }
+        
         //TODO: implement engagement of workers that are busy gathering resources
         var producers = this.productionIndex.get(unitConfig);
 
