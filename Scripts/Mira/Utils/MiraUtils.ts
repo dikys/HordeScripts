@@ -208,10 +208,10 @@ class MiraUtils {
     }
     
     static IncrementMapItem(map: UnitComposition, key: string): void {
-        MiraUtils.IncreaseMapItem(map, key, 1);
+        MiraUtils.AddToMapItem(map, key, 1);
     }
 
-    static IncreaseMapItem(map: UnitComposition, key: string, value: number): void {
+    static AddToMapItem(map: UnitComposition, key: string, value: number): void {
         if (map.has(key)) {
             map.set(key, map.get(key) + value);
         }
@@ -410,6 +410,22 @@ class MiraUtils {
         }
         else {
             return action.Target;
+        }
+    }
+
+    static IsCombatConfig(unitConfig: any): boolean {
+        let mainArmament = unitConfig.MainArmament;
+        let isHarvester = MiraUtils.ConfigHasProfession(unitConfig, UnitProfession.Harvester);
+
+        return mainArmament != null && !isHarvester;
+    }
+
+    static GetUnitStrength(unit: any): number {
+        if (this.IsCombatConfig(unit.Cfg)) {
+            return unit.Health
+        }
+        else {
+            return 0;
         }
     }
 }

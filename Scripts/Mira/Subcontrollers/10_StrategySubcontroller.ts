@@ -34,15 +34,23 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     GetArmyComposition(): UnitComposition {
-        let requiredOffensiveStrength = Math.max(this.calcCurrentEnemyStrength(), 100);
+        let requiredOffensiveStrength = Math.max(this.calcSettlementStrength(this.currentEnemy, true), 100);
+        requiredOffensiveStrength *= 1.5;
         this.parentController.Log(MiraLogLevel.Debug, `Calculated required offensive strength: ${requiredOffensiveStrength}`);
 
-        let producableCfgIds = this.parentController.ProductionController.GetProducableCfgIds();
+        let currentStrength = this.calcSettlementStrength(this.parentController.Settlement, false);
+        this.parentController.Log(MiraLogLevel.Debug, `Current offensive strength: ${currentStrength}`);
+
+        requiredOffensiveStrength -= currentStrength;
+        requiredOffensiveStrength = Math.max(requiredOffensiveStrength, 0);
+        this.parentController.Log(MiraLogLevel.Debug, `Offensive strength to produce: ${requiredOffensiveStrength}`);
+
+        let produceableCfgIds = this.parentController.ProductionController.GetProduceableCfgIds();
         
-        let offensiveCfgIds = producableCfgIds.filter(
+        let offensiveCfgIds = produceableCfgIds.filter(
             (value, index, array) => {
                 let config = MiraUtils.GetUnitConfig(value)
-                return this.parentController.IsCombatConfig(config) &&
+                return MiraUtils.IsCombatConfig(config) &&
                     config.BuildingConfig == null;
             }
         );
@@ -57,10 +65,10 @@ class StrategySubcontroller extends MiraSubcontroller {
         let requiredDefensiveStrength = 0.15 * requiredOffensiveStrength; //add a bit more for defense purposes
         this.parentController.Log(MiraLogLevel.Debug, `Calculated required defensive strength: ${requiredDefensiveStrength}`);
         
-        let defensiveCfgIds = producableCfgIds.filter(
+        let defensiveCfgIds = produceableCfgIds.filter(
             (value, index, array) => {
                 let config = MiraUtils.GetUnitConfig(value)
-                return this.parentController.IsCombatConfig(config);
+                return MiraUtils.IsCombatConfig(config);
             }
         );
         this.parentController.Log(MiraLogLevel.Debug, `Defensive Cfg IDs: ${defensiveCfgIds}`);
@@ -70,7 +78,7 @@ class StrategySubcontroller extends MiraSubcontroller {
         defensiveUnitList.forEach((value, key, map) => {unitListStr += `${key}: ${value}, `});
         this.parentController.Log(MiraLogLevel.Debug, `Defensive unit composition: ${unitListStr}`);
 
-        defensiveUnitList.forEach((value, key, map) => MiraUtils.IncreaseMapItem(unitList, key, value));
+        defensiveUnitList.forEach((value, key, map) => MiraUtils.AddToMapItem(unitList, key, value));
         
         return unitList;
     }
@@ -83,7 +91,10 @@ class StrategySubcontroller extends MiraSubcontroller {
             (val, key, map) => {
                 let config = MiraUtils.GetUnitConfig(key);
                 
-                if (this.parentController.IsCombatConfig(config)) {
+                if (
+                    MiraUtils.IsCombatConfig(config) &&
+                    config.BuildingConfig == null
+                ) {
                     combatUnitCfgIds.push(key);
                 }
             }
@@ -163,34 +174,23 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     private getConfigStrength(unitConfig: any): number {
-        if (this.parentController.IsCombatConfig(unitConfig)) {
+        if (MiraUtils.IsCombatConfig(unitConfig)) {
             return unitConfig.MaxHealth;
         }
     }
 
-    private getUnitStrength(unit: any): number {
-        if (this.isCombatUnit(unit)) {
-            return unit.Health
-        }
-        else {
-            return 0;
-        }
-    }
-
-    private isCombatUnit(unit: any): boolean {
-        return this.parentController.IsCombatConfig(unit.Cfg);
-    }
-
-    private calcCurrentEnemyStrength(): number {
-        let units = enumerate(this.currentEnemy.Units);
+    private calcSettlementStrength(settlement: any, includeBuildings: boolean): number {
+        let units = enumerate(settlement.Units);
         let unit;
-        let enemyStrength = 0;
+        let settlementStrength = 0;
         
         while ((unit = eNext(units)) !== undefined) {
-            enemyStrength += this.getUnitStrength(unit);
+            if (unit.Cfg.BuildingConfig == null || includeBuildings) {
+                settlementStrength += MiraUtils.GetUnitStrength(unit);
+            }
         }
 
-        return enemyStrength;
+        return settlementStrength;
     }
 
     private makeCombatUnitComposition(allowedConfigs: Array<string>, requiredStrength: any): UnitComposition {
@@ -211,6 +211,8 @@ class StrategySubcontroller extends MiraSubcontroller {
 
 class TacticalSubcontroller extends MiraSubcontroller {
     private readonly SQUAD_COMBATIVITY_THRESHOLD = 0.25;
+    private readonly SQUAD_STRENGTH_THRESHOLD = 100;
+
     private offensiveSquads: Array<MiraControllableSquad> = [];
     private defensiveSquads: Array<MiraControllableSquad> = [];
     private initialOffensiveSquadCount: number;
@@ -344,7 +346,6 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.offensiveSquads = [];
         this.defensiveSquads = [];
         this.unitsInSquads = new Map<string, any>();
-        //TODO: compose more than one squad
 
         let units = enumerate(this.parentController.Settlement.Units);
         let unit;
@@ -353,17 +354,42 @@ class TacticalSubcontroller extends MiraSubcontroller {
         while ((unit = eNext(units)) !== undefined) {
             if (this.isCombatUnit(unit)) {
                 combatUnits.push(unit);
-                this.parentController.Log(MiraLogLevel.Debug, `Added unit ${unit.Name} into squad`);
             }
         }
 
-        if (combatUnits.length > 0) {
-            let squad = this.createSquad(combatUnits);
-            this.offensiveSquads.push(squad);
-            this.initialOffensiveSquadCount = this.offensiveSquads.length;
+        if (combatUnits.length == 0) {
+            return;
         }
 
-        this.parentController.Log(MiraLogLevel.Debug, `${this.initialOffensiveSquadCount} squads composed`);
+        let requiredDefensiveStrength = 0.15 * this.calcTotalUnitsStrength(combatUnits);
+        let unitIndex = 0;
+        let defensiveUnits = [];
+        let defensiveStrength = 0;
+        
+        for (unitIndex = 0; unitIndex < combatUnits.length; unitIndex++) {
+            if (defensiveStrength >= requiredDefensiveStrength) {
+                //unitIndex here will be equal to the index of a last defensive unit plus one
+                break;
+            }
+            
+            let unit = combatUnits[unitIndex];
+
+            if (!this.isBuilding(unit)) {
+                defensiveUnits.push(unit);
+            }
+
+            defensiveStrength += MiraUtils.GetUnitStrength(unit);
+        }
+
+        this.defensiveSquads = this.createSquadsFromUnits(defensiveUnits);
+        this.parentController.Log(MiraLogLevel.Debug, `${this.defensiveSquads.length} defensive squads composed`);
+        
+        combatUnits.splice(0, unitIndex);
+        combatUnits.filter((value, index, array) => {return !this.isBuilding(value)});
+        this.offensiveSquads = this.createSquadsFromUnits(combatUnits);
+        this.initialOffensiveSquadCount = this.offensiveSquads.length;
+
+        this.parentController.Log(MiraLogLevel.Debug, `${this.initialOffensiveSquadCount} offensive squads composed`);
     }
 
     ReinforceSquads(): void {
@@ -372,7 +398,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
         let freeUnits = [];
         
         while ((unit = eNext(units)) !== undefined) {
-            if (this.isCombatUnit(unit) && !this.unitsInSquads.has(unit.Id)) {
+            if (this.isCombatUnit(unit) && !this.isBuilding(unit) && !this.unitsInSquads.has(unit.Id)) {
                 freeUnits.push(unit);
                 this.parentController.Log(MiraLogLevel.Debug, `Unit ${unit.ToString()} is marked for reinforcements`);
             }
@@ -409,6 +435,40 @@ class TacticalSubcontroller extends MiraSubcontroller {
             let newSquad = this.createSquad(freeUnits);
             this.offensiveSquads.push(newSquad);
         }
+    }
+
+    private calcTotalUnitsStrength(units: Array<any>): number {
+        let totalStrength = 0;
+        units.forEach((value, index, array) => {totalStrength += MiraUtils.GetUnitStrength(value)});
+        
+        return totalStrength;
+    }
+
+    private createSquadsFromUnits(units: Array<any>): Array<MiraControllableSquad> {
+        let squadUnits = [];
+        let squads = [];
+        let currentSquadStrength = 0;
+
+        for (let unit of units) {
+            currentSquadStrength += MiraUtils.GetUnitStrength(unit);
+            squadUnits.push(unit);
+            this.parentController.Log(MiraLogLevel.Debug, `Added unit ${unit.ToString()} into squad`);
+
+            if (currentSquadStrength >= this.SQUAD_STRENGTH_THRESHOLD) {
+                let squad = this.createSquad(squadUnits);
+                
+                squads.push(squad);
+                currentSquadStrength = 0;
+                squadUnits = [];
+            }
+        }
+
+        if (squadUnits.length > 0) {
+            let squad = this.createSquad(squadUnits);    
+            squads.push(squad);
+        }
+        
+        return squads;
     }
 
     private createSquad(units: Array<any>): MiraControllableSquad {
@@ -451,7 +511,13 @@ class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private isCombatUnit(unit: any): boolean {
-        return this.parentController.IsCombatConfig(unit.Cfg);
+        return MiraUtils.IsCombatConfig(unit.Cfg);
+    }
+
+    private isBuilding(unit: any): boolean {
+        let config = unit.Cfg;
+
+        return config.BuildingConfig != null;
     }
 
     private getPullbackCell(): any {

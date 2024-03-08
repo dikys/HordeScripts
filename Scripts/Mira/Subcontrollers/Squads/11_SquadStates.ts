@@ -232,7 +232,8 @@ abstract class MiraSquadGatheringUpState extends MiraSquadState {
 
 class MiraSquadAttackGatheringUpState extends MiraSquadGatheringUpState {
     protected onGatheredUp(): void {
-        this.squad.SetState(new MiraSquadMoveState(this.squad));
+        this.squad.AttackTargetCell = this.squad.CurrentTargetCell;
+        this.squad.SetState(new MiraSquadAttackState(this.squad));
     }
 }
 
@@ -345,6 +346,7 @@ class MiraSquadBattleState extends MiraSquadState {
         this.updateThreats();
 
         if (this.enemyUnits.length == 0) {
+            this.squad.AttackTargetCell = this.squad.CurrentTargetCell;
             this.squad.SetState(new MiraSquadAttackState(this.squad));
             return;
         }

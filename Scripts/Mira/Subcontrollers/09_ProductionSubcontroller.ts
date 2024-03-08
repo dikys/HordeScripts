@@ -65,7 +65,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
         this.parentController.Log(MiraLogLevel.Debug, "Cleared target production list");
     }
 
-    GetProducableCfgIds(): Array<string> {
+    GetProduceableCfgIds(): Array<string> {
         if (!this.productionIndex) {
             this.updateProductionIndex();
         }
