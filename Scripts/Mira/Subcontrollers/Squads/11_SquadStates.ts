@@ -80,6 +80,9 @@ class MiraSquadIdleState extends MiraSquadState {
             if (tileType !== TileType.Forest) { //run, Forest, run!!
                 unitsToDistribute.push(unit);
             }
+            else {
+                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, unit.Cell);
+            }
         }
 
         if (unitsToDistribute.length == 0) {
