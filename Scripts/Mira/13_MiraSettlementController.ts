@@ -16,6 +16,7 @@ class MiraSettlementController {
     public TacticalController: TacticalSubcontroller;
     
     public HostileAttackingSquads: Array<MiraSquad> = [];
+    public TargetUnitsComposition: UnitComposition = null;
     
     private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;

@@ -402,6 +402,10 @@ class MiraUtils {
 
     static GetUnitTarget(unit: any): any {
         let action = unit.OrdersMind.ActiveAct;
+
+        if (!action) {
+            return null;
+        }
         
         if (
             action.GetType() != 

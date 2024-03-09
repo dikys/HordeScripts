@@ -24,7 +24,21 @@ class BuildingUpState extends ProductionState {
 
 class RebuildState extends ProductionState {
     protected getTargetUnitsComposition(): UnitComposition {
-        return null;
+        let lastUnitsComposition = this.settlementController.TargetUnitsComposition;
+        let unitsComposition = new Map<string, number>();
+
+        lastUnitsComposition.forEach((value, key, map) => {
+            let config = MiraUtils.GetUnitConfig(key);
+
+            if (
+                config.BuildingConfig != null ||
+                MiraUtils.IsProducerConfig(key)
+            ) {
+                unitsComposition.set(key, value);
+            }
+        });
+
+        return unitsComposition;
     }
 
     protected onTargetCompositionReached(): void {

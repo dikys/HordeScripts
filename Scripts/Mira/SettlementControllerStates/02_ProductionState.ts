@@ -8,6 +8,7 @@ abstract class ProductionState extends MiraSettlementControllerState {
     OnEntry(): void {
         this.settlementController.ProductionController.CancelAllProduction();
         this.targetUnitsComposition = this.getTargetUnitsComposition();
+
         this.refreshTargetProductionLists();
     }
 
