@@ -43,8 +43,8 @@ class DevelopingState extends ProductionState {
                     let index = MiraUtils.Random(producingCfgIds.length - 1);
                     let producerCfgId = producingCfgIds[index];
 
-                    if (!targetCompostion.has(cfgId)) {
-                        targetCompostion.set(cfgId, 1);
+                    if (!targetCompostion.has(producerCfgId)) {
+                        targetCompostion.set(producerCfgId, 1);
                     }
                 }
             }
