@@ -21,3 +21,13 @@ class BuildingUpState extends ProductionState {
         this.settlementController.State = new ExterminatingState(this.settlementController);
     }
 }
+
+class RebuildState extends ProductionState {
+    protected getTargetUnitsComposition(): UnitComposition {
+        return null;
+    }
+
+    protected onTargetCompositionReached(): void {
+        this.settlementController.State = new DevelopingState(this.settlementController);
+    }
+}
