@@ -334,7 +334,7 @@ class MiraUtils {
     static RequestMasterMindProduction(configId: string, productionDepartment: any) {
         var cfg = MiraUtils.GetUnitConfig(configId);
         
-        return productionDepartment.AddRequestToProduce(cfg, 1);
+        return productionDepartment.AddRequestToProduce(cfg, 1, null, false);
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {
