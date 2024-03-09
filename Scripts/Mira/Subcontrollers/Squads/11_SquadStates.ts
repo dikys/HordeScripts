@@ -154,6 +154,11 @@ class MiraSquadAttackState extends MiraSquadState {
     OnExit(): void {}
 
     Tick(tickNumber: number): void {
+        if (this.squad.IsEnemyNearby()) {
+            this.squad.SetState(new MiraSquadBattleState(this.squad));
+            return;
+        }
+        
         if (this.squad.MovementTargetCell != null) {
             this.squad.SetState(new MiraSquadMoveState(this.squad));
             return;
@@ -161,11 +166,6 @@ class MiraSquadAttackState extends MiraSquadState {
 
         if (this.squad.AttackTargetCell != null) {
             this.initiateAttack();
-            return;
-        }
-        
-        if (this.squad.IsEnemyNearby()) {
-            this.squad.SetState(new MiraSquadBattleState(this.squad));
             return;
         }
         
