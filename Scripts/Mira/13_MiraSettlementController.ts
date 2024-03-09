@@ -21,6 +21,7 @@ class MiraSettlementController {
     private state: MiraSettlementControllerState;
     private nextState: MiraSettlementControllerState;
     private currentUnitComposition: UnitComposition;
+    private currentDevelopedUnitComposition: UnitComposition;
 
     constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
@@ -59,6 +60,7 @@ class MiraSettlementController {
     
     Tick(tickNumber: number): void {
         this.currentUnitComposition = null;
+        this.currentDevelopedUnitComposition = null;
 
         for (var subcontroller of this.subcontrollers) {
             subcontroller.Tick(tickNumber);
@@ -97,6 +99,25 @@ class MiraSettlementController {
         }
 
         return new Map(this.currentUnitComposition);
+    }
+
+    GetCurrentDevelopedEconomyComposition(): UnitComposition {
+        if (!this.currentDevelopedUnitComposition) {
+            this.currentDevelopedUnitComposition = new Map<string, number>();
+        
+            var units = enumerate(this.Settlement.Units);
+            var unit;
+            
+            while ((unit = eNext(units)) !== undefined) {
+                if (unit.EffectsMind.BuildingInProgress || unit.IsNearDeath) {
+                    continue;
+                }
+                
+                MiraUtils.IncrementMapItem(this.currentDevelopedUnitComposition, unit.Cfg.Uid);
+            }
+        }
+
+        return new Map(this.currentDevelopedUnitComposition);
     }
 
     IsUnderAttack(): boolean {

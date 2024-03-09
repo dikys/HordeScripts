@@ -73,16 +73,62 @@ class ProductionSubcontroller extends MiraSubcontroller {
         return Array.from(this.productionIndex.keys());
     }
 
-    private getProducer(unitConfig: string): any {
+    EstimateProductionTime(unitComposition: UnitComposition): Map<string, number> {
+        let estimation = new Map<string, number>();
+        
+        if (!this.productionIndex) {
+            this.updateProductionIndex();
+        }
+
+        for (let cfgId of unitComposition.keys()) {
+            let producers = this.productionIndex.get(cfgId);
+
+            if (!producers) {
+                estimation.set(cfgId, Infinity);
+            }
+            else {
+                let producersCount = Math.min(producers.length, unitComposition[cfgId]);
+                let config = MiraUtils.GetUnitConfig(cfgId);
+                let productionTime = config.ProductionTime * unitComposition[cfgId] / producersCount;
+
+                estimation.set(cfgId, productionTime);
+            }
+        }
+
+        return estimation;
+    }
+
+    GetProducingCfgIds(cfgId: string): Array<string> {
+        if (!this.productionIndex) {
+            this.updateProductionIndex();
+        }
+        
+        let producers = this.productionIndex[cfgId];
+
+        if (producers) {
+            let cfgIds = new Set<string>();
+            
+            for (let producer of producers) {
+                cfgIds.add(producer.Cfg.Uid);
+            }
+
+            return [...cfgIds.values()];
+        }
+        else {
+            return [];
+        }
+    }
+
+    private getProducer(configId: string): any {
         if (!this.productionIndex) {
             this.updateProductionIndex();
         }
         
         //TODO: implement engagement of workers that are busy gathering resources
-        var producers = this.productionIndex.get(unitConfig);
+        let producers = this.productionIndex.get(configId);
 
         if (producers) {
-            for (var producer of producers) {
+            for (let producer of producers) {
                 if (producer.OrdersMind.OrdersCount === 0) {
                     return producer;
                 }
@@ -137,7 +183,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
         let productionRequirements = enumerate(config.TechConfig?.Requirements);
         let requirementConfig;
 
-        let economyComposition = this.parentController.GetCurrentEconomyComposition();
+        let economyComposition = this.parentController.GetCurrentDevelopedEconomyComposition();
 
         while ((requirementConfig = eNext(productionRequirements)) !== undefined) {
             let atLeastOneUnitFound = false;

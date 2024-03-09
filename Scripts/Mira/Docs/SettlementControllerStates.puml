@@ -2,18 +2,25 @@
 
 state EXPLOIT {
     state Develop: Build-up economy
+    state Rebuild: Rebuild economy after losses
     state Defend: Defend against attacks
     state GatherUp: Build an army that\ncounters enemy strategy
 
     state Exploit_Entry <<inputPin>>
 
     Exploit_Entry --> Develop
-    Develop --> Defend: Attacked
-    Defend --> Develop: Attack countered
-    GatherUp --> Defend: Attacked
+
+    Defend --> Rebuild: Attack countered
     
-    Develop --> GatherUp: Economy functioning
+    Develop --> GatherUp: Economy\nfunctioning
+    Develop --> Defend: Attacked
+
     GatherUp -down-> Exploit_ArmyGathered <<outputPin>>: Army gathered
+    GatherUp --> Defend: Attacked
+    GatherUp --> Develop: Impossible to produce\nany combat unit
+
+    Rebuild --> Develop: Economy\nRestored
+    Rebuild --> Defend: Attacked
 }
 
 note left of EXPLOIT

@@ -421,6 +421,32 @@ class MiraUtils {
         return mainArmament != null && !isHarvester;
     }
 
+    static IsProducerConfig(cfgId: string): boolean {
+        let cfg = MiraUtils.GetUnitConfig(cfgId);
+        
+        return MiraUtils.ConfigHasProfession(cfg, UnitProfession.UnitProducer);
+    }
+
+    static IsTechConfig(cfgId: string): boolean {
+        let unitConfigs = enumerate(AllContent.UnitConfigs.Configs);
+        let kv;
+        
+        while ((kv = eNext(unitConfigs)) !== undefined) {
+            let config = kv.Value;
+
+            let productionRequirements = enumerate(config.TechConfig?.Requirements);
+            let requirementConfig;
+
+            while ((requirementConfig = eNext(productionRequirements)) !== undefined) {
+                if (requirementConfig.Uid == cfgId) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
     static GetUnitStrength(unit: any): number {
         if (this.IsCombatConfig(unit.Cfg)) {
             return unit.Health

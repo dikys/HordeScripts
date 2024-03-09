@@ -34,6 +34,10 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     GetArmyComposition(): UnitComposition {
+        if (!this.currentEnemy) {
+            this.SelectEnemy();
+        }
+        
         let requiredOffensiveStrength = this.calcSettlementStrength(this.currentEnemy, true);
         requiredOffensiveStrength = 1.5 * requiredOffensiveStrength;
         requiredOffensiveStrength = Math.ceil(Math.max(requiredOffensiveStrength / 100, 1)) * 100;
@@ -85,7 +89,7 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     GetReinforcementCfgIds(): Array<string> {
-        let economyComposition = this.parentController.GetCurrentEconomyComposition();
+        let economyComposition = this.parentController.GetCurrentDevelopedEconomyComposition();
         let combatUnitCfgIds = new Array<string>();
 
         economyComposition.forEach(
@@ -196,6 +200,11 @@ class StrategySubcontroller extends MiraSubcontroller {
 
     private makeCombatUnitComposition(allowedConfigs: Array<string>, requiredStrength: any): UnitComposition {
         let unitComposition: UnitComposition = new Map<string, number>();
+
+        if (allowedConfigs.length == 0) {
+            return unitComposition;
+        }
+
         let currentStrength = 0;
 
         while (currentStrength < requiredStrength) {

@@ -29,7 +29,7 @@ abstract class ProductionState extends MiraSettlementControllerState {
 
         this.refreshTargetProductionLists();
 
-        var composition = this.settlementController.GetCurrentEconomyComposition();
+        let composition = this.settlementController.GetCurrentDevelopedEconomyComposition();
 
         if (MiraUtils.SetContains(composition, this.targetUnitsComposition)) {
             this.onTargetCompositionReached();
@@ -37,15 +37,15 @@ abstract class ProductionState extends MiraSettlementControllerState {
     }
 
     private getRemainingProductionList(): UnitComposition {
-        var currentEconomy = this.settlementController.GetCurrentEconomyComposition();
+        let currentEconomy = this.settlementController.GetCurrentEconomyComposition();
         
-        for (var productionListItem of this.settlementController.ProductionController.ProductionList) {
+        for (let productionListItem of this.settlementController.ProductionController.ProductionList) {
             MiraUtils.IncrementMapItem(currentEconomy, productionListItem);
         }
 
-        var masterMind = this.settlementController.MasterMind;
-        var requests = enumerate(masterMind.Requests);
-        var request;
+        let masterMind = this.settlementController.MasterMind;
+        let requests = enumerate(masterMind.Requests);
+        let request;
         while ((request = eNext(requests)) !== undefined) {
             if (request.RequestedCfg) {
                 MiraUtils.IncrementMapItem(currentEconomy, request.RequestedCfg.Uid);
@@ -56,7 +56,7 @@ abstract class ProductionState extends MiraSettlementControllerState {
     }
 
     private refreshTargetProductionLists(): void {
-        var trainingList = this.getRemainingProductionList();
+        let trainingList = this.getRemainingProductionList();
         
         trainingList.forEach(
             (val, key, map) => {
