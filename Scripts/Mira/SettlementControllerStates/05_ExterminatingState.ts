@@ -80,8 +80,11 @@ class ExterminatingState extends MiraSettlementControllerState {
 
     private selectTarget(enemy: any) {
         let target = this.settlementController.StrategyController.GetOffensiveTarget(enemy);
-        this.currentTarget = target;
-        this.settlementController.TacticalController.Attack(target);
+
+        if (target) {
+            this.currentTarget = target;
+            this.settlementController.TacticalController.Attack(target);
+        }
     }
 
     private requestReinforcementsProduction() {
