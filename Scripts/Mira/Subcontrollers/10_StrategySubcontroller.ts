@@ -258,7 +258,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     public get AllSquads(): Array<MiraControllableSquad> {
-        return [...this.offensiveSquads, ...this.defensiveSquads];
+        return [...this.offensiveSquads, ...this.defensiveSquads, ...this.reinforcementSquads];
     }
 
     Tick(tickNumber: number): void {
@@ -536,6 +536,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
     private updateSquads(): void {
         this.offensiveSquads = this.offensiveSquads.filter((squad) => {return squad.Units.length > 0});
         this.defensiveSquads = this.defensiveSquads.filter((squad) => {return squad.Units.length > 0});
+        this.reinforcementSquads = this.defensiveSquads.filter((squad) => {return squad.Units.length > 0});
         this.parentController.HostileAttackingSquads = this.parentController.HostileAttackingSquads.filter((squad) => {return squad.Units.length > 0});
 
         if (this.unitsInSquads != null) {

@@ -34,7 +34,7 @@ class MiraSquad {
     }
 
     protected cleanup(): void {
-        this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive});
+        this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive && !unit.IsNearDeath});
     }
 
     Tick(tickNumber: number): void {
