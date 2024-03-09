@@ -464,9 +464,7 @@ class MiraSquadBattleState extends MiraSquadState {
                             let targetData = {cell: cell, heuristic: heuristic, target: enemy};
 
                             if (optimalTarget == null) {
-                                if (heuristic != Infinity) {
-                                    optimalTarget = targetData;
-                                }
+                                optimalTarget = targetData;
                             }
                             else if (targetData.heuristic < optimalTarget.heuristic) {
                                 if (MiraUtils.IsCellReachable(cell, unit)) {
@@ -487,14 +485,23 @@ class MiraSquadBattleState extends MiraSquadState {
 
             if (optimalTarget) {
                 let attackCell = optimalTarget.target.MoveToCell ?? optimalTarget.target.Cell;
-
-                if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTarget.cell) > 0) {
-                    MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
-                    MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
-                    this.reservedCells.Set(optimalTarget.cell, true);
+                
+                if (optimalTarget.heuristic < Infinity) {
+                    if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTarget.cell) > 0) {
+                        MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
+                        MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
+                        this.reservedCells.Set(optimalTarget.cell, true);
+                    }
+                    else {
+                        MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
+                    }
                 }
                 else {
-                    MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
+                    let nearestFreeCell = MiraUtils.FindFreeCell(attackCell);
+                    
+                    if (nearestFreeCell) {
+                        MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, nearestFreeCell);
+                    }
                 }
             }
             else {
