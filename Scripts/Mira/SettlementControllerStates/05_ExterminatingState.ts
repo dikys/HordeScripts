@@ -1,6 +1,6 @@
 
 class ExterminatingState extends MiraSettlementControllerState {
-    private readonly COMBATIVITY_THRESHOLD = 0.5;
+    private readonly COMBATIVITY_THRESHOLD = 0.33;
     private currentTarget: any; //but actually Unit
     private reinforcementsCfgIds: Array<string>;
     
