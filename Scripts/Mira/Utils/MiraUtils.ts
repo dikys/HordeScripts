@@ -331,10 +331,10 @@ class MiraUtils {
         return HordeContent.GetUnitConfig(configId);
     }
 
-    static RequestMasterMindProduction(configId: string, productionDepartment: any) {
+    static RequestMasterMindProduction(configId: string, productionDepartment: any, checkDuplicate: boolean = false) {
         var cfg = MiraUtils.GetUnitConfig(configId);
         
-        return productionDepartment.AddRequestToProduce(cfg, 1, null, false);
+        return productionDepartment.AddRequestToProduce(cfg, 1, null, checkDuplicate);
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {

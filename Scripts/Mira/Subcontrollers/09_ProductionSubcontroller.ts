@@ -1,5 +1,4 @@
 
-//TODO: implement proper removing of a building from a target list
 //TODO: probably reorganize build list to a queue
 
 class ProductionSubcontroller extends MiraSubcontroller {
@@ -46,7 +45,18 @@ class ProductionSubcontroller extends MiraSubcontroller {
     }
 
     public get ProductionList(): Array<string> {
-        return this.productionList;
+        let list = this.productionList
+
+        let masterMind = this.parentController.MasterMind;
+        let requests = enumerate(masterMind.Requests);
+        let request;
+        while ((request = eNext(requests)) !== undefined) {
+            if (request.RequestedCfg) {
+                list.push(request.RequestedCfg.Uid);
+            }
+        }
+        
+        return list;
     }
 
     RequestProduction(unitConfig: string): void {
@@ -55,7 +65,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
     }
 
     RequestSingleProduction(unitConfig: string): void {
-        if (this.productionList.indexOf(unitConfig) < 0) {
+        if (this.ProductionList.indexOf(unitConfig) < 0) {
             this.RequestProduction(unitConfig);
         }
     }

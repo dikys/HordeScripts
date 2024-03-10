@@ -44,15 +44,6 @@ abstract class ProductionState extends MiraSettlementControllerState {
             MiraUtils.IncrementMapItem(currentEconomy, productionListItem);
         }
 
-        let masterMind = this.settlementController.MasterMind;
-        let requests = enumerate(masterMind.Requests);
-        let request;
-        while ((request = eNext(requests)) !== undefined) {
-            if (request.RequestedCfg) {
-                MiraUtils.IncrementMapItem(currentEconomy, request.RequestedCfg.Uid);
-            }
-        }
-
         return MiraUtils.SubstractCompositionLists(this.targetUnitsComposition, currentEconomy);
     }
 
