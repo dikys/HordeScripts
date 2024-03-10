@@ -296,7 +296,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
             let retreatCell = this.getRetreatCell();
 
             if (retreatCell) {
-                for (let squad of this.defensiveSquads) {
+                for (let squad of this.AllSquads) {
                     if (squad.IsIdle()) {
                         squad.Move(retreatCell);
                     }
@@ -324,8 +324,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.currentTarget = null;
 
         if (
-            this.offensiveSquads.length == 0 &&
-            this.defensiveSquads.length == 0
+            this.AllSquads.length == 0
         ) {
             this.ComposeSquads();
         }
@@ -360,6 +359,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
         
         this.offensiveSquads = [];
         this.defensiveSquads = [];
+        this.reinforcementSquads = [];
         this.unitsInSquads = new Map<string, any>();
 
         let units = enumerate(this.parentController.Settlement.Units);
@@ -389,7 +389,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
             
             let unit = combatUnits[unitIndex];
 
-            if (!this.isBuilding(unit)) {
+            if (!this.isBuilding(unit) && !unit.IsNearDeath) {
                 defensiveUnits.push(unit);
             }
 
@@ -408,42 +408,9 @@ class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     ReinforceSquads(): void {
-        let units = enumerate(this.parentController.Settlement.Units);
-        let unit;
-        let freeUnits = [];
-        
-        while ((unit = eNext(units)) !== undefined) {
-            if (this.isCombatUnit(unit) && !this.isBuilding(unit) && !this.unitsInSquads.has(unit.Id)) {
-                freeUnits.push(unit);
-                this.parentController.Log(MiraLogLevel.Debug, `Unit ${unit.ToString()} is marked for reinforcements`);
-            }
-        }
+        this.reinforceSquadsByFreeUnits();
 
-        if (freeUnits.length == 0) {
-            return;
-        }
-
-        let weakestSquad = this.getWeakestReinforceableSquad(this.defensiveSquads);
-
-        if (weakestSquad == null) {
-            weakestSquad = this.getWeakestReinforceableSquad(this.offensiveSquads, (s) => s.IsIdle());
-        }
-
-        if (weakestSquad == null) {
-            weakestSquad = this.getWeakestReinforceableSquad(this.reinforcementSquads);
-        }
-
-        if (weakestSquad != null) {
-            weakestSquad.AddUnits(freeUnits);
-        
-            for (let unit of freeUnits) {
-                this.unitsInSquads.set(unit.Id, unit);
-            }
-        }
-        else {
-            let newSquad = this.createSquad(freeUnits);
-            this.reinforcementSquads.push(newSquad);
-        }
+        this.reinforceSquadsByReinforcementSquads();
 
         let reinforcements = this.reinforcementSquads.filter((value, index, array) => {return value.CombativityIndex >= 1});
         this.offensiveSquads.push(...reinforcements);
@@ -451,7 +418,21 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.reinforcementSquads = this.reinforcementSquads.filter((value, index, array) => {return value.CombativityIndex < 1});
     }
 
-    private getWeakestReinforceableSquad(
+    private getWeakestReinforceableSquad(): MiraControllableSquad {
+        let weakestSquad = this.findWeakestReinforceableSquad(this.defensiveSquads);
+
+        if (weakestSquad == null) {
+            weakestSquad = this.findWeakestReinforceableSquad(this.offensiveSquads, (s) => s.IsIdle());
+        }
+
+        if (weakestSquad == null) {
+            weakestSquad = this.findWeakestReinforceableSquad(this.reinforcementSquads);
+        }
+
+        return weakestSquad;
+    }
+
+    private findWeakestReinforceableSquad(
         squads: Array<MiraControllableSquad>, 
         squadFilter: (squad: MiraControllableSquad) => boolean = null
     ): MiraControllableSquad {
@@ -478,6 +459,66 @@ class TacticalSubcontroller extends MiraSubcontroller {
         }
 
         return weakestSquad;
+    }
+
+    private reinforceSquadsByFreeUnits(): void {
+        let units = enumerate(this.parentController.Settlement.Units);
+        let unit;
+        let freeUnits = [];
+        
+        while ((unit = eNext(units)) !== undefined) {
+            if (this.isCombatUnit(unit) && !this.isBuilding(unit) && !this.unitsInSquads.has(unit.Id)) {
+                freeUnits.push(unit);
+                this.parentController.Log(MiraLogLevel.Debug, `Unit ${unit.ToString()} is marked for reinforcements`);
+            }
+        }
+
+        if (freeUnits.length == 0) {
+            return;
+        }
+
+        let weakestSquad = this.getWeakestReinforceableSquad();
+
+        if (weakestSquad != null) {
+            weakestSquad.AddUnits(freeUnits);
+        
+            for (let unit of freeUnits) {
+                this.unitsInSquads.set(unit.Id, unit);
+            }
+        }
+        else {
+            let newSquad = this.createSquad(freeUnits);
+            this.reinforcementSquads.push(newSquad);
+        }
+    }
+
+    private reinforceSquadsByReinforcementSquads(): void {
+        let weakestSquad = this.getWeakestReinforceableSquad();
+
+        if (!weakestSquad) {
+            return;
+        }
+
+        let strongestReinforcementIndex = null;
+        let maxStrength = 0;
+
+        for (let i = 0; i < this.reinforcementSquads.length; i++) {
+            if (strongestReinforcementIndex == null) {
+                strongestReinforcementIndex = i;
+                maxStrength = this.reinforcementSquads[i].Strength;
+            }
+
+            if (this.reinforcementSquads[i].Strength > maxStrength) {
+                strongestReinforcementIndex = i;
+                maxStrength = this.reinforcementSquads[i].Strength;
+            }
+        }
+
+        if (strongestReinforcementIndex != null) {
+            let reinforcementSquad = this.reinforcementSquads[strongestReinforcementIndex];
+            weakestSquad.AddUnits(reinforcementSquad.Units);
+            this.reinforcementSquads.splice(strongestReinforcementIndex, 1);
+        }
     }
 
     private calcTotalUnitsStrength(units: Array<any>): number {
@@ -536,7 +577,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
     private updateSquads(): void {
         this.offensiveSquads = this.offensiveSquads.filter((squad) => {return squad.Units.length > 0});
         this.defensiveSquads = this.defensiveSquads.filter((squad) => {return squad.Units.length > 0});
-        this.reinforcementSquads = this.defensiveSquads.filter((squad) => {return squad.Units.length > 0});
+        this.reinforcementSquads = this.reinforcementSquads.filter((squad) => {return squad.Units.length > 0});
         this.parentController.HostileAttackingSquads = this.parentController.HostileAttackingSquads.filter((squad) => {return squad.Units.length > 0});
 
         if (this.unitsInSquads != null) {
