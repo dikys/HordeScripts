@@ -354,7 +354,9 @@ class MiraSquadBattleState extends MiraSquadState {
             return;
         }
 
-        this.distributeTargets();
+        // Temporarily (?) disable proper micro because of it being slow as hell
+        //this.distributeTargets();
+        this.distributeTargets_lite();
     }
 
     private updateThreats(): void {
@@ -440,6 +442,7 @@ class MiraSquadBattleState extends MiraSquadState {
                     for (let col = enemy.Cell.X; col < maxCol; col++) {
                         let analyzedCell = {X: col, Y: row};
                         let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
+
                         let atttackRadius = 0;
 
                         if (MiraUtils.GetTileType(analyzedCell) == TileType.Forest) {
@@ -507,6 +510,15 @@ class MiraSquadBattleState extends MiraSquadState {
             else {
                 MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, unit.Cell);
             }
+        }
+    }
+
+    private distributeTargets_lite(): void {
+        let enemyLocation = this.enemySquads[0].GetLocation();
+        let freeCell = MiraUtils.FindFreeCell(enemyLocation.Point);
+        
+        for (let unit of this.squad.Units) {
+            MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, freeCell);
         }
     }
 
