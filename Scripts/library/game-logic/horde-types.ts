@@ -11,6 +11,7 @@ export const WorldGlobals = HCL.HordeClassLibrary.World.Const.WorldGlobals;
 // --- Сцена
 
 export const Scena = HCL.HordeClassLibrary.World.ScenaComponents.Scena;
+export const DiplomacyStatus = HCL.HordeClassLibrary.World.Simple.DiplomacyStatus;
 
 
 // ===================================================
