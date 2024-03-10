@@ -42,6 +42,6 @@ class RebuildState extends ProductionState {
     }
 
     protected onTargetCompositionReached(): void {
-        this.settlementController.State = new DevelopingState(this.settlementController);
+        this.settlementController.State = new BuildingUpState(this.settlementController);
     }
 }
