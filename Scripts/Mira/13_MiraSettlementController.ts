@@ -3,9 +3,17 @@
     Class that controls the entire life of a single settlement
 */
 
+class SettlementLocation {
+    Center: any;
+    Radius: number;
+
+    constructor(center: any, radius: number) {
+        this.Center = center;
+        this.Radius = radius;
+    }
+}
+
 class MiraSettlementController {
-    public readonly SETTLEMENT_RADIUS = 24;
-    
     public Settlement: any;
     public MasterMind: any;
     public Player: any;
@@ -123,13 +131,17 @@ class MiraSettlementController {
 
     IsUnderAttack(): boolean {
         //TODO: add enemy detection around expands
-        let settlementCenter = this.GetSettlementCenter();
+        let settlementLocation = this.GetSettlementLocation();
 
-        if (!settlementCenter) {
+        if (!settlementLocation) {
             return false;
         }
 
-        let enemies = MiraUtils.GetSettlementUnitsInArea(settlementCenter, this.SETTLEMENT_RADIUS, this.StrategyController.EnemySettlements);
+        let enemies = MiraUtils.GetSettlementUnitsInArea(
+            settlementLocation.Center, 
+            settlementLocation.Radius, 
+            this.StrategyController.EnemySettlements
+        );
         
         return enemies.length > 0;
     }
@@ -138,19 +150,26 @@ class MiraSettlementController {
         return MiraUtils.GetSettlementUnitsInArea(cell, radius, this.StrategyController.EnemySettlements);
     }
 
-    GetSettlementCenter(): any {
-        let castle = this.Settlement.Units.Professions.MainBuildings.First();
+    GetSettlementLocation(): SettlementLocation {
+        let buildings: Array<any> = [];
 
-        if (castle) {
-            return castle.Cell;
+        var units = enumerate(this.Settlement.Units);
+        var unit;
+        
+        while ((unit = eNext(units)) !== undefined) {
+            if (unit.Cfg.BuildingConfig != null) {
+                buildings.push(unit);
+            }
         }
 
-        let productionBuilding = this.Settlement.Units.Professions.ProducingBuildings.First();
-
-        if (productionBuilding) {
-            return productionBuilding.Cell;
+        if (buildings.length == 0) {
+            return null;
         }
 
-        return null;
+        let squad = new MiraSquad(buildings);
+        let location = squad.GetLocation();
+        let radius = (location.Spread / 2) + 10;
+        
+        return new SettlementLocation(location.Point, radius);
     }
 }

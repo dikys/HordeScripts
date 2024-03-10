@@ -459,4 +459,8 @@ class MiraUtils {
             return 0;
         }
     }
+
+    static IsPointsEqual(point1: any, point2: any): boolean {
+        return point1.X == point2.X && point1.Y == point2.Y;
+    }
 }

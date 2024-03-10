@@ -147,7 +147,8 @@ class StrategySubcontroller extends MiraSubcontroller {
     }
 
     OrderAttackersByDangerLevel(): Array<MiraSquad> {
-        let settlementCenter = this.parentController.GetSettlementCenter();
+        let settlementLocation = this.parentController.GetSettlementLocation();
+        let settlementCenter = settlementLocation?.Center;
 
         if (settlementCenter) {
             return this.parentController.HostileAttackingSquads.sort(
@@ -269,16 +270,16 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.updateSquads();
 
         if (this.currentTarget != null) { //we are attacking
-            var pullbackLocation = this.getPullbackCell();
+            let pullbackLocation = this.getPullbackLocation();
 
             for (var squad of this.offensiveSquads) {
                 if (pullbackLocation) {
                     if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                        if (squad.CurrentTargetCell !== pullbackLocation) {
+                        if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, pullbackLocation.Center)) {
                             let squadLocation = squad.GetLocation();
 
-                            if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation) > this.parentController.SETTLEMENT_RADIUS) {
-                                squad.Move(pullbackLocation, this.parentController.SETTLEMENT_RADIUS);
+                            if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation.Center) > pullbackLocation.Radius) {
+                                squad.Move(pullbackLocation.Center, pullbackLocation.Radius);
                             }
                         }
                     }
@@ -293,7 +294,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
             this.updateDefenseTargets();
         }
         else { //building up or something
-            let retreatCell = this.getRetreatCell();
+            let retreatCell = this.getRetreatLocation();
 
             if (retreatCell) {
                 for (let squad of this.AllSquads) {
@@ -345,11 +346,11 @@ class TacticalSubcontroller extends MiraSubcontroller {
 
     Retreat(): void {
         this.parentController.Log(MiraLogLevel.Debug, `Retreating`);
-        var retreatLocation = this.getRetreatCell();
+        var retreatLocation = this.getRetreatLocation();
 
         if (retreatLocation) {
             for (var squad of this.offensiveSquads) {
-                squad.Move(retreatLocation, this.parentController.SETTLEMENT_RADIUS);
+                squad.Move(retreatLocation.Center, retreatLocation.Radius);
             }
         }
     }
@@ -610,12 +611,12 @@ class TacticalSubcontroller extends MiraSubcontroller {
         return config.BuildingConfig != null;
     }
 
-    private getPullbackCell(): any {
-        return this.parentController.GetSettlementCenter();
+    private getPullbackLocation(): any {
+        return this.parentController.GetSettlementLocation();
     }
 
-    private getRetreatCell(): any {
-        return this.getPullbackCell();
+    private getRetreatLocation(): any {
+        return this.getPullbackLocation();
     }
 
     private updateDefenseTargets(): void {
@@ -626,7 +627,8 @@ class TacticalSubcontroller extends MiraSubcontroller {
         let attackerStrength = attackers[attackerIndex].Strength;
         let accumulatedStrength = 0;
 
-        let settlementCenter = this.parentController.GetSettlementCenter();
+        let settlementLocation = this.parentController.GetSettlementLocation();
+        let settlementCenter = settlementLocation?.Center;
 
         if (!settlementCenter) { //everything is lost :(
             return;
@@ -638,7 +640,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
                 settlementCenter
             );
 
-            if (distanceToSettlement > this.parentController.SETTLEMENT_RADIUS) {
+            if (distanceToSettlement > settlementLocation.Radius) {
                 continue;
             }
             

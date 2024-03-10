@@ -53,13 +53,13 @@ class DefendingState extends MiraSettlementControllerState {
         this.settlementController.HostileAttackingSquads = [];
 
         //TODO: add enemy detection around expands
-        let settlementCenter = this.settlementController.GetSettlementCenter();
+        let settlementLocation = this.settlementController.GetSettlementLocation();
 
-        if (!settlementCenter) {
+        if (!settlementLocation) {
             return;
         }
 
-        let attackers = this.settlementController.GetEnemiesInArea(settlementCenter, this.settlementController.SETTLEMENT_RADIUS);
+        let attackers = this.settlementController.GetEnemiesInArea(settlementLocation.Center, settlementLocation.Radius);
         let attackingSquads = MiraUtils.GetSettlementsSquadsFromUnits(attackers, this.settlementController.StrategyController.EnemySettlements);
         this.settlementController.HostileAttackingSquads.push(...attackingSquads);
     }
