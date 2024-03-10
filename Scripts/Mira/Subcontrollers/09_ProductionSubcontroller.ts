@@ -180,37 +180,6 @@ class ProductionSubcontroller extends MiraSubcontroller {
     }
 
     private configProductionRequirementsMet(config: any): boolean {
-        let productionRequirements = enumerate(config.TechConfig?.Requirements);
-        let requirementConfig;
-
-        let economyComposition = this.parentController.GetCurrentDevelopedEconomyComposition();
-
-        while ((requirementConfig = eNext(productionRequirements)) !== undefined) {
-            let atLeastOneUnitFound = false;
-
-            if (!economyComposition.has(requirementConfig.Uid)) {
-                return false;
-            }
-
-            let units = enumerate(this.parentController.Settlement.Units);
-            let unit;
-            
-            while ((unit = eNext(units)) !== undefined) {
-                if (
-                    unit.Cfg.Uid == requirementConfig.Uid &&
-                    !unit.EffectsMind.BuildingInProgress &&
-                    !unit.IsNearDeath
-                ) {
-                    atLeastOneUnitFound = true;
-                    break;
-                }
-            }
-
-            if (!atLeastOneUnitFound) {
-                return false;
-            }
-        }
-
-        return true;
+        return this.parentController.Settlement.TechTree.AreRequirementsSatisfied(config);    
     }
 }
