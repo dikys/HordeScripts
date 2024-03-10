@@ -168,7 +168,7 @@ class MiraSettlementController {
 
         let squad = new MiraSquad(buildings);
         let location = squad.GetLocation();
-        let radius = (location.Spread / 2) + 10;
+        let radius = Math.round((location.Spread / 2)) + 10;
         
         return new SettlementLocation(location.Point, radius);
     }

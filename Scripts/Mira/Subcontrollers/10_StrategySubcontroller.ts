@@ -294,12 +294,12 @@ class TacticalSubcontroller extends MiraSubcontroller {
             this.updateDefenseTargets();
         }
         else { //building up or something
-            let retreatCell = this.getRetreatLocation();
+            let retreatLocation = this.getRetreatLocation();
 
-            if (retreatCell) {
+            if (retreatLocation) {
                 for (let squad of this.AllSquads) {
                     if (squad.IsIdle()) {
-                        squad.Move(retreatCell);
+                        squad.Move(retreatLocation.Center, retreatLocation.Radius);
                     }
                 }
             }
