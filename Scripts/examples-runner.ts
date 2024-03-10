@@ -42,6 +42,7 @@ export function allExamples() {
     addExample(new Example_SettlementResources_2());
     addExample(new Example_SettlementUnitsInfo());
     addExample(new Example_SettlementTaxAndSalary());
+    addExample(new Example_SettlementPeopleIncome());
 
     // - Примеры перечисления юнитов в области
     addExample(new Example_GetUnitsInArea_Bruteforce());
@@ -98,4 +99,5 @@ import { Example_CustomBullet } from "./examples/custom-bullet-example";
 import { Example_CustomUnit } from "./examples/custom-unit-example";
 import { Example_SettlementTaxAndSalary } from "examples/settlement-tax-and-salary";
 import { Example_CustomUnitCommand } from "examples/custom-unit-command";
+import { Example_SettlementPeopleIncome } from "examples/settlement-people-income";
 
