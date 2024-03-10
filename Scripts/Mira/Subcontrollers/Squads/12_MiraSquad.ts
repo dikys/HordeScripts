@@ -20,10 +20,12 @@ class MiraSquad {
     protected location: MiraSquadLocation;
 
     public get Strength(): number {
+        this.cleanup();
+        
         let strength = 0;
         
         for (let unit of this.Units) {
-            strength += unit.Health
+            strength += MiraUtils.GetUnitStrength(unit);
         }
         
         return strength;
@@ -34,7 +36,7 @@ class MiraSquad {
     }
 
     protected cleanup(): void {
-        this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive && !unit.IsNearDeath});
+        this.Units = this.Units.filter((unit) => {return unit != null && unit.IsAlive});
     }
 
     Tick(tickNumber: number): void {
@@ -44,6 +46,8 @@ class MiraSquad {
 
     GetLocation(): MiraSquadLocation {
         if (!this.location) {
+            this.cleanup();
+            
             if (this.Units.length > 0) {
                 let uppermostUnit: any = null;
                 let lowermostUnit: any = null;
@@ -108,6 +112,8 @@ class MiraSquad {
     }
 
     IsAllUnitsIdle(): boolean {
+        this.cleanup();
+
         for (let unit of this.Units) {
             if (!unit.OrdersMind.IsIdle()) {
                 return false;
@@ -118,8 +124,16 @@ class MiraSquad {
     }
 
     AddUnits(units: Array<any>): void {
+        this.cleanup();
+
         this.Units.push(...units);
         this.location = null;
+
+        this.onUnitsAdded();
+    }
+
+    protected onUnitsAdded(): void {
+        //do nothing
     }
 }
 
@@ -208,5 +222,9 @@ class MiraControllableSquad extends MiraSquad {
         if (this.Units.length !== unitCount) {
             this.recalcMinSpread();
         }
+    }
+
+    protected onUnitsAdded(): void {
+        this.recalcMinSpread();
     }
 }

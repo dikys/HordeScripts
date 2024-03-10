@@ -452,8 +452,8 @@ class MiraUtils {
     }
 
     static GetUnitStrength(unit: any): number {
-        if (this.IsCombatConfig(unit.Cfg)) {
-            return unit.Health
+        if (this.IsCombatConfig(unit.Cfg) && unit.IsAlive) {
+            return Math.max(unit.Health, 0);
         }
         else {
             return 0;
