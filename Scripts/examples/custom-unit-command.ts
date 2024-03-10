@@ -116,7 +116,7 @@ export class Example_CustomUnitCommand extends HordeExampleBase {
 
 
 /**
- * Создаёт базовый обработчик движения.
+ * Создаёт базовый обработчик выдачи приказа.
  */
 function createBaseGetOrderWorker() {
     return host.newObj(HCL.HordeClassLibrary.UnitComponents.Workers.BaseBuilding.Special.BaseBuildingGetOrder);
