@@ -367,7 +367,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
         let combatUnits: Array<any> = [];
         
         while ((unit = eNext(units)) !== undefined) {
-            if (this.isCombatUnit(unit)) {
+            if (this.isCombatUnit(unit) && unit.IsAlive) {
                 combatUnits.push(unit);
             }
         }
@@ -467,7 +467,12 @@ class TacticalSubcontroller extends MiraSubcontroller {
         let freeUnits = [];
         
         while ((unit = eNext(units)) !== undefined) {
-            if (this.isCombatUnit(unit) && !this.isBuilding(unit) && !this.unitsInSquads.has(unit.Id)) {
+            if (
+                this.isCombatUnit(unit) && 
+                !this.isBuilding(unit) && 
+                !this.unitsInSquads.has(unit.Id) &&
+                unit.IsAlive
+            ) {
                 freeUnits.push(unit);
                 this.parentController.Log(MiraLogLevel.Debug, `Unit ${unit.ToString()} is marked for reinforcements`);
             }
