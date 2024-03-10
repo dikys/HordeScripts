@@ -418,14 +418,14 @@ class TacticalSubcontroller extends MiraSubcontroller {
         this.reinforcementSquads = this.reinforcementSquads.filter((value, index, array) => {return value.CombativityIndex < 1});
     }
 
-    private getWeakestReinforceableSquad(): MiraControllableSquad {
+    private getWeakestReinforceableSquad(checkReinforcements: boolean): MiraControllableSquad {
         let weakestSquad = this.findWeakestReinforceableSquad(this.defensiveSquads);
 
         if (weakestSquad == null) {
             weakestSquad = this.findWeakestReinforceableSquad(this.offensiveSquads, (s) => s.IsIdle());
         }
 
-        if (weakestSquad == null) {
+        if (weakestSquad == null && checkReinforcements) {
             weakestSquad = this.findWeakestReinforceableSquad(this.reinforcementSquads);
         }
 
@@ -477,7 +477,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
             return;
         }
 
-        let weakestSquad = this.getWeakestReinforceableSquad();
+        let weakestSquad = this.getWeakestReinforceableSquad(true);
 
         if (weakestSquad != null) {
             weakestSquad.AddUnits(freeUnits);
@@ -493,7 +493,7 @@ class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private reinforceSquadsByReinforcementSquads(): void {
-        let weakestSquad = this.getWeakestReinforceableSquad();
+        let weakestSquad = this.getWeakestReinforceableSquad(false);
 
         if (!weakestSquad) {
             return;
