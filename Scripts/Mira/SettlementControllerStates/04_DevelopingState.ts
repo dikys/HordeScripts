@@ -4,9 +4,6 @@ class DevelopingState extends ProductionState {
     
     protected getTargetUnitsComposition(): UnitComposition {
         var targetCompostion = new Map<string, number>();
-        
-        targetCompostion.set("#UnitConfig_Slavyane_Farm", 5);
-        targetCompostion.set("#UnitConfig_Slavyane_Worker1", 5);
 
         let economyComposition = this.settlementController.GetCurrentEconomyComposition();
         let produceableCfgIds = this.settlementController.ProductionController.GetProduceableCfgIds();
@@ -53,9 +50,9 @@ class DevelopingState extends ProductionState {
         let combatComposition = this.settlementController.StrategyController.GetArmyComposition();
         let estimation = this.settlementController.ProductionController.EstimateProductionTime(combatComposition);
 
-        for (let cfgId of estimation.keys()) {
-            if (estimation[cfgId] > this.MAX_PRODUCTION_TIME) {
-                let producingCfgIds = this.settlementController.ProductionController.GetProducingCfgIds(cfgId);
+        estimation.forEach((value, key) => {
+            if (value > this.MAX_PRODUCTION_TIME) {
+                let producingCfgIds = this.settlementController.ProductionController.GetProducingCfgIds(key);
 
                 if (producingCfgIds.length > 0) {
                     let index = MiraUtils.Random(producingCfgIds.length - 1);
@@ -66,7 +63,15 @@ class DevelopingState extends ProductionState {
                     }
                 }
             }
-        }
+        });
+
+        economyComposition.forEach((value, key) => {
+            MiraUtils.AddToMapItem(targetCompostion, key, value);
+        });
+
+        //temp code until resource gathering is implemented
+        targetCompostion.set("#UnitConfig_Slavyane_Farm", 5);
+        targetCompostion.set("#UnitConfig_Slavyane_Worker1", 5);
 
         return targetCompostion;
     }

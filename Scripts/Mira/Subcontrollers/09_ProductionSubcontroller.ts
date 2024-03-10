@@ -80,20 +80,20 @@ class ProductionSubcontroller extends MiraSubcontroller {
             this.updateProductionIndex();
         }
 
-        for (let cfgId of unitComposition.keys()) {
-            let producers = this.productionIndex.get(cfgId);
+        unitComposition.forEach((value, key) => {
+            let producers = this.productionIndex.get(key);
 
             if (!producers) {
-                estimation.set(cfgId, Infinity);
+                estimation.set(key, Infinity);
             }
             else {
-                let producersCount = Math.min(producers.length, unitComposition[cfgId]);
-                let config = MiraUtils.GetUnitConfig(cfgId);
-                let productionTime = config.ProductionTime * unitComposition[cfgId] / producersCount;
+                let producersCount = Math.min(producers.length, value);
+                let config = MiraUtils.GetUnitConfig(key);
+                let productionTime = config.ProductionTime * value / producersCount;
 
-                estimation.set(cfgId, productionTime);
+                estimation.set(key, productionTime);
             }
-        }
+        });
 
         return estimation;
     }
@@ -103,7 +103,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
             this.updateProductionIndex();
         }
         
-        let producers = this.productionIndex[cfgId];
+        let producers = this.productionIndex.get(cfgId);
 
         if (producers) {
             let cfgIds = new Set<string>();
@@ -112,7 +112,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
                 cfgIds.add(producer.Cfg.Uid);
             }
 
-            return [...cfgIds.values()];
+            return Array.from(cfgIds);
         }
         else {
             return [];
