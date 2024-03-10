@@ -66,6 +66,7 @@ export function allExamples() {
     // - Примеры кастомных объектов
     addExample(new Example_CustomBullet());
     addExample(new Example_CustomUnit());
+    addExample(new Example_CustomUnitCommand());
 }
 
 
@@ -96,4 +97,5 @@ import { Example_SpawnUnit } from "./examples/unit-spawn-example";
 import { Example_CustomBullet } from "./examples/custom-bullet-example";
 import { Example_CustomUnit } from "./examples/custom-unit-example";
 import { Example_SettlementTaxAndSalary } from "examples/settlement-tax-and-salary";
+import { Example_CustomUnitCommand } from "examples/custom-unit-command";
 

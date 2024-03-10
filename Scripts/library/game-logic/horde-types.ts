@@ -126,6 +126,7 @@ export const MotionHit = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.Motio
 // Обработчики
 export const ScriptUnitWorkerState = HCL.HordeClassLibrary.UnitComponents.Workers.Script.ScriptUnitWorkerState;
 export const ScriptUnitWorkerEveryTick = HCL.HordeClassLibrary.UnitComponents.Workers.Script.ScriptUnitWorkerEveryTick;
+export const ScriptUnitWorkerGetOrder = HCL.HordeClassLibrary.UnitComponents.Workers.Script.ScriptUnitWorkerGetOrder;
 
 // ===================================================
 // --- Конфиги
