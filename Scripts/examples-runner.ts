@@ -43,6 +43,7 @@ export function allExamples() {
     addExample(new Example_SettlementUnitsInfo());
     addExample(new Example_SettlementTaxAndSalary());
     addExample(new Example_SettlementPeopleIncome());
+    addExample(new Example_SettlementProductionFactor());
     addExample(new Example_SettlementDiplomacy());
 
     // - Примеры перечисления юнитов в области
@@ -102,4 +103,5 @@ import { Example_SettlementTaxAndSalary } from "examples/settlement-tax-and-sala
 import { Example_CustomUnitCommand } from "examples/custom-unit-command";
 import { Example_SettlementPeopleIncome } from "examples/settlement-people-income";
 import { Example_SettlementDiplomacy } from "examples/settlement-diplomacy";
+import { Example_SettlementProductionFactor } from "examples/settlement-production-factor";
 
