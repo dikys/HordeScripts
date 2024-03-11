@@ -50,7 +50,7 @@ export function unitSpeedAtCellByKnownMap(unit, cell) {
  * (Тут учитывается туман войны и другие виды вИдения)
  */
 export function unitCheckPathTo(unit, cell) {
-    return unit.MapMind.CheckPathTo(cell, false);
+    return unit.MapMind.CheckPathTo(cell, false).Found;
 }
 
 /**
