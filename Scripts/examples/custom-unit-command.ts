@@ -104,6 +104,10 @@ export class Example_CustomUnitCommand extends HordeExampleBase {
      * Обработчик для получения приказа из команды
      */
     private worker_getUnitOrder(u: Unit, commandArgs) {
+        if (u.OrdersMind.IsUncontrollable) {
+            return;  // Юнит в данный момент является неуправляемым (например, в режиме паники)
+        }
+
         if (commandArgs.CommandType == CUSTOM_COMMAND_ID) {
             // Была прожата кастомная команда
             this.log.info("Зафиксированно нажатие кастомной команды. Здесь можно выполнить любые действия.");
