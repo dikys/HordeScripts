@@ -30,7 +30,7 @@ export class HordePluginsCollection {
     }
     
     public registerScenaScript(scenaPlugin: ScenaScriptBase) {
-        var scenaName = ActiveScena.GetRealScena().ScenaName;
+        let scenaName = ActiveScena.GetRealScena().ScenaName;
         if (scenaPlugin.scenaName != scenaName) {
             return;
         }
