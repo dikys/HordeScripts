@@ -33,6 +33,7 @@ export function allExamples() {
     addExample(new Example_SpawnOneBullet());
     addExample(new Example_SpawnBulletsRain());
     addExample(new Example_SpawnUnit());
+    addExample(new Example_ReplaceUnit());
     addExample(new Example_UnitWorks());
     addExample(new Example_UnitOrders());
     addExample(new Example_UnitEnumerateEvents());  // В этом примере выполняется перечисление событий произошедших с тестовым юнитом
@@ -103,4 +104,5 @@ import { Example_CustomUnitCommand } from "examples/custom-unit-command";
 import { Example_SettlementPeopleIncome } from "examples/settlement-people-income";
 import { Example_SettlementDiplomacy } from "examples/settlement-diplomacy";
 import { Example_SettlementProductionFactor } from "examples/settlement-production-factor";
+import { Example_ReplaceUnit } from "examples/unit-replace";
 
