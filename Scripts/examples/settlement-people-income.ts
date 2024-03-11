@@ -4,8 +4,8 @@ import HordeExampleBase from "./base-example";
 const PeopleIncomeLevelT = HCL.HordeClassLibrary.World.Settlements.Modules.Misc.PeopleIncomeLevel;
 
 /**
- * Пример работы с налогами и жалованием.
- * Изменяет налоги и жалования поселениям заданным в "settlements".
+ * Пример работы с уровнями прироста населения.
+ * Уровень задаёт скорость прироста населения при определенном количестве ферм и мельниц.
  */
 export class Example_SettlementPeopleIncome extends HordeExampleBase {
     private settlements: Array<string>;

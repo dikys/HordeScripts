@@ -39,7 +39,6 @@ export function allExamples() {
     addExample(new Example_ScenaWorks());
     addExample(new Example_SettlementWorks());
     addExample(new Example_SettlementResources());
-    addExample(new Example_SettlementResources_2());
     addExample(new Example_SettlementUnitsInfo());
     addExample(new Example_SettlementTaxAndSalary());
     addExample(new Example_SettlementPeopleIncome());
@@ -93,7 +92,7 @@ import { Example_HookReceivedChatMessages, Example_HookSentChatMessages, Example
 import { Example_GameWorks, Example_ImportDotNetTypes, Example_Introspection } from "./examples/other-examples";
 import { Example_PlayerWorks } from "./examples/player-examples";
 import { Example_ScenaWorks } from "./examples/scena-examples";
-import { Example_SettlementWorks, Example_SettlementResources, Example_SettlementResources_2, Example_SettlementUnitsInfo } from "./examples/settlement-examples";
+import { Example_SettlementWorks, Example_SettlementResources, Example_SettlementUnitsInfo } from "./examples/settlement-examples";
 import { Example_UnitEnumerateEvents, Example_UnitOrders, Example_UnitWorks } from "./examples/unit-examples";
 import { Example_GetUnitsInArea_Bruteforce, Example_GetUnitsInArea_KdTree, Example_GetUnitsInArea_Squad } from "./examples/unit-get-in-area";
 import { Example_SpawnUnit } from "./examples/unit-spawn-example";
