@@ -45,7 +45,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
     }
 
     public get ProductionList(): Array<string> {
-        let list = this.productionList
+        let list = [...this.productionList];
 
         let masterMind = this.parentController.MasterMind;
         let requests = enumerate(masterMind.Requests);
