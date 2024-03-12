@@ -36,10 +36,7 @@ abstract class MiraSquadState extends FsmState {
 
 class MiraSquadIdleState extends MiraSquadState {
     OnEntry(): void {
-        if (!this.squad.CurrentTargetCell) {
-            this.squad.CurrentTargetCell = this.squad.GetLocation().Point;
-        }
-        
+        this.squad.CurrentTargetCell = this.squad.GetLocation().Point;
         this.distributeUnits();
     }
     
