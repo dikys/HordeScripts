@@ -2,6 +2,9 @@ import { spawnDecoration } from "library/game-logic/decoration-spawn";
 import HordeExampleBase from "./base-example";
 import { getOrCreateTestUnit } from "./unit-example-utils";
 
+
+const ReplaceUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.ReplaceUnitParameters;
+
 /**
  * Пример замены юнита
  */
@@ -14,25 +17,48 @@ export class Example_ReplaceUnit extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
         
-        let unit = getOrCreateTestUnit(this);
-        if (unit == null) {
-            this.log.info('Не удалось создать юнита для этого примера!');
+        // Юнит для замены
+        let unitToReplace = this.getUnitToReplace();
+        if (!unitToReplace) {
+            this.log.info('Не удалось подобрать юнита для этого примера!');
             return;
         }
-        this.log.info('Для этого примера выбран:', unit);
+        this.log.info('Для этого примера выбран:', unitToReplace);
 
-        let newCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Heavymen");
-        // let newCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Castle");
-        this.log.info('Заменяем выбранного юнита на:', newCfg);
-
-        const silent = true;  // Отключаем вывод в лог возможных ошибок (при регистрации и создании модели)
-        let newUnit = unit.Owner.Units.ReplaceUnit(unit, newCfg, silent);
-        if (newUnit) {
-            // Создание графического эффекта
-            spawnDecoration(ActiveScena.GetRealScena(), HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), newUnit.Position);
-            this.log.info("Выбранный юнит заменен на:", newUnit);
-        } else {
+        // Параметры замены
+        let replaceParams = new ReplaceUnitParameters();
+        replaceParams.ReplacingUnit = unitToReplace;
+        replaceParams.ReplaceToUnitConfig = this.getTargetConfig();
+        replaceParams.Cell = null;                  // Можно задать клетку, в которой должен появиться новый юнит. Если null, то центр создаваемого юнита совпадет с предыдущим
+        replaceParams.PreserveHealthLevel = true;   // Нужно ли передать уровень здоровья? (в процентном соотношении)
+        replaceParams.PreserveOrders = true;        // Нужно ли передать приказы?
+        replaceParams.Silent = true;                // Отключение вывода в лог возможных ошибок (при регистрации и создании модели)
+        
+        // Замена
+        this.log.info('Заменяем выбранного юнита на:', replaceParams.ReplaceToUnitConfig);
+        let newUnit = unitToReplace.Owner.Units.ReplaceUnit(replaceParams);
+        if (!newUnit) {
             this.log.info("Не удалось заменить юнита");
+            return;
         }
+        
+        // Создание графического эффекта
+        spawnDecoration(ActiveScena.GetRealScena(), HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), newUnit.Position);
+        this.log.info("Выбранный юнит заменен на:", newUnit);
+    }
+
+    private getUnitToReplace() {
+        // - Варианты:
+        return getOrCreateTestUnit(this);
+        //return ActiveScena.GetRealScena().Settlements.GetByUid("0").Units.GetCastleOrAnyUnit();
+        //return Players["0"].GetRealPlayer().SelectedSquadVirtual.GetFirstUnit();
+    }
+
+    private getTargetConfig() {
+        // - Варианты:
+        return HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Heavymen");
+        //return HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Castle");
+        //return HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Farm");
+        //return HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Mill");
     }
 }

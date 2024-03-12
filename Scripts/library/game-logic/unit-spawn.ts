@@ -4,17 +4,19 @@ import { createPoint } from "library/common/primitives";
 import { UnitDirection } from "./horde-types";
 import { unitCanBePlacedByRealMap } from "./unit-and-map";
 
+
+const SpawnUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.SpawnUnitParameters;
+
 /**
  * Создание одного юнита в заданной клетке.
  * 
  * Возвращает созданного юнита.
  */
 export function spawnUnit(settlement, uCfg, cell, direction) {
-    let csType = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    let spawnParams = ScriptUtils.CreateInstance(csType);
-    ScriptUtils.SetValue(spawnParams, "ProductUnitConfig", uCfg);
-    ScriptUtils.SetValue(spawnParams, "Cell", cell);
-    ScriptUtils.SetValue(spawnParams, "Direction", direction);
+    let spawnParams = new SpawnUnitParameters();
+    spawnParams.ProductUnitConfig = uCfg;
+    spawnParams.Cell = cell;
+    spawnParams.Direction = direction;
 
     let unit = settlement.Units.SpawnUnit(spawnParams);
     return unit;
@@ -26,15 +28,14 @@ export function spawnUnit(settlement, uCfg, cell, direction) {
  * Возвращает список созданных юнитов.
  */
 export function spawnUnits(settlement, uCfg, uCount, direction, generator) {
-    let csType = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    let spawnParams = ScriptUtils.CreateInstance(csType);
-    ScriptUtils.SetValue(spawnParams, "ProductUnitConfig", uCfg);
-    ScriptUtils.SetValue(spawnParams, "Direction", direction);
+    let spawnParams = new SpawnUnitParameters();
+    spawnParams.ProductUnitConfig = uCfg;
+    spawnParams.Direction = direction;
 
     let outSpawnedUnits: any[] = [];
     for (let position = generator.next(); !position.done && outSpawnedUnits.length < uCount; position = generator.next()) {
         if (unitCanBePlacedByRealMap(uCfg, position.value.X, position.value.Y)) {
-            ScriptUtils.SetValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
+            spawnParams.Cell = createPoint(position.value.X, position.value.Y);
             outSpawnedUnits.push(settlement.Units.SpawnUnit(spawnParams));
         }
     }
