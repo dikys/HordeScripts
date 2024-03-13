@@ -1,19 +1,9 @@
+import { MiraLogLevel } from "Mira/Mira";
+import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
+import { RebuildState } from "./RebuildState";
+import { MiraUtils } from "Mira/Utils/MiraUtils";
 
-class IdleState extends MiraSettlementControllerState {
-    OnEntry(): void {
-        this.settlementController.Log(MiraLogLevel.Info, "Chilling...")
-    }
-
-    OnExit(): void {
-        //do nothing
-    }
-
-    Tick(tickNumber: number): void {
-        //do nothing
-    }
-}
-
-class DefendingState extends MiraSettlementControllerState {
+export class DefendingState extends MiraSettlementControllerState {
     private reinforcementsCfgIds: Array<string>;
     
     OnEntry(): void {

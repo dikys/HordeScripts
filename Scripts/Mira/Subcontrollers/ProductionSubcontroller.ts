@@ -1,9 +1,16 @@
 
 //TODO: probably reorganize build list to a queue
 
-class ProductionSubcontroller extends MiraSubcontroller {
+import { MiraLogLevel } from "Mira/Mira";
+import { MiraSettlementController } from "Mira/MiraSettlementController";
+import { eNext, enumerate } from "Mira/Utils/Common";
+import { MiraUtils, UnitComposition } from "Mira/Utils/MiraUtils";
+import { UnitProducerProfessionParams, UnitProfession } from "library/game-logic/unit-professions";
+import { MiraSubcontroller } from "./MiraSubcontroller";
+
+export class ProductionSubcontroller extends MiraSubcontroller {
     private productionList: Array<string> = [];
-    private productionIndex: Map<string, Array<any>> = null;
+    private productionIndex: Map<string, Array<any>> | null = null;
 
     constructor (parent: MiraSettlementController) {
         super(parent);
@@ -80,7 +87,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
             this.updateProductionIndex();
         }
         
-        return Array.from(this.productionIndex.keys());
+        return Array.from(this.productionIndex!.keys());
     }
 
     EstimateProductionTime(unitComposition: UnitComposition): Map<string, number> {
@@ -91,7 +98,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
         }
 
         unitComposition.forEach((value, key) => {
-            let producers = this.productionIndex.get(key);
+            let producers = this.productionIndex!.get(key);
 
             if (!producers) {
                 estimation.set(key, Infinity);
@@ -113,7 +120,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
             this.updateProductionIndex();
         }
         
-        let producers = this.productionIndex.get(cfgId);
+        let producers = this.productionIndex!.get(cfgId);
 
         if (producers) {
             let cfgIds = new Set<string>();
@@ -135,7 +142,7 @@ class ProductionSubcontroller extends MiraSubcontroller {
         }
         
         //TODO: implement engagement of workers that are busy gathering resources
-        let producers = this.productionIndex.get(configId);
+        let producers = this.productionIndex!.get(configId);
 
         if (producers) {
             for (let producer of producers) {
@@ -179,6 +186,11 @@ class ProductionSubcontroller extends MiraSubcontroller {
                     
                     if (this.productionIndex.has(produceListItem.Uid)) {
                         let producers = this.productionIndex.get(produceListItem.Uid);
+
+                        if (!producers) {
+                            producers = new Array<any>();
+                        }
+
                         producers.push(unit);
                     }
                     else {

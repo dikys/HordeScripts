@@ -1,5 +1,10 @@
+import { MiraLogLevel } from "Mira/Mira";
+import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
+import { IdleState } from "./IdleState";
+import { DefendingState } from "./DefendingState";
+import { DevelopingState } from "./DevelopingState";
 
-class ExterminatingState extends MiraSettlementControllerState {
+export class ExterminatingState extends MiraSettlementControllerState {
     private readonly COMBATIVITY_THRESHOLD = 0.33;
     private currentTarget: any; //but actually Unit
     private reinforcementsCfgIds: Array<string>;

@@ -3,6 +3,18 @@
     Class that controls the entire life of a single settlement
 */
 
+import { Mira, MiraLogLevel } from "./Mira";
+import { DevelopingState } from "./SettlementControllerStates/DevelopingState";
+import { MiraSettlementControllerState } from "./SettlementControllerStates/MiraSettlementControllerState";
+import { MiningSubcontroller } from "./Subcontrollers/MiningSubontroller";
+import { MiraSubcontroller } from "./Subcontrollers/MiraSubcontroller";
+import { ProductionSubcontroller } from "./Subcontrollers/ProductionSubcontroller";
+import { MiraSquad } from "./Subcontrollers/Squads/MiraSquad";
+import { StrategySubcontroller } from "./Subcontrollers/StrategySubcontroller";
+import { TacticalSubcontroller } from "./Subcontrollers/TacticalSubcontroller";
+import { eNext, enumerate } from "./Utils/Common";
+import { MiraUtils, UnitComposition } from "./Utils/MiraUtils";
+
 class SettlementLocation {
     Center: any;
     Radius: number;
@@ -13,7 +25,7 @@ class SettlementLocation {
     }
 }
 
-class MiraSettlementController {
+export class MiraSettlementController {
     public Settlement: any;
     public MasterMind: any;
     public Player: any;
@@ -24,13 +36,13 @@ class MiraSettlementController {
     public TacticalController: TacticalSubcontroller;
     
     public HostileAttackingSquads: Array<MiraSquad> = [];
-    public TargetUnitsComposition: UnitComposition = null;
+    public TargetUnitsComposition: UnitComposition | null = null;
     
     private subcontrollers: Array<MiraSubcontroller> = [];
     private state: MiraSettlementControllerState;
-    private nextState: MiraSettlementControllerState;
-    private currentUnitComposition: UnitComposition;
-    private currentDevelopedUnitComposition: UnitComposition;
+    private nextState: MiraSettlementControllerState | null;
+    private currentUnitComposition: UnitComposition | null;
+    private currentDevelopedUnitComposition: UnitComposition | null;
 
     constructor (controlledSettlement, settlementMM, controlledPlayer) {
         this.Settlement = controlledSettlement;
@@ -150,7 +162,7 @@ class MiraSettlementController {
         return MiraUtils.GetSettlementUnitsInArea(cell, radius, this.StrategyController.EnemySettlements);
     }
 
-    GetSettlementLocation(): SettlementLocation {
+    GetSettlementLocation(): SettlementLocation | null {
         let buildings: Array<any> = [];
 
         var units = enumerate(this.Settlement.Units);

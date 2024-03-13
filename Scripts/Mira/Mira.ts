@@ -1,4 +1,9 @@
-enum MiraLogLevel {
+import { log } from "library/common/logging";
+import { MiraSettlementController } from "./MiraSettlementController";
+import { DevelopingState } from "./SettlementControllerStates/DevelopingState";
+import { MiraUtils } from "./Utils/MiraUtils";
+
+export enum MiraLogLevel {
     Debug = 0,
     Info = 1,
     Warning = 2,
@@ -12,7 +17,7 @@ enum MiraLogLevel {
     The class itself is static by its nature
 */
 
-class Mira {
+export class Mira {
     static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
     static CanRun = true;
     
@@ -38,7 +43,7 @@ class Mira {
             }
         }
         catch (ex) {
-            logExc(ex);
+            log.exception(ex);
             this.CanRun = false;
         }
     };
@@ -50,7 +55,7 @@ class Mira {
             Mira.AttachToPlayer("1");
         }
         catch (ex) {
-            logExc(ex);
+            log.exception(ex);
         }
     };
 
@@ -90,16 +95,16 @@ class Mira {
         switch (level) {
             case MiraLogLevel.Debug:
                 logMessage = "(Mira) D " + message;
-                logi(logMessage);
+                log.info(logMessage);
                 break;
             case MiraLogLevel.Info:
-                logi(logMessage);
+                log.info(logMessage);
                 break;
             case MiraLogLevel.Warning:
-                logw(logMessage);
+                log.warning(logMessage);
                 break;
             case MiraLogLevel.Error:
-                loge(logMessage);
+                log.error(logMessage);
                 break;
         }
     }

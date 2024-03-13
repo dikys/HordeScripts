@@ -1,5 +1,9 @@
+import { UnitComposition } from "Mira/Utils/MiraUtils";
+import { ProductionState } from "./ProductionState";
+import { MiraLogLevel } from "Mira/Mira";
+import { ExterminatingState } from "./ExterminatingState";
 
-class BuildingUpState extends ProductionState {
+export class BuildingUpState extends ProductionState {
     protected getTargetUnitsComposition(): UnitComposition {
         let enemy = this.settlementController.StrategyController.CurrentEnemy
         
@@ -19,29 +23,5 @@ class BuildingUpState extends ProductionState {
 
     protected onTargetCompositionReached(): void {
         this.settlementController.State = new ExterminatingState(this.settlementController);
-    }
-}
-
-class RebuildState extends ProductionState {
-    protected getTargetUnitsComposition(): UnitComposition {
-        let lastUnitsComposition = this.settlementController.TargetUnitsComposition;
-        let unitsComposition = new Map<string, number>();
-
-        lastUnitsComposition.forEach((value, key, map) => {
-            let config = MiraUtils.GetUnitConfig(key);
-
-            if (
-                config.BuildingConfig != null ||
-                MiraUtils.IsProducerConfig(key)
-            ) {
-                unitsComposition.set(key, value);
-            }
-        });
-
-        return unitsComposition;
-    }
-
-    protected onTargetCompositionReached(): void {
-        this.settlementController.State = new BuildingUpState(this.settlementController);
     }
 }

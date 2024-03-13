@@ -1,3 +1,12 @@
+import { Mira, MiraLogLevel } from "Mira/Mira";
+import { MiraSquad } from "Mira/Subcontrollers/Squads/MiraSquad";
+import { createBox, createPoint } from "library/common/primitives";
+import { UnitFlags, UnitCommand, AllContent } from "library/game-logic/horde-types";
+import { UnitProfession } from "library/game-logic/unit-professions";
+import { AssignOrderMode, VirtualInput, VirtualSelectUnitsMode } from "library/mastermind/virtual-input";
+import { enumerate, eNext } from "./Common";
+import { generateCellInSpiral } from "library/common/position-tools";
+
 class MiraSettlementData {
     public Settlement: any;
     public MasterMind: any;
@@ -15,7 +24,7 @@ class DotnetHolder {
     
     public static get RealScena() {
         if (!DotnetHolder.realScena) {
-            DotnetHolder.realScena = scena.GetRealScena();
+            DotnetHolder.realScena = ActiveScena.GetRealScena();
         }
 
         return DotnetHolder.realScena;
@@ -25,7 +34,7 @@ class DotnetHolder {
     
     public static get UnitsMap() {
         if (!DotnetHolder.unitsMap) {
-            DotnetHolder.unitsMap = scena.GetRealScena().UnitsMap;
+            DotnetHolder.unitsMap = ActiveScena.GetRealScena().UnitsMap;
         }
         
         return DotnetHolder.unitsMap;
@@ -35,14 +44,14 @@ class DotnetHolder {
     
     public static get LandscapeMap() {
         if (!DotnetHolder.landscapeMap) {
-            DotnetHolder.landscapeMap = scena.GetRealScena().LandscapeMap;
+            DotnetHolder.landscapeMap = ActiveScena.GetRealScena().LandscapeMap;
         }
         
         return DotnetHolder.landscapeMap;
     }
 }
 
-class MiraProfiler {
+export class MiraProfiler {
     private message: string;
     private callCount: number;
     private executionTime: number;
@@ -65,10 +74,10 @@ class MiraProfiler {
     }
 }
 
-let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
-type UnitComposition = Map<string, number>;
+let TileType = HCL.HordeClassLibrary.HordeContentApi.Configs.Tiles.Stuff.TileType;
+export type UnitComposition = Map<string, number>;
 
-class MiraUtils {
+export class MiraUtils {
     static GetSettlementsSquadsFromUnits(units: Array<any>, settlements: Array<any>): Array<MiraSquad> {
         let processedUnitIds = new Set<number>();
         let result: Array<MiraSquad> = [];
@@ -90,9 +99,9 @@ class MiraUtils {
         
         let unitSettlement = unit.Owner;
         
-        let newUnits = [unit];
-        let currentUnits = [];
-        let units = [];
+        let newUnits: any[] = [unit];
+        let currentUnits: any[] = [];
+        let units: any[] = [];
 
         do {
             units.push(...newUnits);
@@ -142,9 +151,9 @@ class MiraUtils {
         radius: number, 
         filter: (cell: any) => boolean
     ): Array<any> {
-        let result = [];
+        let result: any[] = [];
         
-        let generator = generatePositionInSpiral(center.X, center.Y);
+        let generator = generateCellInSpiral(center.X, center.Y);
         let cell: any;
         for (cell = generator.next(); !cell.done; cell = generator.next()) {
             if (MiraUtils.ChebyshevDistance(cell.value, center) > radius) {
@@ -175,9 +184,9 @@ class MiraUtils {
     
     static GetUnitsInArea(cell: any, radius: number): Array<any> {
         let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius, cell.Y + radius, 2);
-        let unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox", box);
-        let count = HordeUtils.getValue(unitsInBox, "Count");
-        let units = HordeUtils.getValue(unitsInBox, "Units");
+        let unitsInBox = ScriptUtils.Invoke(DotnetHolder.RealScena.UnitsMap.UnitsTree, "GetUnitsInBox", box);
+        let count = ScriptUtils.GetValue(unitsInBox, "Count");
+        let units = ScriptUtils.GetValue(unitsInBox, "Units");
 
         let unitsIds = new Set<number>();
         let result = new Array<any>();
@@ -214,7 +223,7 @@ class MiraUtils {
 
     static AddToMapItem(map: UnitComposition, key: string, value: number): void {
         if (map.has(key)) {
-            map.set(key, map.get(key) + value);
+            map.set(key, (map.get(key) ?? 0) + value);
         }
         else {
             map.set(key, value);
@@ -230,7 +239,7 @@ class MiraUtils {
         minuend.forEach(
             (value, key, map) => {
                 if (subtrahend.has(key)) {
-                    var newCount = value - subtrahend.get(key);
+                    var newCount = value - (subtrahend.get(key) ?? 0);
                     
                     if (newCount > 0) {
                         newList.set(key, newCount);
@@ -256,7 +265,7 @@ class MiraUtils {
                 if ( !set.has(key) ) {
                     isContain = false;
                 }
-                else if (set.get(key) < val) {
+                else if (set.get(key) ?? 0 < val) {
                     isContain = false;
                 }    
             }
@@ -268,35 +277,35 @@ class MiraUtils {
     static GetAllSettlements(): Array<any> {
         var result: Array<any> = [];
 
-        for (var player of players) {
+        for (var player of Players) {
             result.push(player.GetRealPlayer().GetRealSettlement());
         }
         
         return result;
     }
 
-    static GetSettlementData(playerId: string): MiraSettlementData {
-        var realPlayer = players[playerId].GetRealPlayer();
+    static GetSettlementData(playerId: string): MiraSettlementData | null {
+        var realPlayer = Players[playerId].GetRealPlayer();
         if (!realPlayer) {
             return null;
         }
 
         var settlement = realPlayer.GetRealSettlement();
-        var masterMind = HordeUtils.getValue(realPlayer, "MasterMind");
+        var masterMind = ScriptUtils.GetValue(realPlayer, "MasterMind");
 
         return new MiraSettlementData(settlement, masterMind, realPlayer);
     }
 
     static GetUnit(cell: any): any {
-        var unitsMap = DotnetHolder.RealScena.UnitsMap;
+        var unitsMap = DotnetHolder.UnitsMap;
         return unitsMap.GetUpperUnit(cell.X, cell.Y);
     }
 
     // finds a free cell nearest to given
     static FindFreeCell(point): any {
-        var unitsMap = scena.GetRealScena().UnitsMap;
+        var unitsMap = DotnetHolder.UnitsMap;
         
-        var generator = generatePositionInSpiral(point.X, point.Y);
+        var generator = generateCellInSpiral(point.X, point.Y);
         var cell: any;
         for (cell = generator.next(); !cell.done; cell = generator.next()) {
             var unit = unitsMap.GetUpperUnit(cell.value.X, cell.value.Y);
@@ -318,8 +327,8 @@ class MiraUtils {
 
     private static issueCommand(unit: any, player: any, location: any, command: any, isReplaceMode: boolean = true) {
         let mode = isReplaceMode ? AssignOrderMode.Replace : AssignOrderMode.Queue;
-        inputSelectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
-        inputPointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
+        VirtualInput.selectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
+        VirtualInput.pointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
     }
 
     static Random(max: number, min: number = 0) {
@@ -328,7 +337,7 @@ class MiraUtils {
     }
 
     static GetUnitConfig(configId: string): any {
-        return HordeContent.GetUnitConfig(configId);
+        return HordeContentApi.GetUnitConfig(configId);
     }
 
     static RequestMasterMindProduction(configId: string, productionDepartment: any, checkDuplicate: boolean = false) {
@@ -338,23 +347,12 @@ class MiraUtils {
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {
-        var profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
+        var profParams = host.newVar(HCL.HordeClassLibrary.HordeContentApi.Configs.Units.ProfessionParams.AUnitProfessionParams);
         if (!unitConfig.ProfessionParams.TryGetValue(profession, profParams.out)) {
             return false;
         }
         else {
             return true;
-        }
-    }
-
-    static GetProduceList(unit: any) {
-        var producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
-        var produceList = enumerate(producerParams.CanProduceList);
-        var produceListItem;
-        var result = [];
-
-        while ((produceListItem = eNext(produceList)) !== undefined) {
-            result.push(produceListItem.Uid);
         }
     }
 
@@ -409,7 +407,7 @@ class MiraUtils {
         
         if (
             action.GetType() != 
-                HordeUtils.GetTypeByName("HordeClassLibrary.UnitComponents.OrdersSystem.Acts.ActAttackUnit", "HordeClassLibrary")
+                ScriptUtils.GetTypeByName("HordeClassLibrary.UnitComponents.OrdersSystem.Acts.ActAttackUnit", "HordeClassLibrary")
         ) {
             return null;
         }

@@ -1,5 +1,8 @@
+import { MiraUtils, UnitComposition } from "Mira/Utils/MiraUtils";
+import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
+import { DefendingState } from "./DefendingState";
 
-abstract class ProductionState extends MiraSettlementControllerState {
+export abstract class ProductionState extends MiraSettlementControllerState {
     private targetUnitsComposition: UnitComposition = new Map<string, number>();
 
     protected abstract getTargetUnitsComposition(): UnitComposition;

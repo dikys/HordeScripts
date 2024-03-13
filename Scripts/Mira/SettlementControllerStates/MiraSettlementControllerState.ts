@@ -1,11 +1,7 @@
+import { MiraSettlementController } from "Mira/MiraSettlementController";
+import { FsmState } from "Mira/Utils/Common";
 
-abstract class FsmState {
-    abstract OnEntry(): void;
-    abstract OnExit(): void;
-    abstract Tick(tickNumber: number): void;
-}
-
-abstract class MiraSettlementControllerState extends FsmState {
+export abstract class MiraSettlementControllerState extends FsmState {
     protected settlementController: MiraSettlementController;
     
     constructor(settlementController: MiraSettlementController) {

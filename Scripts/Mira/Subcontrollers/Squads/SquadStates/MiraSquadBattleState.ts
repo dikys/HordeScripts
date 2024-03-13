@@ -1,254 +1,9 @@
-
-const MAX_SPREAD_THRESHOLD_MULTIPLIER = 2.8;
-const MIN_SPREAD_THRESHOLD_MULTIPLIER = 2;
-const ENEMY_SEARCH_RADIUS = 10; //TODO: maybe calculate this by adding some fixed number to a range of a longest range unit in game
-
-abstract class MiraSquadState extends FsmState {
-    protected squad: MiraControllableSquad;
-    
-    constructor(squad: MiraControllableSquad) {
-        super();
-        this.squad = squad;
-    }
-
-    IsIdle(): boolean {
-        return false;
-    }
-
-    protected initiateMovement() {
-        this.squad.CurrentTargetCell = this.squad.MovementTargetCell;
-        this.squad.MovementTargetCell = null;
-        
-        for (let unit of this.squad.Units) {
-            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);
-        }
-    }
-
-    protected initiateAttack() {
-        this.squad.CurrentTargetCell = this.squad.AttackTargetCell;
-        this.squad.AttackTargetCell = null;
-        
-        for (let unit of this.squad.Units) {
-            MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);
-        }
-    }
-}
-
-class MiraSquadIdleState extends MiraSquadState {
-    OnEntry(): void {
-        this.squad.CurrentTargetCell = this.squad.GetLocation().Point;
-        this.distributeUnits();
-    }
-    
-    OnExit(): void {}
-
-    Tick(tickNumber: number): void {
-        if (this.squad.MovementTargetCell != null) {
-            this.squad.SetState(new MiraSquadMoveState(this.squad));
-            return;
-        }
-
-        if (this.squad.AttackTargetCell != null) {
-            this.squad.SetState(new MiraSquadAttackState(this.squad));
-            return;
-        }
-        
-        if (this.squad.IsEnemyNearby()) {
-            this.squad.SetState(new MiraSquadBattleState(this.squad));
-            return;
-        }
-        
-        if (
-            this.squad.IsAllUnitsIdle() &&
-            this.squad.GetLocation().Spread > this.squad.MinSpread * MIN_SPREAD_THRESHOLD_MULTIPLIER
-        ) {
-            this.squad.SetState(new MiraSquadIdleGatheringUpState(this.squad));
-            return;
-        }
-    }
-
-    IsIdle(): boolean {
-        return true;
-    }
-
-    private distributeUnits(): void {
-        let unitsToDistribute = [];
-
-        for (let unit of this.squad.Units) {
-            let tileType = MiraUtils.GetTileType(unit.Cell);
-            
-            if (tileType !== TileType.Forest) { //run, Forest, run!!
-                unitsToDistribute.push(unit);
-            }
-            else {
-                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, unit.Cell);
-            }
-        }
-
-        if (unitsToDistribute.length == 0) {
-            return;
-        }
-
-        let searchRadius = this.squad.MinSpread * (MAX_SPREAD_THRESHOLD_MULTIPLIER + MIN_SPREAD_THRESHOLD_MULTIPLIER) / 2;
-        let forestCells = MiraUtils.FindCells(this.squad.CurrentTargetCell, searchRadius, MiraUtils.ForestCellFilter);
-        let cellIndex = 0;
-
-        for (let unit of unitsToDistribute) {
-            if (cellIndex >= forestCells.length) {
-                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, this.squad.CurrentTargetCell);
-            }
-            else {
-                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, forestCells[cellIndex]);
-                cellIndex++;
-            }
-        }
-    }
-}
-
-class MiraSquadMoveState extends MiraSquadState {
-    private timeoutTick: number;
-    
-    OnEntry(): void {
-        this.initiateMovement();
-    }
-    
-    OnExit(): void {}
-    
-    Tick(tickNumber: number): void {
-        if (this.squad.MovementTargetCell != null) {
-            this.initiateMovement();
-        }
-
-        if (this.squad.AttackTargetCell != null) {
-            this.squad.SetState(new MiraSquadAttackState(this.squad));
-            return;
-        }
-        
-        let location = this.squad.GetLocation();
-        let distance = MiraUtils.ChebyshevDistance(
-            this.squad.CurrentTargetCell, 
-            location.Point
-        );
-        
-        if (!this.timeoutTick) {
-            this.timeoutTick = tickNumber + distance * 1000 * 3; // given that the speed will be 1 cell/s
-        }
-
-        if (this.squad.IsAllUnitsIdle() || tickNumber > this.timeoutTick) { // не шмогли...
-            this.squad.SetState(new MiraSquadIdleState(this.squad));
-            return;
-        }
-
-        if (distance <= this.squad.MovementPrecision) {
-            this.squad.SetState(new MiraSquadIdleState(this.squad));
-            return;
-        }
-    }
-}
-
-class MiraSquadAttackState extends MiraSquadState {
-    OnEntry(): void {
-        this.initiateAttack();
-    }
-
-    OnExit(): void {}
-
-    Tick(tickNumber: number): void {
-        if (this.squad.IsEnemyNearby()) {
-            this.squad.SetState(new MiraSquadBattleState(this.squad));
-            return;
-        }
-        
-        if (this.squad.MovementTargetCell != null) {
-            this.squad.SetState(new MiraSquadMoveState(this.squad));
-            return;
-        }
-
-        if (this.squad.AttackTargetCell != null) {
-            this.initiateAttack();
-            return;
-        }
-        
-        let location = this.squad.GetLocation();
-        
-        let distance = MiraUtils.ChebyshevDistance(
-            this.squad.CurrentTargetCell, 
-            location.Point
-        );
-
-        if (distance <= this.squad.MovementPrecision) {
-            this.squad.SetState(new MiraSquadIdleState(this.squad));
-            return;
-        }
-
-        if (location.Spread > this.squad.MinSpread * MAX_SPREAD_THRESHOLD_MULTIPLIER) {
-            this.squad.SetState(new MiraSquadAttackGatheringUpState(this.squad));
-            return;
-        }
-    }
-}
-
-abstract class MiraSquadGatheringUpState extends MiraSquadState {
-    OnEntry(): void {
-        if (this.squad.CurrentTargetCell) {
-            let closestToTargetUnit = null;
-            let minDistance = Infinity;
-
-            for (let unit of this.squad.Units) {
-                let unitDistance = MiraUtils.ChebyshevDistance(unit.Cell, this.squad.CurrentTargetCell);
-                
-                if (unitDistance < minDistance) {
-                    minDistance = unitDistance;
-                    closestToTargetUnit = unit;
-                }
-            }
-
-            for (let unit of this.squad.Units) {
-                MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, closestToTargetUnit.Cell);
-            }
-        }
-    }
-    
-    OnExit(): void {}
-    
-    Tick(tickNumber: number): void {
-        if (this.squad.IsEnemyNearby()) {
-            this.squad.SetState(new MiraSquadBattleState(this.squad));
-            return;
-        }
-        
-        let location = this.squad.GetLocation();
-
-        if (location.Spread <= this.squad.MinSpread * MIN_SPREAD_THRESHOLD_MULTIPLIER) {
-            this.onGatheredUp();
-            return;
-        }
-
-        if (this.squad.IsAllUnitsIdle()) {
-            this.onGatheredUp();
-            return;
-        }
-    }
-
-    protected abstract onGatheredUp(): void;
-}
-
-class MiraSquadAttackGatheringUpState extends MiraSquadGatheringUpState {
-    protected onGatheredUp(): void {
-        this.squad.AttackTargetCell = this.squad.CurrentTargetCell;
-        this.squad.SetState(new MiraSquadAttackState(this.squad));
-    }
-}
-
-class MiraSquadIdleGatheringUpState  extends MiraSquadGatheringUpState {
-    protected onGatheredUp(): void {
-        this.squad.SetState(new MiraSquadIdleState(this.squad));
-    }
-
-    IsIdle(): boolean {
-        return true;
-    }
-}
+import { MiraUtils } from "Mira/Utils/MiraUtils";
+import { MiraSquad } from "../MiraSquad";
+import { MiraSquadAttackState } from "./MiraSquadAttackState";
+import { MiraSquadMoveState } from "./MiraSquadMoveState";
+import { ENEMY_SEARCH_RADIUS, MiraSquadState } from "./MiraSquadState";
+import { TileType } from "library/game-logic/horde-types";
 
 abstract class MiraCellDataHolder {
     protected data: any;
@@ -323,7 +78,7 @@ class MiraReservedCellData extends MiraCellDataHolder {
     }
 }
 
-class MiraSquadBattleState extends MiraSquadState {
+export class MiraSquadBattleState extends MiraSquadState {
     private enemySquads: Array<MiraSquad>;
     private enemyUnits: Array<any>;
     private threatMap: MiraThreatMap;
@@ -416,7 +171,7 @@ class MiraSquadBattleState extends MiraSquadState {
         this.reservedCells = new MiraReservedCellData();
         
         for (let unit of this.squad.Units) {
-            let optimalTarget = null;
+            let optimalTarget:any = null;
             this.cellHeuristics = new MiraCellHeuristics();
 
             let mainAttackRange = unit.Cfg.MainArmament.Range;
@@ -517,7 +272,7 @@ class MiraSquadBattleState extends MiraSquadState {
         this.reservedCells = new MiraReservedCellData();
         
         for (let unit of this.squad.Units) {
-            let optimalTarget = null;
+            let optimalTarget:any = null;
             this.cellHeuristics = new MiraCellHeuristics();
 
             let mainAttackRange = unit.Cfg.MainArmament.Range;
@@ -526,7 +281,7 @@ class MiraSquadBattleState extends MiraSquadState {
             let mainVisionRange = unit.Cfg.Sight;
             let forestVisionRange = unit.Cfg.ForestVision;
 
-            let optimalEnemy = null;
+            let optimalEnemy:any = null;
             let shortestDistance = Infinity;
             
             for (let enemy of this.enemyUnits) {

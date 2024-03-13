@@ -2,6 +2,7 @@ import "/library/dotnet/dotnet-utils.ts"
 import { log } from "library/common/logging";
 import { activePlugins } from "active-plugins";
 import { registerExamples } from "examples-runner";
+import { MiraPlugin } from "plugins/mira";
 
 
 /**
@@ -30,6 +31,9 @@ export function onInitialization() {
     // Инициализация плагинов
     activePlugins.clear();
     activePlugins.registerDefaultPlugins();
+
+    //TODO: remove this
+    activePlugins.register(new MiraPlugin());
 
     // Регистрация примеров. Настройка запускаемых примеров находится в файле "examples-runner.ts"
     registerExamples();

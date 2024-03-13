@@ -1,5 +1,8 @@
+import { MiraUtils, UnitComposition } from "Mira/Utils/MiraUtils";
+import { ProductionState } from "./ProductionState";
+import { BuildingUpState } from "./BuildingUpState";
 
-class DevelopingState extends ProductionState {
+export class DevelopingState extends ProductionState {
     protected readonly MAX_PRODUCTION_TIME = 6000 / 2; //2 min
     
     protected getTargetUnitsComposition(): UnitComposition {
@@ -7,8 +10,8 @@ class DevelopingState extends ProductionState {
 
         let economyComposition = this.settlementController.GetCurrentEconomyComposition();
         let produceableCfgIds = this.settlementController.ProductionController.GetProduceableCfgIds();
-        let absentProducers = [];
-        let absentTech = [];
+        let absentProducers: string[] = [];
+        let absentTech: string[] = [];
 
         for (let cfgId of produceableCfgIds) {
             if (economyComposition.has(cfgId)) {

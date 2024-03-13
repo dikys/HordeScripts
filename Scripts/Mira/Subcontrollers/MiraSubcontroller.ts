@@ -1,5 +1,6 @@
+import { MiraSettlementController } from "Mira/MiraSettlementController";
 
-abstract class MiraSubcontroller {
+export abstract class MiraSubcontroller {
     protected readonly parentController: MiraSettlementController;
 
     constructor (parent: MiraSettlementController) {

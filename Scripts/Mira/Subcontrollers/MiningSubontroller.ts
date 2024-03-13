@@ -1,5 +1,9 @@
+import { createResourcesAmount } from "library/common/primitives";
+import { MiraSubcontroller } from "./MiraSubcontroller";
+import { MiraLogLevel } from "Mira/Mira";
+import { MiraSettlementController } from "Mira/MiraSettlementController";
 
-class MiningSubcontroller extends MiraSubcontroller {
+export class MiningSubcontroller extends MiraSubcontroller {
     //TODO: implement resource mining properly
     private readonly RESOUCE_INCREASE_INTERVAL = 10 * 50; // 10 seconds for standard speed
 
