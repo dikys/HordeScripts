@@ -1,5 +1,6 @@
 
 export const ObjectT = xHost.type("System.Object");
+export const BooleanT =  xHost.type('System.Boolean');
 export const Int32 = xHost.type("System.Int32");
 export const DictionaryT = xHost.type("System.Collections.Generic.Dictionary");
 export const IEnumeratorT = xHost.type('System.Collections.IEnumerator');

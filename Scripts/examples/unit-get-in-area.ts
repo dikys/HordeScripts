@@ -1,4 +1,5 @@
 import { createPoint, createRect } from "library/common/primitives";
+import { BooleanT } from "library/dotnet/dotnet-types";
 import { iterateOverUnitsInBox } from "library/game-logic/unit-and-map";
 import HordeExampleBase from "./base-example";
 
@@ -46,7 +47,7 @@ export class Example_GetUnitsInArea_Squad extends HordeExampleBase {
         this.logMessageOnRun();
         
         // Создаём колбек для фильтрации юнитов
-        let filterCallback = host.func(xHost.type('System.Boolean'), 1, function (unit) {
+        let filterCallback = host.func(BooleanT, 1, function (unit) {
             // Для примера пропускаем все здания в области
             return !unit.Cfg.IsBuilding;
         });
