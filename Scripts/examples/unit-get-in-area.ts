@@ -46,7 +46,7 @@ export class Example_GetUnitsInArea_Squad extends HordeExampleBase {
         this.logMessageOnRun();
         
         // Создаём колбек для фильтрации юнитов
-        let filterCallback = xHost.func(xHost.type('System.Boolean'), 1, function (unit) {
+        let filterCallback = host.func(xHost.type('System.Boolean'), 1, function (unit) {
             // Для примера пропускаем все здания в области
             return !unit.Cfg.IsBuilding;
         });

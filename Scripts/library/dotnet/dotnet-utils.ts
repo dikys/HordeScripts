@@ -54,11 +54,11 @@ globalThis.ForEach = ScriptExtensions.ForEach;
 ```
  */
 export function* enumerate(enumerable) {
-    var enumerator = xHost.cast(IEnumeratorT, enumerable.GetEnumerator());
+    var enumerator = host.cast(IEnumeratorT, enumerable.GetEnumerator());
     while (enumerator.MoveNext()) {
         yield enumerator.Current;
     }
-    xHost.cast(IDisposableT, enumerator).Dispose();
+    host.cast(IDisposableT, enumerator).Dispose();
 }
 export function eNext(enumerated) {
     var next = enumerated.next();
