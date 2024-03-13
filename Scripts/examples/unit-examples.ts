@@ -56,25 +56,24 @@ export class Example_UnitWorks extends HordeExampleBase {
         // Отдел команд
         let commandsMind = unit.CommandsMind;
 
-        //  Словарь с запрещенными командами
-        let disallowedCommands = ScriptUtils.GetValue(commandsMind, "DisallowedCommands");
-
         // Запретим/разрешим команду атаки
-        if (!disallowedCommands.ContainsKey(UnitCommand.Attack)) {
-            disallowedCommands.Add(UnitCommand.Attack, 1);  // 1 - это сколько раз команда была запрещена
-            this.log.info('Команда атаки запрещена', disallowedCommands.Item.get(UnitCommand.Attack) ,'раз!');
-            
-            // Внимание! Запрет будет действовать на уровне получения команды.
-            // Т.е. непосредственно атаковать юнит все ещё сможет и даже будет получать приказ при автоатаке, но игрок не сможет выдать эту команду.
-
+        // Внимание! Запрет будет действовать на уровне получения команды.
+        // Т.е. непосредственно атаковать юнит все ещё сможет и даже будет получать приказ при автоатаке, но игрок не сможет выдать эту команду.
+        let unitCmd = UnitCommand.Attack;
+        this.log.info('Запрещение команды:', unitCmd);
+        commandsMind.DisallowCommand(unitCmd);
+        if (commandsMind.IsCommandDisallowed(unitCmd)) {
+            this.log.info('- Команда атаки запрещена');
         } else {
-            let n = disallowedCommands.Item.get(UnitCommand.Attack);
-            if (n == 1) {
-                disallowedCommands.Remove(UnitCommand.Attack);
-            } else {
-                disallowedCommands.Item.set(UnitCommand.Attack, n - 1);
-            }
-            this.log.info('Команда атаки разрешена');
+            this.log.info('- Команда атаки разрешена');
+        }
+        // Снимать запрет нужно столько же раз, сколько он был установлен
+        this.log.info('Снятие запрета на команду:', unitCmd);
+        commandsMind.AllowDisallowedCommand(unitCmd);
+        if (commandsMind.IsCommandDisallowed(unitCmd)) {
+            this.log.info('- Команда атаки запрещена');
+        } else {
+            this.log.info('- Команда атаки разрешена');
         }
 
         // Проверим, может ли юнит дойти до клетки?
