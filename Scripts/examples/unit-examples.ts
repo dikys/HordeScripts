@@ -170,14 +170,14 @@ export class Example_UnitOrders extends HordeExampleBase {
         if (unit.Cfg.GetOrderDelegate(unit, oneClickCommandArgs)) {
             this.log.info('Добавлен приказ для команды:', '"' + oneClickCommandArgs + '"');
         } else {
-            this.log.info('Не удалось добавить команду');
+            this.log.info('Не удалось добавить приказ через команду:', '"' + pointCommandArgs + '"');
         }
 
         // Выдача приказа согласно команде
         if (unit.Cfg.GetOrderDelegate(unit, pointCommandArgs)) {
             this.log.info('Добавлен приказ для команды:', '"' + pointCommandArgs + '"');
         } else {
-            this.log.info('Не удалось добавить команду');
+            this.log.info('Не удалось добавить приказ через команду:', '"' + pointCommandArgs + '"');
         }
     }
 }
