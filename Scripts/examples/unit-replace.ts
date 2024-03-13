@@ -27,8 +27,8 @@ export class Example_ReplaceUnit extends HordeExampleBase {
 
         // Параметры замены
         let replaceParams = new ReplaceUnitParameters();
-        replaceParams.ReplacingUnit = unitToReplace;
-        replaceParams.ReplaceToUnitConfig = this.getTargetConfig();
+        replaceParams.OldUnit = unitToReplace;
+        replaceParams.NewUnitConfig = this.getTargetConfig();
         replaceParams.Cell = null;                  // Можно задать клетку, в которой должен появиться новый юнит. Если null, то центр создаваемого юнита совпадет с предыдущим
         replaceParams.PreserveHealthLevel = true;   // Нужно ли передать уровень здоровья? (в процентном соотношении)
         replaceParams.PreserveOrders = true;        // Нужно ли передать приказы?
