@@ -1,36 +1,44 @@
+import HordeExampleBase from "./base-example";
 
 /**
  * Пример работы с MasterMind
  */
-function example_requestForMasterMind() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_MasterMindRequest extends HordeExampleBase {
 
-    var realPlayer = players["1"].GetRealPlayer();
-    var masterMind = HordeUtils.getValue(realPlayer, "MasterMind");
-    if (!masterMind) {
-        logi('  Выбранный игрок не управляется MasterMind.');
-        return;
+    public constructor() {
+        super("Request for MasterMind");
     }
 
-    // Активация бота, если отключен
-    if (!masterMind.IsWorkMode) {
-        logi('  Включение режима работы MasterMind для', realPlayer.Nickname);
-        masterMind.IsWorkMode = true;
-    }
+    public onFirstRun() {
+        this.logMessageOnRun();
+        
+        let realPlayer = Players["1"].GetRealPlayer();
+        let masterMind = ScriptUtils.GetValue(realPlayer, "MasterMind");
+        if (!masterMind) {
+            this.log.info('Выбранный игрок не управляется MasterMind.');
+            return;
+        }
 
-    // Создадим запрос на производство катапульты
-    var productionDepartament = masterMind.ProductionDepartment;
-    var catapultCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
-    if (!productionDepartament.AddRequestToProduce(catapultCfg, 1)) {
-        logi('  Не удалось добавить запрос на создание катапульты.');
-    } else {
-        logi('  Добавлен запрос на создание 1 катапульты.');
-    }
+        // Активация бота, если отключен
+        if (!masterMind.IsWorkMode) {
+            this.log.info('Включение режима работы MasterMind для', realPlayer.Nickname);
+            masterMind.IsWorkMode = true;
+        }
 
-    // Проверяем запросы
-    var requests = masterMind.Requests;
-    logi('  Запросов в обработке:', requests.Count);
-    ForEach(requests, item => {
-        logi('  -', item.ToString());
-    });
+        // Создадим запрос на производство катапульты
+        let productionDepartament = masterMind.ProductionDepartment;
+        let catapultCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Catapult");
+        if (!productionDepartament.AddRequestToProduce(catapultCfg, 1)) {
+            this.log.info('Не удалось добавить запрос на создание катапульты.');
+        } else {
+            this.log.info('Добавлен запрос на создание 1 катапульты.');
+        }
+
+        // Проверяем запросы
+        let requests = masterMind.Requests;
+        this.log.info('Запросов в обработке:', requests.Count);
+        ForEach(requests, item => {
+            this.log.info('-', item);
+        });
+    }
 }

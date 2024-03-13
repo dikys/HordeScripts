@@ -1,21 +1,14 @@
 
-var BindingFlags = xHost.type("System.Reflection.BindingFlags");
-var Activator = xHost.type("System.Activator");
+export const BindingFlags = xHost.type("System.Reflection.BindingFlags");
+export const Activator = xHost.type("System.Activator");
 
-
-/**
- * Складывает массив BinbingFlags в один флаг.
- */
-function makeBindingFlags(flagsArray) {
-	return makeFlags(BindingFlags, flagsArray);
-}
 
 /**
  * Возвращает имя с неймспейсом для указанного хост-типа.
  */
-function getTypeNameWithNamespace(hostType) {
-	var csType = host.typeOf(hostType);
-	var name = csType.Name;
+export function getTypeNameWithNamespace(hostType) {
+	let csType = host.typeOf(hostType);
+	let name = csType.Name;
 	if (csType.Namespace) {
 		name = csType.Namespace + '.' + name;
 	}
@@ -25,7 +18,7 @@ function getTypeNameWithNamespace(hostType) {
 /**
  * Возвращает полное имя указанного хост-типа.
  */
-function getTypeFullName(hostType) {
-	var csType = host.typeOf(hostType);
+export function getTypeFullName(hostType) {
+	let csType = host.typeOf(hostType);
 	return csType.FullName;
 }

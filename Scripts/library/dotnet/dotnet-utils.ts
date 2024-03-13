@@ -1,20 +1,24 @@
+import { Int32 } from "./dotnet-types";
 
 
 // ===================================================
-// --- Any
+// --- Flags
 
 /**
  * Складывает массив enum-флагов в один флаг.
  * Функция нужна из-за того, что здесь в js не получается использовать перегруженный оператор "|".
+ * 
+ * @param flagsType тип флага. Задаётся отдельно, т.к. нельзя использовать "GetType()" без GodMode.
+ * @param flags массив флагов, которые нужно объединить
  */
-function makeFlags(flagsType, flagsArray) {
-	var flags = 0;
+export function mergeFlags(flagsType, ...flagsArray: any[]) {
+	let flags = 0;
 
-	for(var f of flagsArray) {
-		flags |= xHost.cast(Int32, f);
+	for(let f of flagsArray) {
+		flags |= host.cast(Int32, f);
 	}
 
-	return xHost.cast(flagsType, flags);
+	return host.cast(flagsType, flags);
 }
 
 
@@ -25,42 +29,25 @@ function makeFlags(flagsType, flagsArray) {
  * ForEach - специальная функция для перечисления .Net-объектов.
  * 
  * Примеры:
- * ```
- * ForEach(someList, item => {
- *     logi('-', item.ToString());
- * });
- * 
- * ForEach(someList, (item, i, source) => {
- *     logi('#' + i, item.ToString(), 'from', source);
- * });
- * ```
+```
+ForEach(someList, item => {
+    log.info('-', item);
+});
+
+ForEach(someList, (item, i, source) => {
+    log.info('#' + i, item, 'from', source);
+});
+```
  */
-ForEach = ScriptExtensions.ForEach;
+globalThis.ForEach = ScriptExtensions.ForEach;
 
 /**
- * Делает IEnumerable перечислимым в JS.
- * 
- * Пример:
- * ```
- * var settlements = enumerate(scena.GetRealScena().Settlements);
- * while ((settlement = eNext(settlements)) !== undefined) {
- *     // do somthing with settlement
- * }
- * ```
+ * Преобразует JS-массив в .Net-массив заданного типа.
  */
-function* enumerate(enumerable) {
-    var IEnumeratorT = xHost.type('System.Collections.IEnumerator');
-    var enumerator = xHost.cast(IEnumeratorT, enumerable.GetEnumerator());
-    while (enumerator.MoveNext()) {
-        yield enumerator.Current;
-    }
-    
-    var IDisposableT = xHost.type('System.IDisposable');
-    xHost.cast(IDisposableT, enumerator).Dispose();
-}
-function eNext(enumerated) {
-    var next = enumerated.next();
-    if (next.done)
-        return undefined;
-    return next.value;
+export function createArray(type, items) {
+	let array = host.newArr(type, items.length);
+	for (let i = 0; i < items.length; i++) {
+		array[i] = items[i];
+	}
+	return array;
 }

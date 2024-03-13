@@ -1,4 +1,4 @@
 
-var ObjectT = xHost.type("System.Object");
-var Int32 = xHost.type("System.Int32");
-var Dictionary = xHost.type("System.Collections.Generic.Dictionary");
+export const ObjectT = xHost.type("System.Object");
+export const Int32 = xHost.type("System.Int32");
+export const DictionaryT = xHost.type("System.Collections.Generic.Dictionary");

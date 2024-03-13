@@ -1,19 +1,31 @@
+import { createPoint, createRect } from "library/common/primitives";
+import { iterateOverUnitsInBox } from "library/game-logic/unit-and-map";
+import HordeExampleBase from "./base-example";
 
 /**
  * Выбрать всех юнитов в области (вариант 1 - перебор)
+ * 
  * Внимание! Прямой перебор больших областей будет подтормаживать.
  */
-function example_getUnitsInArea_v1() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_GetUnitsInArea_Bruteforce extends HordeExampleBase {
 
-    var unitsMap = scena.GetRealScena().UnitsMap;
+    public constructor() {
+        super("Get units in area (bruteforce)");
+    }
 
-    for (var i = 0; i < 20; i++) {
-        for (var j = 0; j < 20; j++) {
-            var unit = unitsMap.GetUpperUnit(i, j);
-            if (!unit)
-                continue;
-            logi('  =', unit.ToString());
+    public onFirstRun() {
+        this.logMessageOnRun();
+        
+        let unitsMap = ActiveScena.GetRealScena().UnitsMap;
+
+        this.log.info('Юниты:');
+        for (let i = 0; i < 20; i++) {
+            for (let j = 0; j < 20; j++) {
+                let unit = unitsMap.GetUpperUnit(i, j);
+                if (!unit)
+                    continue;
+                this.log.info('-', unit);
+            }
         }
     }
 }
@@ -21,67 +33,54 @@ function example_getUnitsInArea_v1() {
 
 /**
  * Выбрать всех юнитов в области (вариант 2 - через отряд)
+ * 
  * Внимание! Здесь используется такая же логика как и при выделению юнитов рамкой, т.е., например, нельзя выбрать несколько зданий.
  */
-function example_getUnitsInArea_v2() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_GetUnitsInArea_Squad extends HordeExampleBase {
 
-    // Создаём колбек для фильтрации юнитов
-    var filterCallback = xHost.func(xHost.type('System.Boolean'), 1, function (unit) {
-        // Для примера пропускаем все здания в области
-        return !unit.Cfg.IsBuilding;
-    });
-
-    var unitsMap = scena.GetRealScena().UnitsMap;
-    var rect = createRect(0,0,20,20);
-    var squad = unitsMap.GetSquadFromRect(rect, filterCallback);
-
-    logi('  Собрано юнитов:', squad.Count);
-    var enumerator = squad.GetEnumerator();
-    while(enumerator.MoveNext()) {
-        logi('  =', enumerator.Current.ToString());
+    public constructor() {
+        super("Get units in area (squad)");
     }
-    enumerator.Dispose();
+
+    public onFirstRun() {
+        this.logMessageOnRun();
+        
+        // Создаём колбек для фильтрации юнитов
+        let filterCallback = xHost.func(xHost.type('System.Boolean'), 1, function (unit) {
+            // Для примера пропускаем все здания в области
+            return !unit.Cfg.IsBuilding;
+        });
+
+        let unitsMap = ActiveScena.GetRealScena().UnitsMap;
+        let rect = createRect(0,0,20,20);
+        let squad = unitsMap.GetSquadFromRect(rect, filterCallback);
+
+        this.log.info('Собрано юнитов:', squad.Count);
+        ForEach(squad, u => {
+            this.log.info('-', u);
+        });
+    }
 }
 
 
 /**
  * Выбрать всех юнитов в области (вариант 3 - оптимизация через k-мерное дерево)
+ * Это наиболее оптимальный вариант для выделения юнитов, но нужно самостоятельно учитывать повторы для движущихся юнитов и зданий.
  */
-function example_getUnitsInArea_v3() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_GetUnitsInArea_KdTree extends HordeExampleBase {
 
-    // Эта функция возвращает юнитов по очереди от самого ближайшего, к самому дальнему.
-    // Если юнит находится в нескольких клетках, то будет возвращен несколько раз (здания и юниты в движении)
-    function* iterateOverUnitsInBox(cell, radius) {
-        var box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius - 1, cell.Y + radius - 1, 2);
-        var unitsInBox = HordeUtils.call(scena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox" ,box);
-        var count = HordeUtils.getValue(unitsInBox, "Count");
-        var units = HordeUtils.getValue(unitsInBox, "Units");
-        var positions = HordeUtils.getValue(unitsInBox, "Positions");
-        if (count == 0) {
-            return;
-        }
-
-        for (var index = 0; index < count; ++index) {
-            var unit = units[index];
-            if (unit == null) {
-                continue;
-            }
-
-            // Координаты клетки из который был "взят юнит". Может быть актуально при переборе зданий и движущихся юнитов
-            //var x = positions[index * 3];
-            //var y = positions[index * 3 + 1];
-            //var layer = positions[index * 3 + 2];
-
-            yield unit;
-        }
+    public constructor() {
+        super("Get units in area (Kd tree)");
     }
 
-    var unitsIter = iterateOverUnitsInBox(createPoint(100, 20), 20);
+    public onFirstRun() {
+        this.logMessageOnRun();
 
-    logi('  Юниты:');
-    for (var u = unitsIter.next(); !u.done; u = unitsIter.next()) {
-        logi('  =', u.value.ToString());
+        let unitsIter = iterateOverUnitsInBox(createPoint(10, 10), 10);
+
+        this.log.info('Юниты:');
+        for (let u = unitsIter.next(); !u.done; u = unitsIter.next()) {
+            this.log.info('-', u.value);
+        }
     }
 }

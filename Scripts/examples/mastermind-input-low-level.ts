@@ -1,70 +1,80 @@
+import { createPoint } from "library/common/primitives";
+import { inspectEnum } from "library/common/introspection";
+import { UnitCommand } from "library/game-logic/horde-types";
+import { AssignOrderMode, VirtualInput, VirtualSelectUnitsMode } from "library/mastermind/virtual-input";
+import HordeExampleBase from "./base-example";
 
 /**
  * Пример имитации ввода игрока
  */
-function example_inputLowLevel() {
-    logi('> Запущен пример', '"' + arguments.callee.name + '"');
+export class Example_InputLowLevel extends HordeExampleBase {
 
-    var oleg = players["0"].GetRealPlayer();
-    
-    logi('  Список всех команд юнитов');
-    inspectEnum(UnitCommand);
-
-    logi('  Выделить юнитов в области');
-    inputSelectUnits(oleg, createPoint(0, 0), createPoint(15, 15));
-
-    logi('  Добавить к выделению юнитов в области (shift)');
-    inputSelectUnits(oleg, createPoint(18, 18), createPoint(20, 20), VirtualSelectUnitsMode.Include);
-
-    logi('  Убрать из текущего выделения юнитов из области (ctrl)');
-    inputSelectUnits(oleg, createPoint(18, 18), createPoint(18, 18), VirtualSelectUnitsMode.Exclude);
-
-    logi('  Клик правой кнопкой');
-    inputSmartClick(oleg, createPoint(9, 9));
-
-    logi('  Команда атаки (в очередь)');
-    inputPointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack, AssignOrderMode.Queue);
-
-    logi('  Выбор по id');
-    inputSelectUnitsById(oleg, [42]);
-
-    logi('  Команда атаки');
-    inputPointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack);
-
-    logi('  Команда держать позицию');
-    inputOneClickCommand(oleg, UnitCommand.HoldPosition);
-
-    logi('  Выделить замок и заказать производство рабочего');
-    var castle = oleg.GetRealSettlement().Units.GetCastleOrAnyUnit();
-    inputSelectUnitsById(oleg, [castle.Id]);
-    inputProduceUnitCommand(oleg, "#UnitConfig_Slavyane_Worker1", 1);
-
-    // Отправить свободного рабочего строить здание
-    var someFreeWorker = oleg.GetRealSettlement().Units.Professions.FreeWorkers.First();
-    if (someFreeWorker) {
-        logi('  Выделить свободного рабочего');
-        inputSelectUnitsById(oleg, [someFreeWorker.Id]);
-
-        logi('  Построить забор');
-        inputProduceBuildingCommand(oleg, "#UnitConfig_Slavyane_Fence", createPoint(1, 5), createPoint(7, 7));
-
-        logi('  Построить ферму (в очередь)');
-        inputProduceBuildingCommand(oleg, "#UnitConfig_Slavyane_Farm", createPoint(1, 8), null, AssignOrderMode.Queue);
-    } else {
-        logi('  Свободный рабочий не найден');
+    public constructor() {
+        super("Input low-level");
     }
 
-    // Показать выделенных в предыдущем такте юнитов
-    // Внимание! Здесь не учитываются команды выданные в этом такте! Т.е. это выделение с прошлого такта.
-    var selectedSquad = oleg.SelectedSquadVirtual;
-    if (selectedSquad.Count > 0) {
-        logi('  У', oleg.Nickname, 'выделены следующие юниты:');
-        var enumerator = selectedSquad.GetEnumerator();
-        while(enumerator.MoveNext()) {
-            logi('  - ', enumerator.Current.ToString());
+    public onFirstRun() {
+        this.logMessageOnRun();
+            
+        let oleg = Players["0"].GetRealPlayer();
+        
+        this.log.info('Список всех команд юнитов');
+        inspectEnum(UnitCommand);
+
+        this.log.info('Выделить юнитов в области');
+        VirtualInput.selectUnits(oleg, createPoint(0, 0), createPoint(15, 15));
+
+        this.log.info('Добавить к выделению юнитов в области (shift)');
+        VirtualInput.selectUnits(oleg, createPoint(18, 18), createPoint(20, 20), VirtualSelectUnitsMode.Include);
+
+        this.log.info('Убрать из текущего выделения юнитов из области (ctrl)');
+        VirtualInput.selectUnits(oleg, createPoint(18, 18), createPoint(18, 18), VirtualSelectUnitsMode.Exclude);
+
+        this.log.info('Клик правой кнопкой');
+        VirtualInput.smartClick(oleg, createPoint(9, 9));
+
+        this.log.info('Команда атаки (в очередь)');
+        VirtualInput.pointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack, AssignOrderMode.Queue);
+
+        this.log.info('Выбор по id');
+        VirtualInput.selectUnitsById(oleg, [42]);
+
+        this.log.info('Команда атаки');
+        VirtualInput.pointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack);
+
+        this.log.info('Команда держать позицию');
+        VirtualInput.oneClickCommand(oleg, UnitCommand.HoldPosition);
+
+        this.log.info('Выделить замок и заказать производство рабочего');
+        let castle = oleg.GetRealSettlement().Units.GetCastleOrAnyUnit();
+        VirtualInput.selectUnitsById(oleg, [castle.Id]);
+        VirtualInput.produceUnitCommand(oleg, "#UnitConfig_Slavyane_Worker1", 1);
+
+        // Отправить свободного рабочего строить здание
+        let someFreeWorker = oleg.GetRealSettlement().Units.Professions.FreeWorkers.First();
+        if (someFreeWorker) {
+            this.log.info('Выделить свободного рабочего');
+            VirtualInput.selectUnitsById(oleg, [someFreeWorker.Id]);
+
+            this.log.info('Построить забор');
+            VirtualInput.produceBuildingCommand(oleg, "#UnitConfig_Slavyane_Fence", createPoint(1, 5), createPoint(7, 7));
+
+            this.log.info('Построить ферму (в очередь)');
+            VirtualInput.produceBuildingCommand(oleg, "#UnitConfig_Slavyane_Farm", createPoint(1, 8), null, AssignOrderMode.Queue);
+        } else {
+            this.log.info('Свободный рабочий не найден');
         }
-        enumerator.Dispose();
-    } else {
-        logi('  У', oleg.Nickname, 'нет выделенных юнито в данный момент');
+
+        // Показать выделенных в предыдущем такте юнитов
+        // Внимание! Здесь не учитываются команды выданные в этом такте! Т.е. это выделение с прошлого такта.
+        let selectedSquad = oleg.SelectedSquadVirtual;
+        if (selectedSquad.Count > 0) {
+            this.log.info('У', oleg.Nickname, 'выделены следующие юниты:');
+            ForEach(selectedSquad, u => {
+                this.log.info('- ', u);
+            });
+        } else {
+            this.log.info('У', oleg.Nickname, 'нет выделенных юнитов в данный момент');
+        }
     }
 }

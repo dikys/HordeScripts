@@ -2,8 +2,8 @@
 /**
  * Создание эффекта-декорации в заданных координатах
  */
-function spawnDecoration(scena, decorationCfg, position) {
-    var decoration = decorationCfg.CreateInstance(scena.Context, position);
+export function spawnDecoration(scena, decorationCfg, position) {
+    let decoration = decorationCfg.CreateInstance(scena.Context, position);
     scena.ObjectController.RegisterVisualEffect(decoration);
     return decoration;
 }
@@ -11,6 +11,6 @@ function spawnDecoration(scena, decorationCfg, position) {
 /**
  * Создание звукового эффекта в заданных координатах
  */
-function spawnSound(scena, soundsCatalog, sectionName, position, isLooping) {
+export function spawnSound(scena, soundsCatalog, sectionName, position, isLooping) {
 	scena.ObjectController.UtterSound(soundsCatalog, sectionName, position, isLooping);
 }

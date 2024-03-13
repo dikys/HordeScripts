@@ -1,17 +1,22 @@
+import { log } from "library/common/logging";
+import { generateRandomCellInRect } from "library/common/position-tools";
+import { createPoint } from "library/common/primitives";
+import { UnitDirection } from "./horde-types";
+import { unitCanBePlacedByRealMap } from "./unit-and-map";
 
 /**
  * Создание одного юнита в заданной клетке.
  * 
  * Возвращает созданного юнита.
  */
-function spawnUnit(settlement, uCfg, cell, direction) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    var spawnParams = HordeUtils.CreateInstance(csType);
-    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
-    HordeUtils.setValue(spawnParams, "Cell", cell);
-    HordeUtils.setValue(spawnParams, "Direction", direction);
+export function spawnUnit(settlement, uCfg, cell, direction) {
+    let csType = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    let spawnParams = ScriptUtils.CreateInstance(csType);
+    ScriptUtils.SetValue(spawnParams, "ProductUnitConfig", uCfg);
+    ScriptUtils.SetValue(spawnParams, "Cell", cell);
+    ScriptUtils.SetValue(spawnParams, "Direction", direction);
 
-    var unit = settlement.Units.SpawnUnit(spawnParams);
+    let unit = settlement.Units.SpawnUnit(spawnParams);
     return unit;
 }
 
@@ -20,16 +25,16 @@ function spawnUnit(settlement, uCfg, cell, direction) {
  *
  * Возвращает список созданных юнитов.
  */
-function spawnUnits(settlement, uCfg, uCount, direction, generator) {
-    var csType = HordeUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
-    var spawnParams = HordeUtils.CreateInstance(csType);
-    HordeUtils.setValue(spawnParams, "ProductUnitConfig", uCfg);
-    HordeUtils.setValue(spawnParams, "Direction", direction);
+export function spawnUnits(settlement, uCfg, uCount, direction, generator) {
+    let csType = ScriptUtils.GetTypeByName("HordeClassLibrary.World.Objects.Units.SpawnUnitParameters, HordeClassLibrary");
+    let spawnParams = ScriptUtils.CreateInstance(csType);
+    ScriptUtils.SetValue(spawnParams, "ProductUnitConfig", uCfg);
+    ScriptUtils.SetValue(spawnParams, "Direction", direction);
 
-    outSpawnedUnits = [];
-    for (var position = generator.next(); !position.done && outSpawnedUnits.length < uCount; position = generator.next()) {
+    let outSpawnedUnits: any[] = [];
+    for (let position = generator.next(); !position.done && outSpawnedUnits.length < uCount; position = generator.next()) {
         if (unitCanBePlacedByRealMap(uCfg, position.value.X, position.value.Y)) {
-            HordeUtils.setValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
+            ScriptUtils.SetValue(spawnParams, "Cell", createPoint(position.value.X, position.value.Y));
             outSpawnedUnits.push(settlement.Units.SpawnUnit(spawnParams));
         }
     }
@@ -41,137 +46,20 @@ function spawnUnits(settlement, uCfg, uCount, direction, generator) {
 // ===================================================
 // --- Test
 
-function test_spawnUnits() {
-    var realScena = scena.GetRealScena();
-    var settlements = realScena.Settlements;
+export function test_spawnUnits() {
+    let realScena = ActiveScena.GetRealScena();
+    let settlements = realScena.Settlements;
 
-    var settlement_0 = settlements.Item.get('0');  // Олег
-    var archerCfg = HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer");
-    var spawnCounts = 100;
-    var dir = UnitDirection.RightDown;
+    let settlement_0 = settlements.Item.get('0');  // Олег
+    let archerCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Archer");
+    let spawnCounts = 100;
+    let dir = UnitDirection.RightDown;
 
-    var spawnedUnits = spawnUnits(settlement_0, archerCfg, spawnCounts, dir, generateRandomPositionInRect2D(0, 0, 176, 22));
+    let spawnedUnits = spawnUnits(settlement_0, archerCfg, spawnCounts, dir, generateRandomCellInRect(0, 0, 176, 22));
 
-    // так можно посмотреть всех юнитов
-    //for (var unit of spawnedUnit) {
-    //    logi(unit.ToString());
-    //}
-
-    // когда при спавне ИД будет даваться сразу, а пока выходим
-    return;
-
-    //logi("select spawned units");
-    //var spawnedUnitIdx = [];
-    //for (var unit of spawnedUnits) {
-    //    logi(unit.Id);
-    //}
-    //inputSelectUnitsById(settlement_0, spawnedUnitIdx);
-
-    //logi("attack by spawn units");
-    //inputPointBasedCommand(oleg, createPoint(50, 50), UnitCommand.Attack);
-}
-
-
-// ===================================================
-// --- Internal
-
-/**
- * Генератор позиций вокруг точки по спирале в рамках сцены
- */
-function* generatePositionInSpiral(centerX, centerY) {
-    var scenaWidth  = scena.GetRealScena().Size.Width;
-    var scenaHeight = scena.GetRealScena().Size.Height;
-
-    // проектируем точку на сцену
-    centerX = Math.min(Math.max(0, centerX), scenaWidth - 1);
-    centerY = Math.min(Math.max(0, centerY), scenaHeight - 1);
-
-    yield { X: centerX, Y: centerY };
-
-    var x = 0;
-    var y = 0;
-    var spawnRadius = 1;
-
-    // флаг, что позиции вышли за сцену
-    var outside = false;
-    while (!outside) {
-        outside = true;
-
-        // верхняя часть
-        y = centerY - spawnRadius;
-        if (y >= 0) {
-            outside = false;
-            var xStart = Math.max(centerX - spawnRadius, 0);
-            var xEnd = Math.min(centerX + spawnRadius, scenaWidth - 1);
-            for (x = xStart; x <= xEnd; x++) {
-                yield { X: x, Y: y };
-            }
-        }
-
-        // правая часть
-        x = centerX + spawnRadius;
-        if (x < scenaWidth) {
-            outside = false;
-            var yStart = Math.max(centerY - spawnRadius + 1, 0);
-            var yEnd = Math.min(centerY + spawnRadius - 1, scenaHeight - 1);
-            for (y = yEnd; y >= yStart; y--) {
-                yield { X: x, Y: y };
-            }
-        }
-
-        // нижняя часть
-        y = centerY + spawnRadius;
-        if (y < scenaHeight) {
-            outside = false;
-            var xStart = Math.max(centerX - spawnRadius, 0);
-            var xEnd = Math.min(centerX + spawnRadius, scenaWidth - 1);
-            for (x = xEnd; x >= xStart; x--) {
-                yield { X: x, Y: y };
-            }
-        }
-
-        // левая часть
-        x = centerX - spawnRadius;
-        if (x >= 0) {
-            outside = false;
-            var yStart = Math.max(centerY - spawnRadius + 1, 0);
-            var yEnd = Math.min(centerY + spawnRadius - 1, scenaHeight - 1);
-            for (y = yStart; y <= yEnd; y++) {
-                yield { X: x, Y: y };
-            }
-        }
-
-        spawnRadius++;
-    }
-    return;
-}
-
-/**
- * Генератор рандомных позиций в прямоугольнике в рамках сцены
- */
-function* generateRandomPositionInRect2D(rectX, rectY, rectW, rectH) {
-    var scenaWidth = scena.GetRealScena().Size.Width;
-    var scenaHeight = scena.GetRealScena().Size.Height;
-    // Рандомизатор
-    var rnd = scena.GetRealScena().Context.Randomizer;
-
-    rectX = Math.max(0, rectX);
-    rectY = Math.max(0, rectY);
-    rectW = Math.min(scenaWidth - rectX, rectW);
-    rectH = Math.min(scenaHeight - rectY, rectH);
-
-    var randomNumbers = [];
-    for (var x = rectX; x < rectX + rectW; x++) {
-        for (var y = rectY; y < rectY + rectH; y++) {
-            randomNumbers.push({ X: x, Y: y });
-        }
-    }
-
-    while (randomNumbers.length > 0) {
-        var num = rnd.RandomNumber(0, randomNumbers.length - 1);
-        var randomNumber = randomNumbers[num];
-        randomNumbers.splice(num, 1);
-        yield randomNumber;
+    log.info('Созданные юниты:');
+    for (let unit of spawnedUnits) {
+        log.info('-', unit);
     }
 
     return;

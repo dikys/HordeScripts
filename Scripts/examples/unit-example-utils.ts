@@ -1,29 +1,42 @@
+import { createPoint } from "library/common/primitives";
+import { UnitDirection } from "library/game-logic/horde-types";
+import { spawnUnit } from "library/game-logic/unit-spawn";
+
 // ==============================================================
 // --- Утилиты
 
 /**
  * Возвращает предыдущего или создаёт нового юнита для теста.
  */
-function getOrCreateTestUnit() {
-    if (unitForExample && unitForExample.IsAlive) {
-        return unitForExample;
+export function getOrCreateTestUnit(plugin) {
+    let unit = plugin.globalStorage.unitForExample;
+    if (unit && unit.IsAlive) {
+        return unit;
     }
 
-    return createUnitForTest();
+    return createUnitForTest(plugin);
 }
 
 
 /**
  * Создаёт юнита для теста.
  */
-function createUnitForTest() {
-    var oleg = scena.GetRealScena().Settlements.Item.get('0');  // Олег
-    unitForExample = spawnUnit(oleg, HordeContent.GetUnitConfig("#UnitConfig_Slavyane_Archer"), createPoint(5, 5), UnitDirection.RightDown);
-    if (!unitForExample) {
+export function createUnitForTest(plugin) {
+    let testCell = createPoint(5, 5);
+
+    let realScena = ActiveScena.GetRealScena();
+    let unit = realScena.UnitsMap.GetUpperUnit(testCell);
+    if (unit) {
+        return unit;
+    }
+
+    let oleg = realScena.Settlements.Item.get('0');  // Олег
+    unit = spawnUnit(oleg, HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Archer"), testCell, UnitDirection.RightDown);
+    plugin.globalStorage.unitForExample = unit;
+    if (!unit) {
         return null;
     }
 
-    logi('  Создан новый юнит для теста!', unitForExample.ToString());
-    return unitForExample;
+    plugin.log.info('Создан новый юнит для теста!', unit);
+    return unit;
 }
-var unitForExample;
