@@ -162,14 +162,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
         let unit;
         
         while ((unit = eNext(units)) !== undefined) {
-            let producerParams;
-
-            try {
-                producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
-            }
-            catch (e) { //GetProfessionParams throws exception if there is no such profession
-                continue;
-            }
+            let producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer, true);
             
             if (producerParams) {
                 if (unit.EffectsMind.BuildingInProgress || unit.IsNearDeath) {
