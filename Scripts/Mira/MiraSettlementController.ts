@@ -4,6 +4,7 @@
 */
 
 import { Mira, MiraLogLevel } from "./Mira";
+import { RebuildState } from "./SettlementControllerStates/RebuildState";
 import { DevelopingState } from "./SettlementControllerStates/DevelopingState";
 import { MiraSettlementControllerState } from "./SettlementControllerStates/MiraSettlementControllerState";
 import { MiningSubcontroller } from "./Subcontrollers/MiningSubontroller";
@@ -67,6 +68,11 @@ export class MiraSettlementController {
 
         this.TacticalController = new TacticalSubcontroller(this);
         this.subcontrollers.push(this.TacticalController);
+
+        //!! temporary solution
+        //!! black magic that fixes mysterious import errors which are not even logged
+        //!! TODO: DEAL WITH THIS SHIT SOMEHOW!
+        new RebuildState(this);
 
         this.State = new DevelopingState(this);
     }

@@ -74,7 +74,7 @@ export class MiraProfiler {
     }
 }
 
-let TileType = HCL.HordeClassLibrary.HordeContentApi.Configs.Tiles.Stuff.TileType;
+let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 export type UnitComposition = Map<string, number>;
 
 export class MiraUtils {
@@ -265,7 +265,7 @@ export class MiraUtils {
                 if ( !set.has(key) ) {
                     isContain = false;
                 }
-                else if (set.get(key) ?? 0 < val) {
+                else if ((set.get(key) ?? 0) < val) {
                     isContain = false;
                 }    
             }
@@ -347,7 +347,7 @@ export class MiraUtils {
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {
-        var profParams = host.newVar(HCL.HordeClassLibrary.HordeContentApi.Configs.Units.ProfessionParams.AUnitProfessionParams);
+        var profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
         if (!unitConfig.ProfessionParams.TryGetValue(profession, profParams.out)) {
             return false;
         }
