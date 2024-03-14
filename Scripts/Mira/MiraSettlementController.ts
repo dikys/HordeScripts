@@ -27,6 +27,8 @@ class SettlementLocation {
 }
 
 export class MiraSettlementController {
+    public TickOffset: number = 0;
+    
     public Settlement: any;
     public MasterMind: any;
     public Player: any;
@@ -45,7 +47,9 @@ export class MiraSettlementController {
     private currentUnitComposition: UnitComposition | null;
     private currentDevelopedUnitComposition: UnitComposition | null;
 
-    constructor (controlledSettlement, settlementMM, controlledPlayer) {
+    constructor (controlledSettlement, settlementMM, controlledPlayer, tickOffset) {
+        this.TickOffset = tickOffset;
+        
         this.Settlement = controlledSettlement;
         this.Player = controlledPlayer;
         this.MasterMind = settlementMM;

@@ -32,7 +32,7 @@ export class Mira {
             if (this.CanRun) {
                 for (let controller of this.controllers) {
                     if (!controller.Settlement.Existence.TotalDefeat) {
-                        controller.Tick(tickNumber);
+                        controller.Tick(tickNumber - controller.TickOffset);
                     }
                     else {
                         Mira.Log(MiraLogLevel.Info, `Controller '${controller.Player.Nickname}' lost the battle, but not the war!`);
@@ -58,8 +58,11 @@ export class Mira {
             Mira.CanRun = true;
             Mira.controllers = [];
 
+            let tickOffset = 0;
+
             for (let item of MiraUtils.GetAllPlayers()) {
-                Mira.AttachToPlayer(item.index, true);
+                Mira.AttachToPlayer(item.index, tickOffset, true);
+                tickOffset++;
             }
         }
         catch (ex) {
@@ -70,7 +73,7 @@ export class Mira {
         Mira.Info(`Mira successfully engaged. Have fun! ^^`);
     };
 
-    static AttachToPlayer(playerId: string, suppressNoMmError: boolean = false): void {
+    static AttachToPlayer(playerId: string, tickOffset: number = 0, suppressNoMmError: boolean = false): void {
         Mira.Debug(`Begin attach to player ${playerId}`);
         let settlementData = MiraUtils.GetSettlementData(playerId);
 
@@ -89,7 +92,8 @@ export class Mira {
         let controller = new MiraSettlementController(
             settlementData.Settlement, 
             settlementData.MasterMind, 
-            settlementData.Player
+            settlementData.Player,
+            tickOffset
         );
         
         Mira.controllers.push(controller);
