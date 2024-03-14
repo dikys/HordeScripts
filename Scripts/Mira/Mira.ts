@@ -50,8 +50,8 @@ export class Mira {
 
     static FirstRun(): void {
         Mira.Info(`Engaging Mira...`);
-        Mira.Error(`Failed to load library './Empathy/heart', reason: not found. Try to continue without it.`);
-        Mira.Error(`Failed to load library './Empathy/soul', reason: not found. Try to continue without it.`);
+        Mira.Error(`Failed to load library './Empathy/heart', reason: not found. Proceeding without it.`);
+        Mira.Error(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
         Mira.Warning(`Empathy subsystem is not responding`);
 
         try {
