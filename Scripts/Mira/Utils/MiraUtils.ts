@@ -284,6 +284,17 @@ export class MiraUtils {
         return result;
     }
 
+    static GetAllPlayers(): Array<{index: string, player: any}> {
+        let result: Array<any> = [];
+
+        for (let i in Players) {
+            let player = Players[i];
+            result.push({index: i, player: player});
+        }
+        
+        return result;
+    }
+
     static GetSettlementData(playerId: string): MiraSettlementData | null {
         var realPlayer = Players[playerId].GetRealPlayer();
         if (!realPlayer) {

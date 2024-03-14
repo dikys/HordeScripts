@@ -30,7 +30,7 @@ export class Mira {
     static Tick(tickNumber: number): void {
         try {
             if (this.CanRun) {
-                for (var controller of this.controllers) {
+                for (let controller of this.controllers) {
                     if (!controller.Settlement.Existence.TotalDefeat) {
                         controller.Tick(tickNumber);
                     }
@@ -49,30 +49,44 @@ export class Mira {
     };
 
     static FirstRun(): void {
+        Mira.Info(`Engaging Mira...`);
+        Mira.Error(`Failed to load library './Empathy/heart', reason: not found. Try to continue without it.`);
+        Mira.Error(`Failed to load library './Empathy/soul', reason: not found. Try to continue without it.`);
+        Mira.Warning(`Empathy subsystem is not responding`);
+
         try {
             Mira.CanRun = true;
-            Mira.controllers.length = 0;
-            Mira.AttachToPlayer("1");
+            Mira.controllers = [];
+
+            for (let item of MiraUtils.GetAllPlayers()) {
+                Mira.AttachToPlayer(item.index, true);
+            }
         }
         catch (ex) {
             log.exception(ex);
+            return;
         }
+
+        Mira.Info(`Mira successfully engaged. Have fun! ^^`);
     };
 
-    static AttachToPlayer(playerId: string): void {
+    static AttachToPlayer(playerId: string, suppressNoMmError: boolean = false): void {
         Mira.Debug(`Begin attach to player ${playerId}`);
-        var settlementData = MiraUtils.GetSettlementData(playerId);
+        let settlementData = MiraUtils.GetSettlementData(playerId);
 
         if (!settlementData) {
             return;
         }
 
         if (!settlementData.MasterMind) {
-            Mira.Error(`Unable to attach to player ${playerId}: player is not controlled by MasterMind`);
+            if (!suppressNoMmError) {
+                Mira.Error(`Unable to attach to player ${playerId}: player is not controlled by MasterMind`);
+            }
+
             return;
         }
 
-        var controller = new MiraSettlementController(
+        let controller = new MiraSettlementController(
             settlementData.Settlement, 
             settlementData.MasterMind, 
             settlementData.Player
@@ -90,7 +104,7 @@ export class Mira {
             return;
         }
 
-        var logMessage = "(Mira) " + message;
+        let logMessage = "(Mira) " + message;
 
         switch (level) {
             case MiraLogLevel.Debug:

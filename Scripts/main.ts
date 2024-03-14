@@ -3,6 +3,7 @@ import { log } from "library/common/logging";
 import { activePlugins } from "active-plugins";
 import { registerExamples } from "examples-runner";
 import { MiraPlugin } from "plugins/mira";
+import { inspect } from "library/common/introspection";
 
 
 /**
