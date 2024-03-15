@@ -140,7 +140,7 @@ export class MiraUtils {
     static GetSettlementUnitsInArea(cell: any, radius: number, enemySettelemnts: Array<any>, includePassive: boolean = false): Array<any> {
         let units = MiraUtils.GetUnitsInArea(cell, radius);
         let enemies = units.filter((unit) => {
-            return enemySettelemnts.indexOf(unit.Owner) > -1 && (unit.Cfg.HasNotFlags(UnitFlags.Passive) || includePassive)
+            return enemySettelemnts.indexOf(unit.Owner) > -1 && unit.IsAlive && (unit.Cfg.HasNotFlags(UnitFlags.Passive) || includePassive)
         });
 
         return enemies;
