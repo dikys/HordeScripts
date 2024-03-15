@@ -122,14 +122,8 @@ export class StrategySubcontroller extends MiraSubcontroller {
     SelectEnemy(): any { //but actually Settlement
         this.currentEnemy = null;
 
-        let undefeatedEnemies: any[] = [];
+        let undefeatedEnemies: any[] = this.EnemySettlements.filter((value) => {return !value.Existence.IsTotalDefeat});
         
-        for (let enemy of this.EnemySettlements) {
-            if (!enemy.Existence.IsTotalDefeat) {
-                undefeatedEnemies.push(enemy);
-            }
-        }
-
         if (undefeatedEnemies.length > 0) {
             let index = MiraUtils.Random(undefeatedEnemies.length - 1);
             this.currentEnemy = undefeatedEnemies[index];
