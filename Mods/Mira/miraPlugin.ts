@@ -1,5 +1,5 @@
 import { Mira } from "Mira/Mira";
-import HordePluginBase from "./base-plugin";
+import HordePluginBase from "../plugins/base-plugin";
 
 export class MiraPlugin extends HordePluginBase {
     public constructor() {
