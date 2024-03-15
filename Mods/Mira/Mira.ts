@@ -31,7 +31,7 @@ export class Mira {
         try {
             if (this.CanRun) {
                 for (let controller of this.controllers) {
-                    if (!controller.Settlement.Existence.TotalDefeat) {
+                    if (!controller.Settlement.Existence.IsTotalDefeat) {
                         controller.Tick(tickNumber - controller.TickOffset);
                     }
                     else {
@@ -39,7 +39,7 @@ export class Mira {
                     }
                 }
 
-                this.controllers = this.controllers.filter((controller) => {return !controller.Settlement.Existence.TotalDefeat});
+                this.controllers = this.controllers.filter((controller) => {return !controller.Settlement.Existence.IsTotalDefeat});
             }
         }
         catch (ex) {
