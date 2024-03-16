@@ -82,7 +82,7 @@ export class VirtualInput {
 	}
 	
 	private static _checkPlayerIsLocal(player) {
-		return player.PlayerOrigin.ToString() == "Local";
+		return player.IsLocal;
 	}
 
 	private static _inputPush(vii) {

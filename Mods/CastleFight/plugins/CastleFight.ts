@@ -1470,7 +1470,7 @@ import HordePluginBase from "plugins/base-plugin";
                 var settlement    = realPlayer.GetRealSettlement();
                 var settlementId  = settlement.Uid;
     
-                if (isReplayMode() && realPlayer.PlayerOrigin.ToString() != "Replay") {
+                if (isReplayMode() && !realPlayer.IsReplay) {
                     continue;
                 }
     
