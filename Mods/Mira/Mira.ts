@@ -1,6 +1,5 @@
 import { log } from "library/common/logging";
 import { MiraSettlementController } from "./MiraSettlementController";
-import { DevelopingState } from "./SettlementControllerStates/DevelopingState";
 import { MiraUtils } from "./Utils/MiraUtils";
 
 export enum MiraLogLevel {
@@ -18,7 +17,7 @@ export enum MiraLogLevel {
 */
 
 export class Mira {
-    static LogLevel: MiraLogLevel = MiraLogLevel.Info;
+    static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
     static CanRun = true;
     
     private static controllers: Array<MiraSettlementController> = [];
@@ -61,7 +60,7 @@ export class Mira {
             let tickOffset = 0;
 
             for (let item of MiraUtils.GetAllPlayers()) {
-                Mira.AttachToPlayer(item.index, tickOffset, true);
+                Mira.AttachToPlayer(item.index, tickOffset);
                 tickOffset++;
             }
         }
@@ -74,7 +73,7 @@ export class Mira {
         Mira.Info(`Mira successfully engaged. Have fun! ^^`);
     };
 
-    static AttachToPlayer(playerId: string, tickOffset: number = 0, suppressNoMmError: boolean = false): void {
+    static AttachToPlayer(playerId: string, tickOffset: number = 0): void {
         Mira.Debug(`Begin attach to player ${playerId}`);
         let settlementData = MiraUtils.GetSettlementData(playerId);
 
@@ -82,11 +81,13 @@ export class Mira {
             return;
         }
 
-        if (!settlementData.MasterMind) {
-            if (!suppressNoMmError) {
-                Mira.Error(`Unable to attach to player ${playerId}: player is not controlled by MasterMind`);
-            }
+        if (!settlementData.Player.IsLocal) {
+            Mira.Info(`Skipping player ${playerId}: player is not local`);
+            return;
+        }
 
+        if (!settlementData.MasterMind) {
+            Mira.Info(`Unable to attach to player ${playerId}: player is not controlled by MasterMind`);
             return;
         }
 
@@ -98,8 +99,6 @@ export class Mira {
         );
         
         Mira.controllers.push(controller);
-        controller.State = new DevelopingState(controller);
-
         Mira.Info(`Successfully attached to player ${playerId}`);
     };
 
