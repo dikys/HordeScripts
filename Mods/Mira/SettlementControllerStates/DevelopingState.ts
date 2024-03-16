@@ -3,7 +3,8 @@ import { ProductionState } from "./ProductionState";
 import { BuildingUpState } from "./BuildingUpState";
 
 export class DevelopingState extends ProductionState {
-    protected readonly MAX_PRODUCTION_TIME = 6000 / 2; //2 min
+    private readonly MAX_PRODUCTION_TIME = (2 * 60 * 50) / 2; //2 min
+    private readonly PRODUCER_PRODUCTION_PROBABILITY = 66;
     
     protected getTargetUnitsComposition(): UnitComposition {
         var targetCompostion = new Map<string, number>();
@@ -32,7 +33,7 @@ export class DevelopingState extends ProductionState {
             if (absentProducers.length > 0 && absentTech.length > 0) {
                 let pick = MiraUtils.Random(100, 1);
                 
-                if (pick > 70) {
+                if (pick > this.PRODUCER_PRODUCTION_PROBABILITY) {
                     selectedCfgIds = absentTech;
                 }
                 else {

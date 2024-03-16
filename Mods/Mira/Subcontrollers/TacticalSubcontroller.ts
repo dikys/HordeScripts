@@ -1,5 +1,5 @@
 import { MiraLogLevel } from "Mira/Mira";
-import { MiraSettlementController } from "Mira/MiraSettlementController";
+import { MiraSettlementController, SettlementLocation } from "Mira/MiraSettlementController";
 import { eNext, enumerate } from "Mira/Utils/Common";
 import { MiraUtils } from "Mira/Utils/MiraUtils";
 import { MiraSubcontroller } from "./MiraSubcontroller";
@@ -54,24 +54,26 @@ export class TacticalSubcontroller extends MiraSubcontroller {
 
         this.updateSquads();
 
-        if (this.currentTarget != null) { //we are attacking
-            let pullbackLocation = this.getPullbackLocation();
+        if (this.currentTarget) { //we are attacking
+            if (this.currentTarget.IsAlive) {
+                let pullbackLocation = this.getPullbackLocation();
 
-            for (var squad of this.offensiveSquads) {
-                if (pullbackLocation) {
-                    if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                        if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, pullbackLocation.Center)) {
-                            let squadLocation = squad.GetLocation();
+                for (var squad of this.offensiveSquads) {
+                    if (pullbackLocation) {
+                        if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
+                            if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, pullbackLocation.Center)) {
+                                let squadLocation = squad.GetLocation();
 
-                            if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation.Center) > pullbackLocation.Radius) {
-                                squad.Move(pullbackLocation.Center, pullbackLocation.Radius);
+                                if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation.Center) > pullbackLocation.Radius) {
+                                    squad.Move(pullbackLocation.Center, pullbackLocation.Radius);
+                                }
                             }
                         }
                     }
-                }
 
-                if (squad.IsIdle() && squad.CombativityIndex >= 1) {
-                    squad.Attack(this.currentTarget.Cell);
+                    if (squad.IsIdle() && squad.CombativityIndex >= 1) {
+                        squad.Attack(this.currentTarget.Cell);
+                    }
                 }
             }
         }
@@ -164,18 +166,18 @@ export class TacticalSubcontroller extends MiraSubcontroller {
 
         let requiredDefensiveStrength = 0.15 * this.calcTotalUnitsStrength(combatUnits);
         let unitIndex = 0;
-        let defensiveUnits:any[] = [];
+        let defensiveUnits: any[] = [];
         let defensiveStrength = 0;
         
         for (unitIndex = 0; unitIndex < combatUnits.length; unitIndex++) {
             if (defensiveStrength >= requiredDefensiveStrength) {
-                //unitIndex here will be equal to the index of a last defensive unit plus one
+                //unitIndex here will be equal to an index of the last defensive unit plus one
                 break;
             }
             
             let unit = combatUnits[unitIndex];
 
-            if (!this.isBuilding(unit) && !unit.IsNearDeath) {
+            if (!this.isBuilding(unit)) {
                 defensiveUnits.push(unit);
             }
 
@@ -254,9 +256,9 @@ export class TacticalSubcontroller extends MiraSubcontroller {
         
         while ((unit = eNext(units)) !== undefined) {
             if (
+                !this.unitsInSquads.has(unit.Id) &&
                 this.isCombatUnit(unit) && 
                 !this.isBuilding(unit) && 
-                !this.unitsInSquads.has(unit.Id) &&
                 unit.IsAlive
             ) {
                 freeUnits.push(unit);
@@ -396,11 +398,11 @@ export class TacticalSubcontroller extends MiraSubcontroller {
         return config.BuildingConfig != null;
     }
 
-    private getPullbackLocation(): any {
+    private getPullbackLocation(): SettlementLocation | null {
         return this.parentController.GetSettlementLocation();
     }
 
-    private getRetreatLocation(): any {
+    private getRetreatLocation(): SettlementLocation | null {
         return this.getPullbackLocation();
     }
 

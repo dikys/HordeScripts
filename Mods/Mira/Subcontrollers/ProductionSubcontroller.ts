@@ -23,26 +23,26 @@ export class ProductionSubcontroller extends MiraSubcontroller {
 
         this.productionIndex = null;
         
-        var mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
-        var producedUnits:Array<string> = [];
+        let mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
+        let orderedUnits: Array<string> = [];
 
-        for (var unitConfig of this.productionList) {
-            var freeProducer = this.getProducer(unitConfig);
+        for (let unitConfig of this.productionList) {
+            let freeProducer = this.getProducer(unitConfig);
             
-            //!! most probably doesn't work as expected since worker is always free on this tick
+            //!! most probably doesn't work as expected since producer is always free on this tick
             if (freeProducer) {
                 if (MiraUtils.RequestMasterMindProduction(unitConfig, mmProductionDepartament)) {
                     this.parentController.Log(MiraLogLevel.Debug, "Added " + unitConfig + " to the production list");
-                    producedUnits.push(unitConfig);
+                    orderedUnits.push(unitConfig);
                 }
             }
         }
 
-        if (producedUnits.length > 0) {
-            this.parentController.Log(MiraLogLevel.Debug, `Removed ${producedUnits.length} units from target production list`);
+        if (orderedUnits.length > 0) {
+            this.parentController.Log(MiraLogLevel.Debug, `Removed ${orderedUnits.length} units from target production list`);
 
-            for (var cfg of producedUnits) {
-                const index = this.productionList.indexOf(cfg);
+            for (let cfg of orderedUnits) {
+                let index = this.productionList.indexOf(cfg);
 
                 if (index > -1) {
                     this.productionList.splice(index, 1);
@@ -57,6 +57,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
         let masterMind = this.parentController.MasterMind;
         let requests = enumerate(masterMind.Requests);
         let request;
+
         while ((request = eNext(requests)) !== undefined) {
             if (request.RequestedCfg) {
                 list.push(request.RequestedCfg.Uid);
@@ -165,7 +166,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
             let producerParams = unit.Cfg.GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer, true);
             
             if (producerParams) {
-                if (unit.EffectsMind.BuildingInProgress || unit.IsNearDeath) {
+                if (!unit.IsAlive || unit.EffectsMind.BuildingInProgress) {
                     continue;
                 }
                 
@@ -179,12 +180,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
                     
                     if (this.productionIndex.has(produceListItem.Uid)) {
                         let producers = this.productionIndex.get(produceListItem.Uid);
-
-                        if (!producers) {
-                            producers = new Array<any>();
-                        }
-
-                        producers.push(unit);
+                        producers!.push(unit);
                     }
                     else {
                         this.productionIndex.set(produceListItem.Uid, [unit]);

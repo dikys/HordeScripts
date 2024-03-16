@@ -20,12 +20,12 @@ export abstract class ProductionState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 5 !== 0) {
+        if (tickNumber % 10 != 0) {
             return;
         }
 
-        if (tickNumber % 1000 !== 0) {
-            if (this.settlementController.IsUnderAttack()) {
+        if (tickNumber % 50 != 0) {
+            if (this.settlementController.StrategyController.IsUnderAttack()) {
                 this.settlementController.State = new DefendingState(this.settlementController);
                 return;
             }
@@ -41,7 +41,7 @@ export abstract class ProductionState extends MiraSettlementControllerState {
     }
 
     private getRemainingProductionList(): UnitComposition {
-        let currentEconomy = this.settlementController.GetCurrentEconomyComposition();
+        let currentEconomy = this.settlementController.GetCurrentDevelopedEconomyComposition();
         
         for (let productionListItem of this.settlementController.ProductionController.ProductionList) {
             MiraUtils.IncrementMapItem(currentEconomy, productionListItem);

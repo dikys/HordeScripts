@@ -7,7 +7,7 @@ import { AssignOrderMode, VirtualInput, VirtualSelectUnitsMode } from "library/m
 import { enumerate, eNext } from "./Common";
 import { generateCellInSpiral } from "library/common/position-tools";
 
-class MiraSettlementData {
+export class MiraSettlementData {
     public Settlement: any;
     public MasterMind: any;
     public Player: any;
@@ -146,6 +146,7 @@ export class MiraUtils {
         return enemies;
     }
 
+    // This has neat side effect that resulting cells are ordered from closest to farthest from center
     static FindCells(
         center: {X: number; Y: number;}, 
         radius: number, 
@@ -173,7 +174,7 @@ export class MiraUtils {
             0 <= point.X && point.X < DotnetHolder.RealScena.Size.Width &&
             0 <= point.Y && point.Y < DotnetHolder.RealScena.Size.Height
         ) {
-            var tile = DotnetHolder.LandscapeMap.Item.get(point.X, point.Y);
+            let tile = DotnetHolder.LandscapeMap.Item.get(point.X, point.Y);
 
             return tile.Cfg.Type;
         }
@@ -234,12 +235,12 @@ export class MiraUtils {
         minuend: UnitComposition, 
         subtrahend: UnitComposition
     ): UnitComposition {
-        var newList = new Map<string, number>();
+        let newList = new Map<string, number>();
 
         minuend.forEach(
             (value, key, map) => {
                 if (subtrahend.has(key)) {
-                    var newCount = value - (subtrahend.get(key) ?? 0);
+                    let newCount = value - (subtrahend.get(key) ?? 0);
                     
                     if (newCount > 0) {
                         newList.set(key, newCount);
@@ -258,7 +259,7 @@ export class MiraUtils {
         set: UnitComposition, 
         subset: UnitComposition
     ): boolean {
-        var isContain = true;
+        let isContain = true;
 
         subset.forEach( //using forEach here because keys(), values() or entries() return empty iterators for some reason
             (val, key, m) => {
@@ -275,9 +276,9 @@ export class MiraUtils {
     }
 
     static GetAllSettlements(): Array<any> {
-        var result: Array<any> = [];
+        let result: Array<any> = [];
 
-        for (var player of Players) {
+        for (let player of Players) {
             result.push(player.GetRealPlayer().GetRealSettlement());
         }
         
@@ -296,30 +297,30 @@ export class MiraUtils {
     }
 
     static GetSettlementData(playerId: string): MiraSettlementData | null {
-        var realPlayer = Players[playerId].GetRealPlayer();
+        let realPlayer = Players[playerId].GetRealPlayer();
         if (!realPlayer) {
             return null;
         }
 
-        var settlement = realPlayer.GetRealSettlement();
-        var masterMind = ScriptUtils.GetValue(realPlayer, "MasterMind");
+        let settlement = realPlayer.GetRealSettlement();
+        let masterMind = ScriptUtils.GetValue(realPlayer, "MasterMind");
 
         return new MiraSettlementData(settlement, masterMind, realPlayer);
     }
 
     static GetUnit(cell: any): any {
-        var unitsMap = DotnetHolder.UnitsMap;
+        let unitsMap = DotnetHolder.UnitsMap;
         return unitsMap.GetUpperUnit(cell.X, cell.Y);
     }
 
     // finds a free cell nearest to given
     static FindFreeCell(point): any {
-        var unitsMap = DotnetHolder.UnitsMap;
+        let unitsMap = DotnetHolder.UnitsMap;
         
-        var generator = generateCellInSpiral(point.X, point.Y);
-        var cell: any;
+        let generator = generateCellInSpiral(point.X, point.Y);
+        let cell: any;
         for (cell = generator.next(); !cell.done; cell = generator.next()) {
-            var unit = unitsMap.GetUpperUnit(cell.value.X, cell.value.Y);
+            let unit = unitsMap.GetUpperUnit(cell.value.X, cell.value.Y);
             if (!unit) {
                 return {X: cell.value.X, Y: cell.value.Y};
             }
@@ -352,13 +353,13 @@ export class MiraUtils {
     }
 
     static RequestMasterMindProduction(configId: string, productionDepartment: any, checkDuplicate: boolean = false) {
-        var cfg = MiraUtils.GetUnitConfig(configId);
+        let cfg = MiraUtils.GetUnitConfig(configId);
         
         return productionDepartment.AddRequestToProduce(cfg, 1, null, checkDuplicate);
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {
-        var profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
+        let profParams = host.newlet(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
         if (!unitConfig.ProfessionParams.TryGetValue(profession, profParams.out)) {
             return false;
         }
@@ -463,6 +464,15 @@ export class MiraUtils {
     static GetUnitStrength(unit: any): number {
         if (this.IsCombatConfig(unit.Cfg) && unit.IsAlive) {
             return Math.max(unit.Health, 0);
+        }
+        else {
+            return 0;
+        }
+    }
+
+    static GetConfigStrength(unitConfig: any): number {
+        if (MiraUtils.IsCombatConfig(unitConfig)) {
+            return unitConfig.MaxHealth;
         }
         else {
             return 0;

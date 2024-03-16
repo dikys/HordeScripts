@@ -62,6 +62,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
         let offensiveCfgIds = produceableCfgIds.filter(
             (value, index, array) => {
                 let config = MiraUtils.GetUnitConfig(value)
+                
                 return MiraUtils.IsCombatConfig(config) &&
                     config.BuildingConfig == null;
             }
@@ -69,10 +70,8 @@ export class StrategySubcontroller extends MiraSubcontroller {
         this.parentController.Log(MiraLogLevel.Debug, `Offensive Cfg IDs: ${offensiveCfgIds}`);
 
         let unitList = this.makeCombatUnitComposition(offensiveCfgIds, requiredOffensiveStrength);
-        
-        let unitListStr: string = "";
-        unitList.forEach((value, key, map) => {unitListStr += `${key}: ${value}, `});
-        this.parentController.Log(MiraLogLevel.Debug, `Offensive unit composition: ${unitListStr}`);
+        this.parentController.Log(MiraLogLevel.Debug, `Offensive unit composition:`);
+        MiraUtils.PrintMap(unitList);
 
         let requiredDefensiveStrength = 0.15 * requiredOffensiveStrength; //add a bit more for defense purposes
         this.parentController.Log(MiraLogLevel.Debug, `Calculated required defensive strength: ${requiredDefensiveStrength}`);
@@ -80,15 +79,15 @@ export class StrategySubcontroller extends MiraSubcontroller {
         let defensiveCfgIds = produceableCfgIds.filter(
             (value, index, array) => {
                 let config = MiraUtils.GetUnitConfig(value)
+                
                 return MiraUtils.IsCombatConfig(config);
             }
         );
         this.parentController.Log(MiraLogLevel.Debug, `Defensive Cfg IDs: ${defensiveCfgIds}`);
         
         let defensiveUnitList = this.makeCombatUnitComposition(defensiveCfgIds, requiredDefensiveStrength);
-        unitListStr = "";
-        defensiveUnitList.forEach((value, key, map) => {unitListStr += `${key}: ${value}, `});
-        this.parentController.Log(MiraLogLevel.Debug, `Defensive unit composition: ${unitListStr}`);
+        this.parentController.Log(MiraLogLevel.Debug, `Defensive unit composition:`);
+        MiraUtils.PrintMap(defensiveUnitList);
 
         defensiveUnitList.forEach((value, key, map) => MiraUtils.AddToMapItem(unitList, key, value));
         
@@ -113,7 +112,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
         );
 
         if (combatUnitCfgIds.length == 0) {
-            combatUnitCfgIds.push("#UnitConfig_Slavyane_Swordmen"); //maybe calculate this dynamically based on current configs
+            combatUnitCfgIds.push("#UnitConfig_Slavyane_Swordmen"); //TODO: calculate this dynamically based on current configs
         }
         
         return combatUnitCfgIds;
@@ -142,12 +141,10 @@ export class StrategySubcontroller extends MiraSubcontroller {
         enemySettlement: any //but actually Settlement
     ): any { //but actually Point2D
         if (!enemySettlement.Existence.IsTotalDefeat) {
-            var professionCenter = enemySettlement.Units.Professions;
-            var productionBuilding = professionCenter.ProducingBuildings.First();
+            let professionCenter = enemySettlement.Units.Professions;
+            let productionBuilding = professionCenter.ProducingBuildings.First();
             
-            if (productionBuilding) {
-                return productionBuilding;
-            }
+            return productionBuilding;
         }
 
         return null;
@@ -164,7 +161,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
                     let bLoc = b.GetLocation();
 
                     return MiraUtils.ChebyshevDistance(settlementCenter, aLoc.Point) - 
-                    MiraUtils.ChebyshevDistance(settlementCenter, bLoc.Point)
+                        MiraUtils.ChebyshevDistance(settlementCenter, bLoc.Point);
                 }
             );
         }
@@ -173,26 +170,31 @@ export class StrategySubcontroller extends MiraSubcontroller {
         }
     }
 
-    private buildEnemyList(): void {
-        this.EnemySettlements = [];
-        var diplomacy = this.parentController.Settlement.Diplomacy;
-        
-        var settlements = MiraUtils.GetAllSettlements();
-        
-        for (var item of settlements) {
-            if (diplomacy.IsWarStatus(item)) {
-                this.EnemySettlements.push(item);
-            }
+    IsUnderAttack(): boolean {
+        //TODO: add enemy detection around expands
+        let settlementLocation = this.parentController.GetSettlementLocation();
+
+        if (!settlementLocation) {
+            return false;
         }
+
+        let enemies = MiraUtils.GetSettlementUnitsInArea(
+            settlementLocation.Center, 
+            settlementLocation.Radius, 
+            this.EnemySettlements
+        );
+        
+        return enemies.length > 0;
     }
 
-    private getConfigStrength(unitConfig: any): number {
-        if (MiraUtils.IsCombatConfig(unitConfig)) {
-            return unitConfig.MaxHealth;
-        }
-        else {
-            return 0;
-        }
+    GetEnemiesInArea(cell: any, radius: number): Array<any> {
+        return MiraUtils.GetSettlementUnitsInArea(cell, radius, this.EnemySettlements);
+    }
+
+    private buildEnemyList(): void {
+        let diplomacy = this.parentController.Settlement.Diplomacy;
+        let settlements = MiraUtils.GetAllSettlements();
+        this.EnemySettlements = settlements.filter((value) => {return diplomacy.IsWarStatus(value)})
     }
 
     private calcSettlementStrength(settlement: any, includeBuildings: boolean): number {
@@ -223,7 +225,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
             let configId = allowedConfigs[index];
 
             MiraUtils.IncrementMapItem(unitComposition, configId);
-            currentStrength += this.getConfigStrength(MiraUtils.GetUnitConfig(configId));
+            currentStrength += MiraUtils.GetConfigStrength(MiraUtils.GetUnitConfig(configId));
         }
 
         return unitComposition;

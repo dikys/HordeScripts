@@ -5,7 +5,7 @@ import { MiraSquadState, MIN_SPREAD_THRESHOLD_MULTIPLIER } from "./MiraSquadStat
 export abstract class MiraSquadGatheringUpState extends MiraSquadState {
     OnEntry(): void {
         if (this.squad.CurrentTargetCell) {
-            let closestToTargetUnit:any = null;
+            let closestToTargetUnit: any = null;
             let minDistance = Infinity;
 
             for (let unit of this.squad.Units) {

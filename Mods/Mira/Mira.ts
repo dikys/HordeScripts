@@ -29,8 +29,8 @@ export class Mira {
     
     static Tick(tickNumber: number): void {
         try {
-            if (this.CanRun) {
-                for (let controller of this.controllers) {
+            if (Mira.CanRun) {
+                for (let controller of Mira.controllers) {
                     if (!controller.Settlement.Existence.IsTotalDefeat) {
                         controller.Tick(tickNumber - controller.TickOffset);
                     }
@@ -39,12 +39,12 @@ export class Mira {
                     }
                 }
 
-                this.controllers = this.controllers.filter((controller) => {return !controller.Settlement.Existence.IsTotalDefeat});
+                Mira.controllers = Mira.controllers.filter((controller) => {return !controller.Settlement.Existence.IsTotalDefeat});
             }
         }
         catch (ex) {
             log.exception(ex);
-            this.CanRun = false;
+            Mira.CanRun = false;
         }
     };
 
@@ -67,6 +67,7 @@ export class Mira {
         }
         catch (ex) {
             log.exception(ex);
+            Mira.CanRun = false;
             return;
         }
 
@@ -104,7 +105,7 @@ export class Mira {
 
     //#region logging helpers
     static Log(level: MiraLogLevel, message: string) {
-        if (this.LogLevel > level) {
+        if (Mira.LogLevel > level) {
             return;
         }
 
@@ -127,16 +128,16 @@ export class Mira {
         }
     }
     static Debug(message: string): void {
-        this.Log(MiraLogLevel.Debug, message);
+        Mira.Log(MiraLogLevel.Debug, message);
     }
     static Info(message: string): void {
-        this.Log(MiraLogLevel.Info, message);
+        Mira.Log(MiraLogLevel.Info, message);
     }
     static Warning(message: string): void {
-        this.Log(MiraLogLevel.Warning, message);
+        Mira.Log(MiraLogLevel.Warning, message);
     }
     static Error(message: string): void {
-        this.Log(MiraLogLevel.Error, message);
+        Mira.Log(MiraLogLevel.Error, message);
     }
     //#endregion
 }

@@ -14,8 +14,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
         this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
         
         if (!this.selectAndAttackEnemy()) {
-            this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
-            this.settlementController.State = new IdleState(this.settlementController);
+            this.celebrateVictory();
             return;
         }
     }
@@ -30,7 +29,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
         }
 
         if (tickNumber % 50 == 0) {
-            if (this.settlementController.IsUnderAttack()) {
+            if (this.settlementController.StrategyController.IsUnderAttack()) {
                 this.settlementController.State = new DefendingState(this.settlementController);
                 return;
             }
@@ -46,7 +45,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
             
             if (!enemy) {
                 if (!this.selectAndAttackEnemy()) {
-                    this.settlementController.State = new IdleState(this.settlementController);
+                    this.celebrateVictory();
                     return;
                 }
             }
@@ -64,6 +63,11 @@ export class ExterminatingState extends MiraSettlementControllerState {
         }
     }
 
+    private celebrateVictory(): void {
+        this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
+        this.settlementController.State = new IdleState(this.settlementController);
+    }
+
     private selectAndAttackEnemy(): boolean {
         var enemy = this.settlementController.StrategyController.CurrentEnemy;
         
@@ -78,7 +82,6 @@ export class ExterminatingState extends MiraSettlementControllerState {
             return true;
         }
         else {
-            this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
             return false;
         }
     }

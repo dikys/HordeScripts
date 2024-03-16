@@ -20,7 +20,7 @@ export class DefendingState extends MiraSettlementControllerState {
 
     Tick(tickNumber: number): void {
         if (tickNumber % 50 == 0) {
-            if (!this.settlementController.IsUnderAttack()) {
+            if (!this.settlementController.StrategyController.IsUnderAttack()) {
                 this.settlementController.Log(MiraLogLevel.Debug, `Attack countered`);
                 this.settlementController.State = new RebuildState(this.settlementController);
                 return;
@@ -49,7 +49,7 @@ export class DefendingState extends MiraSettlementControllerState {
             return;
         }
 
-        let attackers = this.settlementController.GetEnemiesInArea(settlementLocation.Center, settlementLocation.Radius);
+        let attackers = this.settlementController.StrategyController.GetEnemiesInArea(settlementLocation.Center, settlementLocation.Radius);
         let attackingSquads = MiraUtils.GetSettlementsSquadsFromUnits(attackers, this.settlementController.StrategyController.EnemySettlements);
         this.settlementController.HostileAttackingSquads.push(...attackingSquads);
     }

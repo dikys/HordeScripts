@@ -16,7 +16,7 @@ import { TacticalSubcontroller } from "./Subcontrollers/TacticalSubcontroller";
 import { eNext, enumerate } from "./Utils/Common";
 import { MiraUtils, UnitComposition } from "./Utils/MiraUtils";
 
-class SettlementLocation {
+export class SettlementLocation {
     Center: any;
     Radius: number;
 
@@ -47,11 +47,11 @@ export class MiraSettlementController {
     private currentUnitComposition: UnitComposition | null;
     private currentDevelopedUnitComposition: UnitComposition | null;
 
-    constructor (controlledSettlement, settlementMM, controlledPlayer, tickOffset) {
+    constructor (settlement, settlementMM, player, tickOffset) {
         this.TickOffset = tickOffset;
         
-        this.Settlement = controlledSettlement;
-        this.Player = controlledPlayer;
+        this.Settlement = settlement;
+        this.Player = player;
         this.MasterMind = settlementMM;
 
         if (!this.MasterMind.IsWorkMode) {
@@ -93,7 +93,7 @@ export class MiraSettlementController {
         this.currentUnitComposition = null;
         this.currentDevelopedUnitComposition = null;
 
-        for (var subcontroller of this.subcontrollers) {
+        for (let subcontroller of this.subcontrollers) {
             subcontroller.Tick(tickNumber);
         }
         
@@ -113,7 +113,7 @@ export class MiraSettlementController {
     }
 
     Log(level: MiraLogLevel, message: string): void {
-        var logMessage = `[${this.Player.Nickname}] ${message}`;
+        let logMessage = `[${this.Player.Nickname}] ${message}`;
         Mira.Log(level, logMessage);
     }
 
@@ -121,8 +121,8 @@ export class MiraSettlementController {
         if (!this.currentUnitComposition) {
             this.currentUnitComposition = new Map<string, number>();
         
-            var units = enumerate(this.Settlement.Units);
-            var unit;
+            let units = enumerate(this.Settlement.Units);
+            let unit;
             
             while ((unit = eNext(units)) !== undefined) {
                 MiraUtils.IncrementMapItem(this.currentUnitComposition, unit.Cfg.Uid);
@@ -136,8 +136,8 @@ export class MiraSettlementController {
         if (!this.currentDevelopedUnitComposition) {
             this.currentDevelopedUnitComposition = new Map<string, number>();
         
-            var units = enumerate(this.Settlement.Units);
-            var unit;
+            let units = enumerate(this.Settlement.Units);
+            let unit;
             
             while ((unit = eNext(units)) !== undefined) {
                 if (unit.EffectsMind.BuildingInProgress || unit.IsNearDeath) {
@@ -151,32 +151,11 @@ export class MiraSettlementController {
         return new Map(this.currentDevelopedUnitComposition);
     }
 
-    IsUnderAttack(): boolean {
-        //TODO: add enemy detection around expands
-        let settlementLocation = this.GetSettlementLocation();
-
-        if (!settlementLocation) {
-            return false;
-        }
-
-        let enemies = MiraUtils.GetSettlementUnitsInArea(
-            settlementLocation.Center, 
-            settlementLocation.Radius, 
-            this.StrategyController.EnemySettlements
-        );
-        
-        return enemies.length > 0;
-    }
-
-    GetEnemiesInArea(cell: any, radius: number): Array<any> {
-        return MiraUtils.GetSettlementUnitsInArea(cell, radius, this.StrategyController.EnemySettlements);
-    }
-
     GetSettlementLocation(): SettlementLocation | null {
         let buildings: Array<any> = [];
 
-        var units = enumerate(this.Settlement.Units);
-        var unit;
+        let units = enumerate(this.Settlement.Units);
+        let unit;
         
         while ((unit = eNext(units)) !== undefined) {
             if (unit.Cfg.BuildingConfig != null) {

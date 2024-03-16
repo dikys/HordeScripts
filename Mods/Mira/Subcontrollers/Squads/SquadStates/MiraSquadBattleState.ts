@@ -104,7 +104,7 @@ export class MiraSquadBattleState extends MiraSquadState {
         this.updateThreats();
 
         if (this.enemyUnits.length == 0) {
-            this.squad.AttackTargetCell = this.squad.CurrentTargetCell;
+            this.squad.Attack(this.squad.CurrentTargetCell);
             this.squad.SetState(new MiraSquadAttackState(this.squad));
             return;
         }
@@ -171,7 +171,7 @@ export class MiraSquadBattleState extends MiraSquadState {
         this.reservedCells = new MiraReservedCellData();
         
         for (let unit of this.squad.Units) {
-            let optimalTarget:any = null;
+            let optimalTargetData: any = null;
             this.cellHeuristics = new MiraCellHeuristics();
 
             let mainAttackRange = unit.Cfg.MainArmament.Range;
@@ -181,7 +181,7 @@ export class MiraSquadBattleState extends MiraSquadState {
             let forestVisionRange = unit.Cfg.ForestVision;
             
             for (let enemy of this.enemyUnits) {
-                if (!unit.BattleMind.CanAttackTarget(enemy)) {
+                if (!unit.BattleMind.CanAttackTarget(enemy) || !enemy.IsAlive) {
                     continue;
                 }
 
@@ -196,8 +196,6 @@ export class MiraSquadBattleState extends MiraSquadState {
                 for (let row = enemy.Cell.Y; row < maxRow; row++) {
                     for (let col = enemy.Cell.X; col < maxCol; col++) {
                         let analyzedCell = {X: col, Y: row};
-                        let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
-
                         let atttackRadius = 0;
 
                         if (MiraUtils.GetTileType(analyzedCell) == TileType.Forest) {
@@ -206,6 +204,8 @@ export class MiraSquadBattleState extends MiraSquadState {
                         else {
                             atttackRadius = Math.min(mainAttackRange, mainVisionRange);
                         }
+
+                        let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
 
                         MiraUtils.ForEachCell(analyzedCell, atttackRadius, (cell) => {
                             if (MiraUtils.ChebyshevDistance(unit.Cell, cell) > analyzedCellDistance) {
@@ -221,18 +221,18 @@ export class MiraSquadBattleState extends MiraSquadState {
 
                             let targetData = {cell: cell, heuristic: heuristic, target: enemy};
 
-                            if (optimalTarget == null) {
-                                optimalTarget = targetData;
+                            if (optimalTargetData == null) {
+                                optimalTargetData = targetData;
                             }
-                            else if (targetData.heuristic < optimalTarget.heuristic) {
+                            else if (targetData.heuristic < optimalTargetData.heuristic) {
                                 if (MiraUtils.IsCellReachable(cell, unit)) {
-                                    optimalTarget = targetData;
+                                    optimalTargetData = targetData;
                                 }
                             }
-                            else if (targetData.heuristic == optimalTarget.heuristic) {
-                                if (targetData.target.Health < optimalTarget.target.Health) {
+                            else if (targetData.heuristic == optimalTargetData.heuristic) {
+                                if (targetData.target.Health < optimalTargetData.target.Health) {
                                     if (MiraUtils.IsCellReachable(cell, unit)) {
-                                        optimalTarget = targetData;
+                                        optimalTargetData = targetData;
                                     }
                                 }
                             }
@@ -241,14 +241,14 @@ export class MiraSquadBattleState extends MiraSquadState {
                 }
             }
 
-            if (optimalTarget) {
-                let attackCell = optimalTarget.target.MoveToCell ?? optimalTarget.target.Cell;
+            if (optimalTargetData) {
+                let attackCell = optimalTargetData.target.MoveToCell ?? optimalTargetData.target.Cell;
                 
-                if (optimalTarget.heuristic < Infinity) {
-                    if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTarget.cell) > 0) {
-                        MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
+                if (optimalTargetData.heuristic < Infinity) {
+                    if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTargetData.cell) > 0) {
+                        MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTargetData.cell);
                         MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
-                        this.reservedCells.Set(optimalTarget.cell, true);
+                        this.reservedCells.Set(optimalTargetData.cell, true);
                     }
                     else {
                         MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
@@ -272,7 +272,7 @@ export class MiraSquadBattleState extends MiraSquadState {
         this.reservedCells = new MiraReservedCellData();
         
         for (let unit of this.squad.Units) {
-            let optimalTarget:any = null;
+            let optimalTargetData: any = null;
             this.cellHeuristics = new MiraCellHeuristics();
 
             let mainAttackRange = unit.Cfg.MainArmament.Range;
@@ -281,7 +281,7 @@ export class MiraSquadBattleState extends MiraSquadState {
             let mainVisionRange = unit.Cfg.Sight;
             let forestVisionRange = unit.Cfg.ForestVision;
 
-            let optimalEnemy:any = null;
+            let optimalEnemy: any = null;
             let shortestDistance = Infinity;
             
             for (let enemy of this.enemyUnits) {
@@ -315,8 +315,6 @@ export class MiraSquadBattleState extends MiraSquadState {
                 for (let row = optimalEnemy.Cell.Y; row < maxRow; row++) {
                     for (let col = optimalEnemy.Cell.X; col < maxCol; col++) {
                         let analyzedCell = {X: col, Y: row};
-                        let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
-    
                         let atttackRadius = 0;
     
                         if (MiraUtils.GetTileType(analyzedCell) == TileType.Forest) {
@@ -325,6 +323,8 @@ export class MiraSquadBattleState extends MiraSquadState {
                         else {
                             atttackRadius = Math.min(mainAttackRange, mainVisionRange);
                         }
+
+                        let analyzedCellDistance = MiraUtils.ChebyshevDistance(unit.Cell, analyzedCell);
     
                         MiraUtils.ForEachCell(analyzedCell, atttackRadius, (cell) => {
                             if (MiraUtils.ChebyshevDistance(unit.Cell, cell) > analyzedCellDistance) {
@@ -340,18 +340,18 @@ export class MiraSquadBattleState extends MiraSquadState {
     
                             let targetData = {cell: cell, heuristic: heuristic, target: optimalEnemy};
     
-                            if (optimalTarget == null) {
-                                optimalTarget = targetData;
+                            if (optimalTargetData == null) {
+                                optimalTargetData = targetData;
                             }
-                            else if (targetData.heuristic < optimalTarget.heuristic) {
+                            else if (targetData.heuristic < optimalTargetData.heuristic) {
                                 if (MiraUtils.IsCellReachable(cell, unit)) {
-                                    optimalTarget = targetData;
+                                    optimalTargetData = targetData;
                                 }
                             }
-                            else if (targetData.heuristic == optimalTarget.heuristic) {
-                                if (targetData.target.Health < optimalTarget.target.Health) {
+                            else if (targetData.heuristic == optimalTargetData.heuristic) {
+                                if (targetData.target.Health < optimalTargetData.target.Health) {
                                     if (MiraUtils.IsCellReachable(cell, unit)) {
-                                        optimalTarget = targetData;
+                                        optimalTargetData = targetData;
                                     }
                                 }
                             }
@@ -360,14 +360,14 @@ export class MiraSquadBattleState extends MiraSquadState {
                 }
             }
 
-            if (optimalTarget) {
-                let attackCell = optimalTarget.target.MoveToCell ?? optimalTarget.target.Cell;
+            if (optimalTargetData) {
+                let attackCell = optimalTargetData.target.MoveToCell ?? optimalTargetData.target.Cell;
                 
-                if (optimalTarget.heuristic < Infinity) {
-                    if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTarget.cell) > 0) {
-                        MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTarget.cell);
+                if (optimalTargetData.heuristic < Infinity) {
+                    if (MiraUtils.ChebyshevDistance(unit.Cell, optimalTargetData.cell) > 0) {
+                        MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, optimalTargetData.cell);
                         MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell, false);
-                        this.reservedCells.Set(optimalTarget.cell, true);
+                        this.reservedCells.Set(optimalTargetData.cell, true);
                     }
                     else {
                         MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
@@ -390,7 +390,7 @@ export class MiraSquadBattleState extends MiraSquadState {
     private calcCellHeuristic(targetCell: any, unit: any): number {
         let occupyingUnit = MiraUtils.GetUnit(targetCell);
         
-        if (occupyingUnit && occupyingUnit != unit) {
+        if (occupyingUnit && occupyingUnit.Id != unit.Id) {
             return Infinity;
         }
         
