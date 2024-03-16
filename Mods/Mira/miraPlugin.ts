@@ -25,11 +25,15 @@ export class MiraPlugin extends HordePluginBase {
 
         let resourceIncrease = createResourcesAmount(100, 100, 100, 2);
         
-        for (let controller of Mira.Controllers) {
-            let settlementResources = controller.Settlement.Resources;
-            settlementResources.AddResources(resourceIncrease);
+        for (let player of Players) {
+            let realPlayer = player.GetRealPlayer();
+
+            if (realPlayer.IsBot) {
+                let settlementResources = realPlayer.GetRealSettlement().Resources;
+                settlementResources.AddResources(resourceIncrease);
+            }
         }
 
-        Mira.Info("Mined resources for all controllers: " + resourceIncrease.ToString());
+        Mira.Debug("Mined resources for all Mira controllers: " + resourceIncrease.ToString());
     }
 }

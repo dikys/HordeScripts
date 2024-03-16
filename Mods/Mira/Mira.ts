@@ -17,7 +17,7 @@ export enum MiraLogLevel {
 */
 
 export class Mira {
-    static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
+    static LogLevel: MiraLogLevel = MiraLogLevel.Info;
     static CanRun = true;
     
     private static controllers: Array<MiraSettlementController> = [];
