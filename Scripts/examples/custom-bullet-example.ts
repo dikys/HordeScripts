@@ -131,7 +131,7 @@ export class Example_CustomBullet extends HordeExampleBase {
                 // Примечание: Для нанесения урона по единственной клетке можно использовать метод "bull.DamageCell(bool magicDamage)".
 
                 // Изменение тайлов земли при взрыве
-                var explodeCenterCell = positionToCell(bull.Position);
+                let explodeCenterCell = positionToCell(bull.Position);
                 if (bull.Scena.PointInScena(explodeCenterCell)){
                     bull.Scena.LandscapeMap.ChangeCellPayload(explodeCenterCell, TilePayload.Exploded);
                 }

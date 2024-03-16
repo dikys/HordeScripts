@@ -45,10 +45,12 @@ export function inspectToStr(object, maxDepth, result) {
  */
 export function inspect(object, maxDepth=undefined, msg: string|null=null) {
     msg = msg ?? 'Object introspection result:';
-    if (object.constructor) {
-        log.info(msg, '\nType:', typeof object, '-', object.constructor.name, '\n' + inspectToStr(object, maxDepth, undefined));
-    } else {
+    if (!object) {
+        log.info(msg, '\nType:', typeof object);
+    } else if (!object.constructor) {
         log.info(msg, '\nType:', typeof object, '\n' + inspectToStr(object, maxDepth, undefined));
+    } else {
+        log.info(msg, '\nType:', typeof object, '-', object.constructor.name, '\n' + inspectToStr(object, maxDepth, undefined));
     }
 }
 

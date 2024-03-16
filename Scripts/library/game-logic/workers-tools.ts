@@ -1,4 +1,4 @@
-import { ScriptUnitWorkerState } from "./horde-types";
+import { ScriptUnitWorkerGetOrder, ScriptUnitWorkerState } from "./horde-types";
 
 
 // ===================================================
@@ -62,4 +62,26 @@ export function setUnitStateWorker(plugin, unitCfg, unitState, workerFunc) {
     // Установка обработчика в конфиг
     const stateWorkers = ScriptUtils.GetValue(unitCfg, "StateWorkers");
     stateWorkers.Item.set(unitState, workerObject);
+}
+
+/**
+ * Установить обработчик получения приказа для юнита на основе метода из плагина.
+ */
+export function setUnitGetOrderWorker(plugin, unitCfg, workerFunc) {
+    const workerName = `${plugin.name}_GetOrderWorker`
+
+    // Обертка для метода из плагина, чтобы работал "this"
+    const workerWrapper = (u, cmdArgs) => workerFunc.call(plugin, u, cmdArgs);
+
+    // Прокидываем доступ к функции-обработчику в .Net через глобальную переменную
+    UnitWorkersRegistry.Register(workerName, workerWrapper);
+
+    // Объект-обработчик
+    const workerObject = host.newObj(ScriptUnitWorkerGetOrder);
+    
+    // Установка функции-обработчика
+    ScriptUtils.SetValue(workerObject, "FuncName", workerName);
+
+    // Установка обработчика в конфиг
+    unitCfg.GetOrderWorker = workerObject;
 }

@@ -46,6 +46,27 @@ export class Example_PlayerWorks extends HordeExampleBase {
             var msg = createGameMessageWithSound(`А вот цветной текст со звуком`, createHordeColor(255, 150, 150, 255));
             messages.AddMessage(msg);
             // Можно ещё разукрашивать отдельные слова, но это покажу потом
+
+            this.log.info('Происхождение игрока:');
+            this.log.info('- Источник ввода:');
+            if (realPlayer.IsReplay) {
+                this.log.info('  Реплей-игрок:', realPlayer);
+            } else if (realPlayer.IsLocal) {
+                this.log.info('  Локальный игрок:', realPlayer);
+            } else if (realPlayer.IsRemote) {
+                this.log.info('  Удаленный игрок:', realPlayer);
+            } else {
+                this.log.info('  Невозможно определить источник ввода игрока:', realPlayer);
+            }
+
+            this.log.info('- Источник управления:');
+            if (realPlayer.IsBot) {
+                this.log.info('  Игрок-бот:', realPlayer);
+            } else if (realPlayer.IsHuman) {
+                this.log.info('  Игрок-человек:', realPlayer);
+            } else {
+                this.log.info('  Невозможно определить источник управления игрока:', realPlayer);
+            }
         }
     }
 }

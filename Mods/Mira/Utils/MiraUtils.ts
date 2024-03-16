@@ -407,7 +407,7 @@ export class MiraUtils {
     }
 
     static IsCellReachable(cell: any, unit: any): boolean {
-        return unit.MapMind.CheckPathTo(createPoint(cell.X, cell.Y), false);
+        return unit.MapMind.CheckPathTo(createPoint(cell.X, cell.Y), false).Found;
     }
 
     static GetUnitTarget(unit: any): any {
