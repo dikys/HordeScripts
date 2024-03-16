@@ -1,1 +1,6 @@
-# Nothing yet
+tsconfig.json
+.gitignore
+/out/
+notes.txt
+*.bat
+shit.ts
