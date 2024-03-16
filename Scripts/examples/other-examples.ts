@@ -29,22 +29,6 @@ export class Example_GameWorks extends HordeExampleBase {
         } else {
             this.log.info('В данный момент невозможно определить статус реплея:', repl);
         }
-
-        // Инфо по игрокам
-        this.log.info('Происхождение игроков:');
-        for (let player of Players) {
-            let realPlayer = player.GetRealPlayer();
-            let pOrigin = realPlayer.PlayerOrigin.ToString();
-            if (pOrigin == "Replay") {
-                this.log.info('- Реплей-игрок:', realPlayer);
-            } else if (pOrigin == "Local") {
-                this.log.info('- Локальный игрок:', realPlayer);
-            } else if (pOrigin == "Remote") {
-                this.log.info('- Удаленный игрок:', realPlayer);
-            } else {
-                this.log.info('- Невозможно определить происхождение игрока:', realPlayer);
-            }
-        }
     }
 }
 
@@ -93,7 +77,7 @@ export class Example_ImportDotNetTypes extends HordeExampleBase {
         
         let List = xHost.type('System.Collections.Generic.List');
         let DayOfWeek = xHost.type('System.DayOfWeek');
-        let week = xHost.newObj(List(DayOfWeek), 7);
+        let week = host.newObj(List(DayOfWeek), 7);
         week.Add(DayOfWeek.Sunday);
         
         this.log.info("DayOfWeek:", week[0]);

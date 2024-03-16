@@ -33,15 +33,19 @@ export function allExamples() {
     addExample(new Example_SpawnOneBullet());
     addExample(new Example_SpawnBulletsRain());
     addExample(new Example_SpawnUnit());
+    addExample(new Example_ReplaceUnit());
     addExample(new Example_UnitWorks());
     addExample(new Example_UnitOrders());
+    addExample(new Example_UnitCheckPath());
     addExample(new Example_UnitEnumerateEvents());  // В этом примере выполняется перечисление событий произошедших с тестовым юнитом
     addExample(new Example_ScenaWorks());
     addExample(new Example_SettlementWorks());
     addExample(new Example_SettlementResources());
-    addExample(new Example_SettlementResources_2());
     addExample(new Example_SettlementUnitsInfo());
     addExample(new Example_SettlementTaxAndSalary());
+    addExample(new Example_SettlementPeopleIncome());
+    addExample(new Example_SettlementProductionFactor());
+    addExample(new Example_SettlementDiplomacy());
 
     // - Примеры перечисления юнитов в области
     addExample(new Example_GetUnitsInArea_Bruteforce());
@@ -90,7 +94,7 @@ import { Example_HookReceivedChatMessages, Example_HookSentChatMessages, Example
 import { Example_GameWorks, Example_ImportDotNetTypes, Example_Introspection } from "./examples/other-examples";
 import { Example_PlayerWorks } from "./examples/player-examples";
 import { Example_ScenaWorks } from "./examples/scena-examples";
-import { Example_SettlementWorks, Example_SettlementResources, Example_SettlementResources_2, Example_SettlementUnitsInfo } from "./examples/settlement-examples";
+import { Example_SettlementWorks, Example_SettlementResources, Example_SettlementUnitsInfo } from "./examples/settlement-examples";
 import { Example_UnitEnumerateEvents, Example_UnitOrders, Example_UnitWorks } from "./examples/unit-examples";
 import { Example_GetUnitsInArea_Bruteforce, Example_GetUnitsInArea_KdTree, Example_GetUnitsInArea_Squad } from "./examples/unit-get-in-area";
 import { Example_SpawnUnit } from "./examples/unit-spawn-example";
@@ -98,4 +102,9 @@ import { Example_CustomBullet } from "./examples/custom-bullet-example";
 import { Example_CustomUnit } from "./examples/custom-unit-example";
 import { Example_SettlementTaxAndSalary } from "examples/settlement-tax-and-salary";
 import { Example_CustomUnitCommand } from "examples/custom-unit-command";
+import { Example_SettlementPeopleIncome } from "examples/settlement-people-income";
+import { Example_SettlementDiplomacy } from "examples/settlement-diplomacy";
+import { Example_SettlementProductionFactor } from "examples/settlement-production-factor";
+import { Example_ReplaceUnit } from "examples/unit-replace";
+import { Example_UnitCheckPath } from "examples/unit-path-example";
 

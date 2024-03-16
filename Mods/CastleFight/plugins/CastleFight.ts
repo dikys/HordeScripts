@@ -99,6 +99,7 @@ import HordePluginBase from "plugins/base-plugin";
         };
     }
 
+    /** полигон из точек по часовой стрелке! */
     class Polygon {
         // набор точек задающие полигон
         points: Array<Point>;
@@ -109,6 +110,10 @@ import HordePluginBase from "plugins/base-plugin";
 
         /** флаг, что точка лежит внутри полигона */
         public IsPointInside(px:number, py:number) {
+            if (this.points.length < 3) {
+                return false;
+            }
+
             var inside = true;
             for (var pointNum = 0, prevPointNum = this.points.length - 1;
                 pointNum < this.points.length;
@@ -165,6 +170,9 @@ import HordePluginBase from "plugins/base-plugin";
 
         /** для каждого поселения хранит обработчик построенных юнитов */
         unitProducedCallbacks: Array<any>;
+
+        /** параметры */
+        castle_health_coeff: number;
         
         public constructor (
             )
@@ -178,6 +186,8 @@ import HordePluginBase from "plugins/base-plugin";
             this.systems_func          = new Array<any>();
             this.systems_name          = new Array<string>();
             this.systems_executionTime = new Array<number>();
+
+            this.castle_health_coeff = 1;
         }
 
         public Init(
@@ -227,7 +237,7 @@ import HordePluginBase from "plugins/base-plugin";
             // убираем ЗП
             ScriptUtils.SetValue(this.configs["castle"], "SalarySlots", 0);
             // здоровье
-            ScriptUtils.SetValue(this.configs["castle"], "MaxHealth", 200000);
+            ScriptUtils.SetValue(this.configs["castle"], "MaxHealth", 200000*this.castle_health_coeff);
             // броня
             ScriptUtils.SetValue(this.configs["castle"], "Shield", 200);
 
@@ -1150,23 +1160,36 @@ import HordePluginBase from "plugins/base-plugin";
             // Алтарь героя
             ////////////////////
             
-            this.configs["hero_altar"] = HordeContentApi.CloneConfig(HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Castle"));
-            // имя
-            ScriptUtils.SetValue(this.configs["hero_altar"], "Name", "Алтарь героя");
-            // описание
-            ScriptUtils.SetValue(this.configs["hero_altar"], "Description", "Место, где можно создать уникального героя и прокачать его");
-            // стоимость
-            ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "Gold",   300);
-            ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "Metal",  0);
-            ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "Lumber", 300);
-            ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "People", 2);
-            {
-                var entity : Entity = new Entity();
-                entity.components.set(COMPONENT_TYPE.UNIT_COMPONENT, new UnitComponent(null, "hero_altar"));
-                entity.components.set(COMPONENT_TYPE.HERO_ALTAR_COMPONENT,
-                    new HeroAltarComponent(["unit_1", "unit_2"]));
-                this.cfgUid_entity.set(this.configs["hero_altar"].Uid, entity);
-            }
+            // герой - лучник - unit_1
+            // this.configs["hero_unit_1"] = HordeContentApi.CloneConfig(world.configs["unit_1"]);
+            // {
+            //     var entity : Entity = new Entity();
+            //     entity.components.set(COMPONENT_TYPE.UNIT_COMPONENT, new UnitComponent(null, "hero_altar"));
+            //     entity.components.set(COMPONENT_TYPE.HERO_ALTAR_COMPONENT,
+            //         new HeroAltarComponent(["unit_1", "unit_2"]));
+            //     this.cfgUid_entity.set(this.configs["hero_altar"].Uid, entity);
+            // }
+
+            // // алтарь
+
+            // // на UnitConfig_Slavyane_HeroAltar есть ограничение в 1 штуку, поэтому клонировать нельзя
+            // this.configs["hero_altar"] = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_HeroAltar");
+            // // имя
+            // ScriptUtils.SetValue(this.configs["hero_altar"], "Name", "Алтарь героя");
+            // // описание
+            // ScriptUtils.SetValue(this.configs["hero_altar"], "Description", "Место, где можно создать уникального героя. Герой прокачивается за убийства. Героем можно управлять с помощью места сбора алтаря героя.");
+            // // стоимость
+            // ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "Gold",   300);
+            // ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "Metal",  0);
+            // ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "Lumber", 300);
+            // ScriptUtils.SetValue(this.configs["hero_altar"].CostResources, "People", 0);
+            // {
+            //     var entity : Entity = new Entity();
+            //     entity.components.set(COMPONENT_TYPE.UNIT_COMPONENT, new UnitComponent(null, "hero_altar"));
+            //     entity.components.set(COMPONENT_TYPE.HERO_ALTAR_COMPONENT,
+            //         new HeroAltarComponent(["unit_1", "unit_2"]));
+            //     this.cfgUid_entity.set(this.configs["hero_altar"].Uid, entity);
+            // }
 
             ////////////////////
             // юнит для сброса таймера спавна
@@ -1229,7 +1252,7 @@ import HordePluginBase from "plugins/base-plugin";
 
             for (var cfgId in this.configs) {
                 if (this.configs[cfgId].MainArmament) {
-                    log.info(this.configs[cfgId].Name, " friend fire off, bullet = ", this.configs[cfgId].MainArmament.BulletConfig.Uid);
+                    //log.info(this.configs[cfgId].Name, " friend fire off, bullet = ", this.configs[cfgId].MainArmament.BulletConfig.Uid);
                     var bulletCfg = HordeContentApi.GetBulletConfig(this.configs[cfgId].MainArmament.BulletConfig.Uid);
                     ScriptUtils.SetValue(bulletCfg, "CanDamageAllied", false);
                 }
@@ -1280,10 +1303,6 @@ import HordePluginBase from "plugins/base-plugin";
             ////////////////////
             
             for (var cfgId in this.configs) {
-                // запрещаем самоуничтожение
-                //if (this.configs[cfgId].AllowedCommands.ContainsKey(UnitCommand.DestroySelf)) {
-                //    this.configs[cfgId].AllowedCommands.Remove(UnitCommand.DestroySelf);
-                //}
                 // убираем захват
                 if (this.configs[cfgId].ProfessionParams.ContainsKey(UnitProfession.Capturable)) {
                     this.configs[cfgId].ProfessionParams.Remove(UnitProfession.Capturable);
@@ -1312,7 +1331,8 @@ import HordePluginBase from "plugins/base-plugin";
     
                     // проверка, что нужно добавить профессию найма и сбросить список
                     if (entity.components.has(COMPONENT_TYPE.SPAWN_BUILDING_COMPONENT) ||
-                        entity.components.has(COMPONENT_TYPE.UPGRADABLE_BUILDING_COMPONENT)) {
+                        entity.components.has(COMPONENT_TYPE.UPGRADABLE_BUILDING_COMPONENT) ||
+                        entity.components.has(COMPONENT_TYPE.HERO_ALTAR_COMPONENT)) {
                         
                         // даем профессию найма юнитов
                         CfgAddUnitProducer(this.configs[cfgId]);
@@ -1348,6 +1368,19 @@ import HordePluginBase from "plugins/base-plugin";
                                 ? "  иммунитет к " + (spawnUnitCfg.Flags.HasFlag(UnitFlags.FireResistant) ? "огню " : "") + 
                                     (spawnUnitCfg.Flags.HasFlag(UnitFlags.MagicResistant) ? "магии " : "") + "\n"
                                 : ""));
+                    }
+
+                    // проверка, что здание это алтарь героя
+                    if (entity.components.has(COMPONENT_TYPE.HERO_ALTAR_COMPONENT)) {
+                        var heroAltarComponent = entity.components.get(COMPONENT_TYPE.HERO_ALTAR_COMPONENT) as HeroAltarComponent;
+
+                        // добавляем героев на выбор
+                        var producerParams = this.configs[cfgId].GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
+                        var produceList    = producerParams.CanProduceList;
+
+                        for (var heroCfgId of heroAltarComponent.heroesCfgIdxs) {
+                            produceList.Add(this.configs[heroCfgId]);
+                        }
                     }
     
                     // проверка, что здание разово приносит доход
@@ -1437,7 +1470,7 @@ import HordePluginBase from "plugins/base-plugin";
                 var settlement    = realPlayer.GetRealSettlement();
                 var settlementId  = settlement.Uid;
     
-                if (isReplayMode() && realPlayer.PlayerOrigin.ToString() != "Replay") {
+                if (isReplayMode() && !realPlayer.IsReplay) {
                     continue;
                 }
     
@@ -1563,8 +1596,8 @@ import HordePluginBase from "plugins/base-plugin";
 
         public IsSettlementInGame (settlementId: number) {
             return this.settlements[settlementId] &&
-                this.settlements_castleUnit &&
-                !this.settlements_castleUnit.IsDead;
+                this.settlements_castleUnit[settlementId] &&
+                !this.settlements_castleUnit[settlementId].IsDead;
         }
 
         /** загеристрировать систему */
@@ -1623,6 +1656,13 @@ import HordePluginBase from "plugins/base-plugin";
                 var newEntity_unitComponent = newEntity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
                 newEntity_unitComponent.unit = unit;
             }
+
+            // если это здание, то запрещаем самоуничтожение
+            if (unit.Cfg.IsBuilding) {
+                var commandsMind       = unit.CommandsMind;
+                var disallowedCommands = ScriptUtils.GetValue(commandsMind, "DisallowedCommands");
+                disallowedCommands.Add(UnitCommand.DestroySelf, 1);
+            }
             
             // регистрируем сущность
             world.settlements_entities[settlementId].push(newEntity);
@@ -1680,6 +1720,8 @@ import HordePluginBase from "plugins/base-plugin";
         UPGRADABLE_BUILDING_COMPONENT,
         BUFFABLE_COMPONENT,
         BUFF_COMPONENT,
+
+        HERO_COMPONENT,
         HERO_ALTAR_COMPONENT,
 
         INCOME_INCREASE_COMPONENT,
@@ -2019,19 +2061,53 @@ import HordePluginBase from "plugins/base-plugin";
         }
     }
 
+    /** компонент героя */
+    class HeroComponent extends IComponent {
+        /** ссылка на алтарь */
+        heroAltarEntity: Entity;
+        /** количество убийств */
+        kills: number;
+        /** текущий уровень */
+        level: number;
+
+        public constructor (heroAltarEntity?: Entity) {
+            super(COMPONENT_TYPE.HERO_COMPONENT);
+
+            if (heroAltarEntity) {
+                this.heroAltarEntity = heroAltarEntity;
+            }
+        }
+
+        public Clone() : HeroComponent {
+            return new HeroComponent(this.heroAltarEntity);
+        }
+    };
+
     /** Компонент для алтаря героя */
     class HeroAltarComponent extends IComponent {
         /** список ид всех героев */
         heroesCfgIdxs: Array<string>;
+        /** номер выбранного героя */
+        selectedHeroNum: number;
+        /** ссылка на героя */
+        heroEntity: Entity;
 
-        public constructor (heroesCfgIdxs: Array<string>) {
+        public constructor (heroesCfgIdxs: Array<string>, selectedHeroNum?: number, heroEntity?: Entity) {
             super(COMPONENT_TYPE.HERO_ALTAR_COMPONENT);
 
             this.heroesCfgIdxs = heroesCfgIdxs;
+            if (selectedHeroNum) {
+                this.selectedHeroNum = selectedHeroNum;
+            } else {
+                this.selectedHeroNum = -1;
+            }
+            if (heroEntity) {
+                this.heroEntity = heroEntity;
+            }
         }
 
         public Clone() : HeroAltarComponent {
-            return new HeroAltarComponent(this.heroesCfgIdxs);
+            return new HeroAltarComponent(this.heroesCfgIdxs, this.selectedHeroNum, this.heroEntity);
         }
     };
 
@@ -2151,22 +2227,22 @@ import HordePluginBase from "plugins/base-plugin";
                 }
 
                 // убиваем всех юнитов
-                for (var i = 0; i < world.settlements_entities[other_settlementId].length; i++) {
-                    var entity = world.settlements_entities[other_settlementId][i];
-                    if (!entity.components.has(COMPONENT_TYPE.UNIT_COMPONENT)) {
-                        continue;
-                    }
-                    var unitComponent = entity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
+                // for (var i = 0; i < world.settlements_entities[other_settlementId].length; i++) {
+                //     var entity = world.settlements_entities[other_settlementId][i];
+                //     if (!entity.components.has(COMPONENT_TYPE.UNIT_COMPONENT)) {
+                //         continue;
+                //     }
+                //     var unitComponent = entity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
 
-                    if (!unitComponent.unit || unitComponent.unit.IsDead) {
-                        continue;
-                    }
+                //     if (!unitComponent.unit || unitComponent.unit.IsDead) {
+                //         continue;
+                //     }
 
-                    var battleMind = unitComponent.unit.BattleMind;
-                    battleMind.InstantDeath(null, UnitDeathType.Mele);
-                }
-                // удаляем замок
-                world.settlements_castleUnit[other_settlementId] = null;
+                //     var battleMind = unitComponent.unit.BattleMind;
+                //     battleMind.InstantDeath(null, UnitDeathType.Mele);
+                // }
+                // // удаляем замок
+                // world.settlements_castleUnit[other_settlementId] = null;
                 // присуждаем поражение
                 world.settlements[other_settlementId].Existence.ForceTotalDefeat();
             }
@@ -2235,6 +2311,28 @@ import HordePluginBase from "plugins/base-plugin";
 
     function WordClearSystem(gameTickNum: number) {
         for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
+            // проверяем уничтожение замка
+            if (world.settlements[settlementId] &&
+                world.settlements_castleUnit[settlementId] &&
+                world.settlements_castleUnit[settlementId].IsDead) {
+                // убиваем всех юнитов
+                for (var i = 0; i < world.settlements_entities[settlementId].length; i++) {
+                    var entity = world.settlements_entities[settlementId][i];
+                    if (!entity.components.has(COMPONENT_TYPE.UNIT_COMPONENT)) {
+                        continue;
+                    }
+                    var unitComponent = entity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
+
+                    if (!unitComponent.unit || unitComponent.unit.IsDead) {
+                        continue;
+                    }
+
+                    var battleMind = unitComponent.unit.BattleMind;
+                    battleMind.InstantDeath(null, UnitDeathType.Mele);
+                }
+                world.settlements_castleUnit[settlementId] = null;
+            }
+
             if (!world.IsSettlementInGame(settlementId)) {
                 continue;
             }
@@ -2727,8 +2825,7 @@ import HordePluginBase from "plugins/base-plugin";
                             var upgrade_entity = new Entity();
                             upgrade_entity.components.set(COMPONENT_TYPE.UPGRADABLE_BUILDING_EVENT,
                                 new UpgradableBuildingEvent(upgradableBuildingComponent.upgradeCfgIds[upgradeId],
-                                    new Point(unitComponent.unit.Cell.X, unitComponent.unit.Cell.Y)
-                                    ));
+                                    new Point(unitComponent.unit.Cell.X, unitComponent.unit.Cell.Y)));
                             world.settlements_entities[settlementId].push(upgrade_entity);
 
                             // отменяем постройку
@@ -2946,7 +3043,7 @@ import HordePluginBase from "plugins/base-plugin";
         }
     }
 
-    function UnitProducedSystem() {
+    function UnitProducedSystem(gameTickNum: number) {
         for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
             if (!world.IsSettlementInGame(settlementId)) {
                 continue;
@@ -2965,13 +3062,6 @@ import HordePluginBase from "plugins/base-plugin";
                     continue;
                 }
 
-                // если это здание, то запрещаем самоуничтожение
-                if (unitProducedEvent.producedUnit.Cfg.IsBuilding) {
-                    var commandsMind       = unitProducedEvent.producedUnit.CommandsMind;
-                    var disallowedCommands = ScriptUtils.GetValue(commandsMind, "DisallowedCommands");
-                    disallowedCommands.Add(UnitCommand.DestroySelf, 1);
-                }
-                
                 // проверяем, что у нового юнита есть сущность
                 if (world.cfgUid_entity.has(unitProducedEvent.producedUnit.Cfg.Uid)) {
                     world.RegisterUnitEntity(unitProducedEvent.producedUnit);
@@ -2979,6 +3069,72 @@ import HordePluginBase from "plugins/base-plugin";
 
                 // удаляем событие
                 entity.components.delete(COMPONENT_TYPE.UNIT_PRODUCED_EVENT);
+            }
+        }
+    }
+
+    function HeroAltarSystem(gameTickNum: number) {
+        for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
+            if (!world.IsSettlementInGame(settlementId)) {
+                continue;
+            }
+
+            for (var i = 0; i < world.settlements_entities[settlementId].length; i++) {
+                var entity = world.settlements_entities[settlementId][i] as Entity;
+                if (!entity.components.has(COMPONENT_TYPE.HERO_ALTAR_COMPONENT)) {
+                    continue;
+                }
+                var heroAltarComponent = entity.components.get(COMPONENT_TYPE.HERO_ALTAR_COMPONENT) as HeroAltarComponent;
+                var unitComponent      = entity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
+
+                // если герой не выбран
+                if (heroAltarComponent.selectedHeroNum < 0) {
+                    // проверяем, что алтарь что-то строит
+                    if (unitComponent.unit.OrdersMind.ActiveAct.GetType().Name == "ActProduce") {
+                        // выбираем героя
+                        var productUnitCfg = unitComponent.unit.OrdersMind.ActiveOrder.ProductUnitConfig;
+                        
+                        for (var heroNum = 0; heroNum < heroAltarComponent.heroesCfgIdxs.length; heroNum++) {
+                            if (world.configs[heroAltarComponent.heroesCfgIdxs[heroNum]].Uid == productUnitCfg.Uid) {
+                                heroAltarComponent.selectedHeroNum = heroNum;
+                                break;
+                            }
+                        }
+                        
+                        // отменяем постройку
+                        unitComponent.unit.OrdersMind.CancelOrders(true);
+
+                        // запрещаем постройку
+                        var commandsMind       = unitComponent.unit.CommandsMind;
+                        var disallowedCommands = ScriptUtils.GetValue(commandsMind, "DisallowedCommands");
+                        if (disallowedCommands.ContainsKey(UnitCommand.Produce)) disallowedCommands.Remove(UnitCommand.Produce);
+                        disallowedCommands.Add(UnitCommand.Produce, 1);
+                        //log.info(disallowedCommands.Item.get(UnitCommand.Produce));
+                        ScriptUtils.GetValue(unitComponent.unit, "Model").ProfessionsData.Remove(UnitProfession.UnitProducer)
+
+                        // регистрируем героя
+                        world.configs["hero_" + settlementId] = HordeContentApi.CloneConfig(world.configs[heroAltarComponent.heroesCfgIdxs[heroAltarComponent.selectedHeroNum]]);
+                        // делаем подходящий цвет
+                        log.info("делаем подходящий цвет героя");
+                        
+                        // точка спавна относительно юнита
+                        var emergePoint = world.configs[unitComponent.cfgId].BuildingConfig.EmergePoint;
+
+                        // регистрируем героя
+                        var heroEntity = new Entity();
+                        heroEntity.components.set(COMPONENT_TYPE.UNIT_COMPONENT, new UnitComponent(null, "hero_" + settlementId));
+                        heroEntity.components.set(COMPONENT_TYPE.HERO_COMPONENT, new HeroComponent(entity));
+                        heroEntity.components.set(COMPONENT_TYPE.REVIVE_COMPONENT,
+                            new ReviveComponent(new Point(unitComponent.unit.Cell.X + emergePoint.X, unitComponent.unit.Cell.Y + emergePoint.Y),
+                            50*60, gameTickNum));
+                        world.settlements_entities[settlementId].push(heroEntity);
+
+                        // делаем ссылку
+                        heroAltarComponent.heroEntity = heroEntity;
+                    }
+                } else {
+
+                }
             }
         }
     }
@@ -3011,7 +3167,7 @@ import HordePluginBase from "plugins/base-plugin";
                 var settlements_attack_paths: Array<Array<Array<Point>>>;
 
                 var scenaName = ActiveScena.GetRealScena().ScenaName;
-                if (scenaName == "Битва замков - лесная тропа (3х3)") {
+                if (scenaName == "Битва замков - лесная тропа с мостами (3х3)") {
                     settlementsCount                    = 6;
                     settlements_field                   = [
                         new Polygon([new Point(0, 0), new Point(45, 0), new Point(45, 63), new Point(0, 63)]),
@@ -3043,15 +3199,97 @@ import HordePluginBase from "plugins/base-plugin";
                         [[new Point(21, 30)]],
                         [[new Point(21, 30)]]
                     ];
+                } else if (scenaName == "Битва замков - лесная тропа (3х3)") {
+                    settlementsCount                    = 6;
+                    settlements_field                   = [
+                        new Polygon([new Point(0, 0), new Point(45, 0), new Point(45, 63), new Point(0, 63)]),
+                        new Polygon([new Point(0, 0), new Point(45, 0), new Point(45, 63), new Point(0, 63)]),
+                        new Polygon([new Point(0, 0), new Point(45, 0), new Point(45, 63), new Point(0, 63)]),
+                        new Polygon([new Point(162, 0), new Point(207, 0), new Point(207, 63), new Point(162, 63)]),
+                        new Polygon([new Point(162, 0), new Point(207, 0), new Point(207, 63), new Point(162, 63)]),
+                        new Polygon([new Point(162, 0), new Point(207, 0), new Point(207, 63), new Point(162, 63)])
+                    ];
+                    settlements_workers_revivePositions = [
+                        [new Point(0, 31)],
+                        [new Point(0, 31)],
+                        [new Point(0, 31)],
+                        [new Point(207, 31)],
+                        [new Point(207, 31)],
+                        [new Point(207, 31)]];
+                    settlements_castle_position         = [
+                        new Point(21, 30),
+                        new Point(21, 30),
+                        new Point(21, 30),
+                        new Point(182, 30),
+                        new Point(182, 30),
+                        new Point(182, 30)];
+                    settlements_attack_paths            = [
+                        [[new Point(182, 30)]],
+                        [[new Point(182, 30)]],
+                        [[new Point(182, 30)]],
+                        [[new Point(21, 30)]],
+                        [[new Point(21, 30)]],
+                        [[new Point(21, 30)]]
+                    ];
+                } else if (scenaName == "Битва замков - две тропы (3х3)") {
+                    settlementsCount                    = 6;
+                    settlements_field                   = [
+                        new Polygon([new Point(0, 0), new Point(48, 0), new Point(48, 95), new Point(0, 95)]),
+                        new Polygon([new Point(0, 0), new Point(48, 0), new Point(48, 95), new Point(0, 95)]),
+                        new Polygon([new Point(0, 0), new Point(48, 0), new Point(48, 95), new Point(0, 95)]),
+                        new Polygon([new Point(207, 0), new Point(255, 0), new Point(255, 95), new Point(207, 95)]),
+                        new Polygon([new Point(207, 0), new Point(255, 0), new Point(255, 95), new Point(207, 95)]),
+                        new Polygon([new Point(207, 0), new Point(255, 0), new Point(255, 95), new Point(207, 95)])
+                    ];
+                    settlements_workers_revivePositions = [
+                        [new Point(0, 47)],
+                        [new Point(0, 47)],
+                        [new Point(0, 47)],
+                        [new Point(255, 47)],
+                        [new Point(255, 47)],
+                        [new Point(255, 47)]];
+                    settlements_castle_position         = [
+                        new Point(44, 46),
+                        new Point(44, 46),
+                        new Point(44, 46),
+                        new Point(207, 46),
+                        new Point(207, 46),
+                        new Point(207, 46)];
+                    settlements_attack_paths            = [
+                        [
+                            [new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12), new Point(207, 46)],
+                            [new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83), new Point(207, 46)]
+                        ],
+                        [
+                            [new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12), new Point(207, 46)],
+                            [new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83), new Point(207, 46)]
+                        ],
+                        [
+                            [new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12), new Point(207, 46)],
+                            [new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83), new Point(207, 46)]
+                        ],
+                        [
+                            [new Point(0, 47), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
+                            [new Point(0, 47), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
+                        ],
+                        [
+                            [new Point(0, 47), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
+                            [new Point(0, 47), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
+                        ],
+                        [
+                            [new Point(0, 47), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
+                            [new Point(0, 47), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
+                        ]
+                    ];
                 } else if (scenaName == "Битва замков - царь горы (2x2x2)") {
                     settlementsCount                    = 6;
                     settlements_field                   = [
-                        new Polygon([new Point(68, 147), new Point(122, 148), new Point(135, 177), new Point(95, 187), new Point(55, 177)]),
-                        new Polygon([new Point(68, 147), new Point(122, 148), new Point(135, 177), new Point(95, 187), new Point(55, 177)]),
-                        new Polygon([new Point(63, 91), new Point(3, 89), new Point(16, 19), new Point(44, 19), new Point(64, 46)]),
-                        new Polygon([new Point(63, 91), new Point(3, 89), new Point(16, 19), new Point(44, 19), new Point(64, 46)]),
-                        new Polygon([new Point(126, 44), new Point(145, 19), new Point(174, 49), new Point(186, 89), new Point(154, 92)]),
-                        new Polygon([new Point(126, 44), new Point(145, 19), new Point(174, 49), new Point(186, 89), new Point(154, 92)])
+                        new Polygon([new Point(68, 147), new Point(122, 148), new Point(135, 177), new Point(95, 187), new Point(55, 177)].reverse()),
+                        new Polygon([new Point(68, 147), new Point(122, 148), new Point(135, 177), new Point(95, 187), new Point(55, 177)].reverse()),
+                        new Polygon([new Point(63, 91), new Point(3, 89), new Point(16, 19), new Point(44, 19), new Point(64, 46)].reverse()),
+                        new Polygon([new Point(63, 91), new Point(3, 89), new Point(16, 19), new Point(44, 19), new Point(64, 46)].reverse()),
+                        new Polygon([new Point(126, 44), new Point(145, 19), new Point(174, 49), new Point(186, 89), new Point(154, 92)].reverse()),
+                        new Polygon([new Point(126, 44), new Point(145, 19), new Point(174, 49), new Point(186, 89), new Point(154, 92)].reverse())
                     ];
                     settlements_workers_revivePositions = [
                         [new Point(95, 185)],
@@ -3114,6 +3352,83 @@ import HordePluginBase from "plugins/base-plugin";
                         [[new Point(97, 21),  new Point(173, 97), new Point(97, 173)],
                          [new Point(97, 173), new Point(173, 97), new Point(97, 21)]]
                     ];
+                } else if (scenaName == "Битва замков - союзник в тылу врага (2x2x2)") {
+                    settlementsCount                    = 6;
+                    settlements_field                   = [
+                        new Polygon([new Point(0, 135), new Point(63, 135), new Point(63, 72), new Point(0, 72)].reverse()),
+                        new Polygon([new Point(288, 135), new Point(351, 135), new Point(351, 72), new Point(288, 72)].reverse()),
+                        new Polygon([new Point(72, 63), new Point(135, 63), new Point(135, 0), new Point(72, 0)].reverse()),
+                        new Polygon([new Point(216, 207), new Point(279, 207), new Point(280, 144), new Point(216, 144)].reverse()),
+                        new Polygon([new Point(216, 63), new Point(279, 63), new Point(279, 0), new Point(216, 0)].reverse()),
+                        new Polygon([new Point(72, 207), new Point(135, 207), new Point(135, 144), new Point(72, 144)].reverse())
+                    ];
+                    settlements_workers_revivePositions = [
+                        [new Point(1, 103)],
+                        [new Point(350, 103)],
+                        [new Point(103, 1)],
+                        [new Point(247, 206)],
+                        [new Point(247, 1)],
+                        [new Point(103, 206)]];
+                    settlements_castle_position         = [
+                        new Point(30, 102),
+                        new Point(318, 102),
+                        new Point(102, 30),
+                        new Point(246, 174),
+                        new Point(246, 30),
+                        new Point(102, 174)];
+                    settlements_attack_paths            = [
+                        [[new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174)],
+                         [new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174)].reverse()],
+
+                        [[new Point(246, 30), new Point(102, 30), new Point(30, 102), new Point(102, 174), new Point(246, 174)],
+                         [new Point(246, 30), new Point(102, 30), new Point(30, 102), new Point(102, 174), new Point(246, 174)].reverse()],
+
+                        [[new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102)],
+                         [new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102)].reverse()],
+
+                        [[new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102)],
+                         [new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102)].reverse()],
+
+                        [[new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(102, 30)],
+                         [new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(102, 30)].reverse()],
+
+                        [[new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174)],
+                         [new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174)].reverse()]
+                    ];
+                } else if (scenaName == "Битва замков - царь горы (2-6)") {
+                    settlementsCount                    = 6;
+                    settlements_field                   = [
+                        new Polygon([new Point(156, 157), new Point(156, 162), new Point(140, 164), new Point(140, 155)]),
+                        new Polygon([new Point(159, 151), new Point(159, 156), new Point(153, 156), new Point(144, 145), new Point(155, 139)]),
+                        new Polygon([new Point(166, 156), new Point(160, 156), new Point(160, 151), new Point(164, 139), new Point(175, 145)]),
+                        new Polygon([new Point(163, 157), new Point(179, 155), new Point(179, 164), new Point(163, 162)]),
+                        new Polygon([new Point(160, 163), new Point(166, 163), new Point(175, 174), new Point(165, 180), new Point(160, 168)]),
+                        new Polygon([new Point(153, 163), new Point(159, 163), new Point(159, 168), new Point(155, 180), new Point(144, 173)])
+                    ];
+                    settlements_workers_revivePositions = [
+                        [new Point(74, 160)],
+                        [new Point(118, 88)],
+                        [new Point(203, 85)],
+                        [new Point(244, 160)],
+                        [new Point(201, 231)],
+                        [new Point(118, 229)]];
+                    settlements_castle_position         = [
+                        new Point(151, 158),
+                        new Point(154, 152),
+                        new Point(161, 152),
+                        new Point(164, 158),
+                        new Point(161, 164),
+                        new Point(154, 164)];
+                    settlements_attack_paths            = [
+                        [[new Point(159, 159)]],
+                        [[new Point(159, 159)]],
+                        [[new Point(159, 159)]],
+                        [[new Point(159, 159)]],
+                        [[new Point(159, 159)]],
+                        [[new Point(159, 159)]]
+                    ];
+
+                    world.castle_health_coeff = 5;
                 } else {
                     return;
                 }
@@ -3135,6 +3450,7 @@ import HordePluginBase from "plugins/base-plugin";
                 world.RegisterSystem(UpgradableBuildingSystem_Stage1, "UpgradableBuildingSystem_Stage1");
                 world.RegisterSystem(BuffSystem, "BuffSystem");
                 world.RegisterSystem(UpgradableBuildingSystem_Stage2, "UpgradableBuildingSystem_Stage2");
+                //world.RegisterSystem(HeroAltarSystem, "HeroAltarSystem");
                 world.RegisterSystem(UnitProducedSystem, "UnitProducedSystem");
     
                 world.gameInit = true;

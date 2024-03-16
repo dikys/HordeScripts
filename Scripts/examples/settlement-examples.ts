@@ -60,61 +60,12 @@ export class Example_SettlementWorks extends HordeExampleBase {
  * Работа с ресурсами поселения
  */
 export class Example_SettlementResources extends HordeExampleBase {
+    private settlements: Array<string>;
 
     public constructor() {
         super("Settlement resources");
-    }
-
-    public onFirstRun() {
-        this.logMessageOnRun();
-        
-        let realPlayer = Players["0"].GetRealPlayer();
-        let realSettlement = realPlayer.GetRealSettlement();
-
-        // Высокоуровневый объект для управления ресурсами поселения
-        let settlementResources = realSettlement.Resources;
-        this.log.info("Ресурсы:", settlementResources);
-        // let resoucesAmount = ScriptUtils.GetValue(settlementResources, "Resources");
-
-        // Прибавим ресурсы
-        let addRes = createResourcesAmount(100, 100, 100, 10);
-        settlementResources.AddResources(addRes);
-
-        // Отнимем ресуры
-        let subRes = createResourcesAmount(90, 300, 90, 9);
-        if(!settlementResources.TakeResourcesIfEnough(subRes)) {
-            this.log.info("Ресурсов недостаточно!");
-        }
-        this.log.info("Теперь ресурсов:", settlementResources);
-
-        // Ещё у settlementResources есть следующие методы:
-        //   TakeResources - забрать без проверки количества
-        //   SetResources - установить значение
-    }
-}
-
-
-/**
- * Ещё один пример работы с ресурсами послеения.
- * Устанавливает фиксированное количество ресурсов игрокам заданным в "settlements".
- */
-export class Example_SettlementResources_2 extends HordeExampleBase {
-    private settlements: Array<string>;
-
-    private gold: number;
-    private metal: number;
-    private lumber: number;
-    private people: number;
-
-    public constructor() {
-        super("Set resources");
 
         this.settlements = ["0"];
-
-        this.gold = 50;
-        this.metal = 50;
-        this.lumber = 10;
-        this.people = 0;
     }
 
     public onFirstRun() {
@@ -123,16 +74,39 @@ export class Example_SettlementResources_2 extends HordeExampleBase {
         let scenaSettlements = ActiveScena.GetRealScena().Settlements;
         for (let settlementId of this.settlements) {
             let settlement = scenaSettlements.GetByUid(settlementId);
-            let amount = createResourcesAmount(this.gold, this.metal, this.lumber, this.people);
-            settlement.Resources.SetResources(amount);
+            
+            // Высокоуровневый объект для управления ресурсами поселения
+            let settlementResources = settlement.Resources;
+            this.log.info("Ресурсы поселения", '"' + settlement.TownName + '":', settlementResources);
 
-            let msg = createGameMessageWithSound(`[${this.exampleDisplayName}] Установлены ресуры: ${amount}`);
-            settlement.Messages.AddMessage(msg);
+            let initialResources = settlementResources.GetCopy();
+            this.log.info("Текущее количество ресурсов:", initialResources);
+
+            let amount = createResourcesAmount(50, 50, 10, 0);
+            settlementResources.SetResources(amount);
+            this.log.info("Установлено:", amount);
+            this.log.info("- Текущее количество ресурсов:", settlementResources.GetCopy());
+
+            amount = createResourcesAmount(1, 2, 3, 5);
+            settlementResources.AddResources(amount);
+            this.log.info("Добавлено:", amount);
+            this.log.info("- Текущее количество ресурсов:", settlementResources.GetCopy());
+
+            amount = createResourcesAmount(3, 1, 2, 5);
+            settlementResources.TakeResources(amount);
+            this.log.info("Снято:", amount);
+            this.log.info("- Текущее количество ресурсов:", settlementResources.GetCopy());
+
+            amount = createResourcesAmount(300, 100, 200, 0);
+            this.log.info("Попытка снять:", amount);
+            if(!settlementResources.TakeResourcesIfEnough(amount)) {
+                this.log.info("- Ресурсов недостаточно!");
+            }
+            this.log.info("- Текущее количество ресурсов:", settlementResources.GetCopy());
+
+            settlementResources.SetResources(initialResources);
+            this.log.info("Установлено прежнее количество ресурсов:", settlementResources.GetCopy());
         }
-    }
-
-    public onEveryTick(gameTickNum: number) {
-        // Do nothing
     }
 }
 
