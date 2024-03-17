@@ -13,6 +13,8 @@ import { spawnUnit, spawnUnits } from "library/game-logic/unit-spawn";
 import { AssignOrderMode } from "library/mastermind/virtual-input";
 import HordePluginBase from "plugins/base-plugin";
 
+const PeopleIncomeLevelT = HCL.HordeClassLibrary.World.Settlements.Modules.Misc.PeopleIncomeLevel;
+
 // оборачиваем все в пространство имен
 //namespace CastleFight {
     /////////////////////////////////////////////////////////////////
@@ -168,6 +170,9 @@ import HordePluginBase from "plugins/base-plugin";
         /** для каждой системы хранит время выполнения */
         systems_executionTime: Array<number>;
 
+        /** реальная сцена */
+        realScena: any;
+
         /** для каждого поселения хранит обработчик построенных юнитов */
         unitProducedCallbacks: Array<any>;
 
@@ -196,6 +201,8 @@ import HordePluginBase from "plugins/base-plugin";
             settlements_workers_revivePositions: Array<Array<Point>>,
             settlements_castle_position: Array<Point>,
             settlements_attack_paths: Array<Array<Array<Point>>>) {
+            this.realScena                = ActiveScena.GetRealScena();
+
             this.settlementsCount         = settlementsCount;
             this.settlements              = new Array<any>(this.settlementsCount);
             this.settlements_entities     = new Array<Array<Entity>>(this.settlementsCount);
@@ -1223,10 +1230,11 @@ import HordePluginBase from "plugins/base-plugin";
             // число людей
             //ScriptUtils.SetValue(this.configs["worker"].CostResources, "People", 10000);
             ScriptUtils.SetValue(this.configs["worker"].CostResources, "People", 0);
-            // убираем добычу
+            // убираем профессию добычу
             if (this.configs["worker"].ProfessionParams.ContainsKey(UnitProfession.Harvester)) {
                 this.configs["worker"].ProfessionParams.Remove(UnitProfession.Harvester);
             }
+            
             // добавляем постройки
             {
                 var producerParams = this.configs["worker"].GetProfessionParams(UnitProducerProfessionParams, UnitProfession.UnitProducer);
@@ -1390,7 +1398,8 @@ import HordePluginBase from "plugins/base-plugin";
                         ScriptUtils.SetValue(this.configs[cfgId], "Description", this.configs[cfgId].Description + "Разово дает " +
                             (incomeComponent.metal > 0 ? incomeComponent.metal + " железа" : "") +
                             (incomeComponent.gold > 0 ? incomeComponent.gold + " золота" : "") +
-                            (incomeComponent.lumber > 0 ? incomeComponent.lumber + " дерева" : "") + "\n");
+                            (incomeComponent.lumber > 0 ? incomeComponent.lumber + " дерева" : "") +
+                            (incomeComponent.people > 0 ? incomeComponent.people + " людей" : "") + "\n");
                     }
     
                     // проверка, что здание увеличивает инком
@@ -1497,11 +1506,17 @@ import HordePluginBase from "plugins/base-plugin";
     
                         var entity = new Entity();
                         entity.components.set(COMPONENT_TYPE.SETTLEMENT_COMPONENT, new SettlementComponent(0, 100, 0, goldTime / goldPerPlayer * 100, 0));
-                        entity.components.set(COMPONENT_TYPE.INCOME_EVENT, new IncomeEvent(0, 0, 200));
+                        entity.components.set(COMPONENT_TYPE.INCOME_EVENT, new IncomeEvent(0, 0, 200, 1));
                         entity.components.set(COMPONENT_TYPE.INCOME_LIMITED_PERIODICAL_COMPONENT,
                             new IncomeLimitedPeriodicalComponent(0, 0, totalLumberPerPlayer, 0, 0, 100, totalLumberTime / totalLumberPerPlayer * 100, 0))
                         this.settlements_entities[settlementId].push(entity);
                     }
+
+                    // Отключить прирост населения
+                    let censusModel = ScriptUtils.GetValue(settlement.Census, "Model");
+                    censusModel.PeopleIncomeLevels.Clear();
+                    censusModel.PeopleIncomeLevels.Add(new PeopleIncomeLevelT(0, 0, -1));
+                    censusModel.LastPeopleIncomeLevel = 0;
                 }
 
                 // создаем сущность для рабочего для каждого игрока
@@ -1571,8 +1586,7 @@ import HordePluginBase from "plugins/base-plugin";
         }
     
         private _PlaceCastle() {
-            var realScena       = ActiveScena.GetRealScena();
-            var unitsMap        = realScena.UnitsMap;
+            var unitsMap        = this.realScena.UnitsMap;
 
             for (var settlementId = 0; settlementId < this.settlementsCount; settlementId++) {
                 // проверяем, что поселение в игре
@@ -1586,7 +1600,7 @@ import HordePluginBase from "plugins/base-plugin";
                 } else {
                     this.settlements_castleUnit[settlementId] = spawnUnit(
                         this.settlements[settlementId],
-                        world.configs["castle"],
+                        this.configs["castle"],
                         createPoint(this.settlements_castle_position[settlementId].X, this.settlements_castle_position[settlementId].Y),
                         UnitDirection.Down
                     );
@@ -1823,17 +1837,20 @@ import HordePluginBase from "plugins/base-plugin";
         gold: number;
         /** доход дерева */
         lumber: number;
+        /** доход населения */
+        people: number;
 
-        public constructor(metal:number, gold:number, lumber:number) {
+        public constructor(metal:number, gold:number, lumber:number, people: number) {
             super(COMPONENT_TYPE.INCOME_EVENT);
 
-            this.metal = metal;
-            this.gold = gold;
+            this.metal  = metal;
+            this.gold   = gold;
             this.lumber = lumber;
+            this.people = people;
         }
 
         public Clone(): IncomeEvent {
-            return new IncomeEvent(this.metal, this.gold, this.lumber);
+            return new IncomeEvent(this.metal, this.gold, this.lumber, this.people);
         }
     }
 
@@ -2389,6 +2406,7 @@ import HordePluginBase from "plugins/base-plugin";
             var incomeGold     : number   = 0;
             var incomeLumber   : number   = 0;
             var incomeMetal    : number   = 0;
+            var incomePeople   : number   = 0;
             // добыто из ограниченного источника
             var minedGold      : number   = 0;
             var minedLumber    : number   = 0;
@@ -2442,10 +2460,11 @@ import HordePluginBase from "plugins/base-plugin";
             for (var i = 0; i < world.settlements_entities[settlementId].length; i++) {
                 var entity = world.settlements_entities[settlementId][i];
                 if (entity.components.has(COMPONENT_TYPE.INCOME_EVENT)) {
-                    var income_event = entity.components.get(COMPONENT_TYPE.INCOME_EVENT) as IncomeIncreaseEvent;
+                    var income_event = entity.components.get(COMPONENT_TYPE.INCOME_EVENT) as IncomeEvent;
                     incomeGold   += income_event.gold;
                     incomeLumber += income_event.lumber;
                     incomeMetal  += income_event.metal;
+                    incomePeople += income_event.people;
 
                     entity.components.delete(COMPONENT_TYPE.INCOME_EVENT);
                 }
@@ -2519,9 +2538,15 @@ import HordePluginBase from "plugins/base-plugin";
                     createHordeColor(255, 170, 107, 0));
                 world.settlements[settlementId].Messages.AddMessage(msg);
             }
+            if (incomePeople > 0) {
+                emptyIncome = false;
+                var msg = createGameMessageWithNoSound("Выращено людей: " + incomePeople,
+                    createHordeColor(255, 204, 204, 0));
+                world.settlements[settlementId].Messages.AddMessage(msg);
+            }
 
             if (!emptyIncome) {
-                world.settlements[settlementId].Resources.AddResources(createResourcesAmount(incomeGold + minedGold, incomeMetal + minedMetal, incomeLumber + minedLumber, 0));
+                world.settlements[settlementId].Resources.AddResources(createResourcesAmount(incomeGold + minedGold, incomeMetal + minedMetal, incomeLumber + minedLumber, incomePeople));
             }
 
             // если у поселения есть люди отбираем их
@@ -2534,6 +2559,8 @@ import HordePluginBase from "plugins/base-plugin";
     function AttackingAlongPathSystem(gameTickNum: number) {
         /** радиус реагирования на текущую точку пути атаки, если <= то отправляем в следующую точку */
         const pathNodeReactionRadius = 5;
+
+        var unitsMap = world.realScena.UnitsMap;
 
         /** позиции вражеских юнитов на нашей базе */
         var settlements_enemyPositionOnBase = new Array<Array<Point>>(world.settlementsCount);
@@ -2625,6 +2652,15 @@ import HordePluginBase from "plugins/base-plugin";
                     attackingAlongPathComponent.attackPath[attackingAlongPathComponent.currentPathPointNum].X,
                     attackingAlongPathComponent.attackPath[attackingAlongPathComponent.currentPathPointNum].Y) <= pathNodeReactionRadius) {
                     
+                    // проверка, что в ячейке нету вражеского замка
+                    var unitInPoint = unitsMap.GetUpperUnit(attackingAlongPathComponent.attackPath[attackingAlongPathComponent.currentPathPointNum].X, attackingAlongPathComponent.attackPath[attackingAlongPathComponent.currentPathPointNum].Y);
+                    if (unitInPoint &&
+                        unitInPoint.Cfg.Uid == world.configs["castle"].Uid &&
+                        unitInPoint.Owner.Uid < world.settlementsCount &&
+                        world.settlements_settlements_warFlag[settlementId][unitInPoint.Owner.Uid]) {
+                        continue;
+                    }
+
                     attackingAlongPathComponent.currentPathPointNum++;
 
                     // проверяем, что точка последняя
@@ -2883,7 +2919,7 @@ import HordePluginBase from "plugins/base-plugin";
                     upgradedUnit = world.settlements[settlementId].Units.SpawnUnit(spawnParams);
                 }
                 world.RegisterUnitEntity(upgradedUnit);
-                spawnDecoration(ActiveScena.GetRealScena(), HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_BigDust"), upgradedUnit.Position);
+                spawnDecoration(world.realScena, HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_BigDust"), upgradedUnit.Position);
 
                 // удаляем компонент
                 entity.components.delete(COMPONENT_TYPE.UPGRADABLE_BUILDING_EVENT);
@@ -2950,7 +2986,7 @@ import HordePluginBase from "plugins/base-plugin";
                         // запрещаем команды
                         DisallowedCommandsForUnit(spawnedUnit);
                         // создаем эффект появления
-                        spawnDecoration(ActiveScena.GetRealScena(), HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), spawnedUnit.Position);
+                        spawnDecoration(world.realScena, HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), spawnedUnit.Position);
                     }
                 }
                 entity.components.delete(COMPONENT_TYPE.BUFF_EVENT);
@@ -3269,16 +3305,16 @@ import HordePluginBase from "plugins/base-plugin";
                             [new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83), new Point(207, 46)]
                         ],
                         [
-                            [new Point(0, 47), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
-                            [new Point(0, 47), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
+                            [new Point(44, 46), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
+                            [new Point(44, 46), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
                         ],
                         [
-                            [new Point(0, 47), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
-                            [new Point(0, 47), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
+                            [new Point(44, 46), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
+                            [new Point(44, 46), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
                         ],
                         [
-                            [new Point(0, 47), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
-                            [new Point(0, 47), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
+                            [new Point(44, 46), new Point(60, 12), new Point(76, 27), new Point(99, 27), new Point(115, 12), new Point(140, 12), new Point(155, 27), new Point(180, 27), new Point(195, 12)].reverse(),
+                            [new Point(44, 46), new Point(60, 83), new Point(76, 68), new Point(99, 68), new Point(115, 83), new Point(140, 83), new Point(155, 68), new Point(180, 68), new Point(195, 83)].reverse()
                         ]
                     ];
                 } else if (scenaName == "Битва замков - царь горы (2x2x2)") {
@@ -3377,23 +3413,23 @@ import HordePluginBase from "plugins/base-plugin";
                         new Point(246, 30),
                         new Point(102, 174)];
                     settlements_attack_paths            = [
-                        [[new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174)],
-                         [new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174)].reverse()],
+                        [[new Point(32, 32), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174)],
+                         [new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(32, 175)].reverse()],
 
-                        [[new Point(246, 30), new Point(102, 30), new Point(30, 102), new Point(102, 174), new Point(246, 174)],
-                         [new Point(246, 30), new Point(102, 30), new Point(30, 102), new Point(102, 174), new Point(246, 174)].reverse()],
+                        [[new Point(319, 32), new Point(246, 30), new Point(102, 30), new Point(30, 102), new Point(102, 174), new Point(246, 174)],
+                         [new Point(246, 30), new Point(102, 30), new Point(30, 102), new Point(102, 174), new Point(246, 174), new Point(319, 175)].reverse()],
 
-                        [[new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102)],
-                         [new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102)].reverse()],
+                        [[new Point(175, 32), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102)],
+                         [new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(32, 32)].reverse()],
 
-                        [[new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102)],
-                         [new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102)].reverse()],
+                        [[new Point(176, 175), new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102)],
+                         [new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(319, 175)].reverse()],
 
-                        [[new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(102, 30)],
-                         [new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(102, 30)].reverse()],
+                        [[new Point(319, 32), new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(102, 30)],
+                         [new Point(318, 102), new Point(246, 174), new Point(102, 174), new Point(30, 102), new Point(102, 30), new Point(176, 32)].reverse()],
 
-                        [[new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174)],
-                         [new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174)].reverse()]
+                        [[new Point(32, 175), new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174)],
+                         [new Point(30, 102), new Point(102, 30), new Point(246, 30), new Point(318, 102), new Point(246, 174), new Point(175, 175)].reverse()]
                     ];
                 } else if (scenaName == "Битва замков - царь горы (2-6)") {
                     settlementsCount                    = 6;
@@ -3420,12 +3456,12 @@ import HordePluginBase from "plugins/base-plugin";
                         new Point(161, 164),
                         new Point(154, 164)];
                     settlements_attack_paths            = [
-                        [[new Point(159, 159)]],
-                        [[new Point(159, 159)]],
-                        [[new Point(159, 159)]],
-                        [[new Point(159, 159)]],
-                        [[new Point(159, 159)]],
-                        [[new Point(159, 159)]]
+                        [[new Point(162, 167)], [new Point(162, 162)]],
+                        [[new Point(156, 163)], [new Point(163, 156)]],
+                        [[new Point(156, 157)], [new Point(163, 162)]],
+                        [[new Point(157, 157)], [new Point(156, 162)]],
+                        [[new Point(156, 162)], [new Point(162, 156)]],
+                        [[new Point(156, 157)], [new Point(163, 162)]]
                     ];
 
                     world.castle_health_coeff = 5;
