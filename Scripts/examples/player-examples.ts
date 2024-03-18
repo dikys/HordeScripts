@@ -58,6 +58,7 @@ export class Example_PlayerWorks extends HordeExampleBase {
             } else {
                 this.log.info('  Невозможно определить источник ввода игрока:', realPlayer);
             }
+            // Дополнительно ещё есть "realPlayer.IsNotLocal" - означает либо реплей-игрока, либо удаленного игрока
 
             this.log.info('- Источник управления:');
             if (realPlayer.IsBot) {
