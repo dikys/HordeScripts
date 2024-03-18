@@ -25,7 +25,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
     }
     
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 !== 0) {
+        if (tickNumber % 10 != 0) {
             return;
         }
 

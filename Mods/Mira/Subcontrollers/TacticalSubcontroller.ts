@@ -48,45 +48,43 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 !== 0) {
-            return;
-        }
+        if (tickNumber % 10 == 0) {
+            this.updateSquads();
 
-        this.updateSquads();
+            if (this.currentTarget) { //we are attacking
+                if (this.currentTarget.IsAlive) {
+                    let pullbackLocation = this.getPullbackLocation();
 
-        if (this.currentTarget) { //we are attacking
-            if (this.currentTarget.IsAlive) {
-                let pullbackLocation = this.getPullbackLocation();
+                    for (var squad of this.offensiveSquads) {
+                        if (pullbackLocation) {
+                            if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
+                                if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, pullbackLocation.Center)) {
+                                    let squadLocation = squad.GetLocation();
 
-                for (var squad of this.offensiveSquads) {
-                    if (pullbackLocation) {
-                        if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                            if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, pullbackLocation.Center)) {
-                                let squadLocation = squad.GetLocation();
-
-                                if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation.Center) > pullbackLocation.Radius) {
-                                    squad.Move(pullbackLocation.Center, pullbackLocation.Radius);
+                                    if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation.Center) > pullbackLocation.Radius) {
+                                        squad.Move(pullbackLocation.Center, pullbackLocation.Radius);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (squad.IsIdle() && squad.CombativityIndex >= 1) {
-                        squad.Attack(this.currentTarget.Cell);
+                        if (squad.IsIdle() && squad.CombativityIndex >= 1) {
+                            squad.Attack(this.currentTarget.Cell);
+                        }
                     }
                 }
             }
-        }
-        else if (this.parentController.HostileAttackingSquads.length > 0) { //we are under attack
-            this.updateDefenseTargets();
-        }
-        else { //building up or something
-            let retreatLocation = this.getRetreatLocation();
+            else if (this.parentController.HostileAttackingSquads.length > 0) { //we are under attack
+                this.updateDefenseTargets();
+            }
+            else { //building up or something
+                let retreatLocation = this.getRetreatLocation();
 
-            if (retreatLocation) {
-                for (let squad of this.AllSquads) {
-                    if (squad.IsIdle()) {
-                        squad.Move(retreatLocation.Center, retreatLocation.Radius);
+                if (retreatLocation) {
+                    for (let squad of this.AllSquads) {
+                        if (squad.IsIdle()) {
+                            squad.Move(retreatLocation.Center, retreatLocation.Radius);
+                        }
                     }
                 }
             }

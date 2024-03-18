@@ -92,10 +92,6 @@ export class MiraSquadBattleState extends MiraSquadState {
     OnExit(): void {}
     
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 != 0) {
-            return;
-        }
-
         if (this.squad.MovementTargetCell != null) {
             this.squad.SetState(new MiraSquadMoveState(this.squad));
             return;
