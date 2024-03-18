@@ -30,9 +30,9 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     public get OffenseCombativityIndex(): number {
-        var combativityIndex = 0;
+        let combativityIndex = 0;
 
-        for (var squad of this.offensiveSquads) {
+        for (let squad of this.offensiveSquads) {
             combativityIndex += squad.CombativityIndex;
         }
 
@@ -55,16 +55,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
                 if (this.currentTarget.IsAlive) {
                     let pullbackLocation = this.getPullbackLocation();
 
-                    for (var squad of this.offensiveSquads) {
+                    for (let squad of this.offensiveSquads) {
                         if (pullbackLocation) {
                             if (squad.CombativityIndex < this.SQUAD_COMBATIVITY_THRESHOLD) {
-                                if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, pullbackLocation.Center)) {
-                                    let squadLocation = squad.GetLocation();
-
-                                    if (MiraUtils.ChebyshevDistance(squadLocation.Point, pullbackLocation.Center) > pullbackLocation.Radius) {
-                                        squad.Move(pullbackLocation.Center, pullbackLocation.Radius);
-                                    }
-                                }
+                                this.sendSquadToLocation(squad, pullbackLocation);
                             }
                         }
 
@@ -83,7 +77,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
                 if (retreatLocation) {
                     for (let squad of this.AllSquads) {
                         if (squad.IsIdle()) {
-                            squad.Move(retreatLocation.Center, retreatLocation.Radius);
+                            this.sendSquadToLocation(squad, retreatLocation);
                         }
                     }
                 }
@@ -131,10 +125,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
 
     Retreat(): void {
         this.parentController.Log(MiraLogLevel.Debug, `Retreating`);
-        var retreatLocation = this.getRetreatLocation();
+        let retreatLocation = this.getRetreatLocation();
 
         if (retreatLocation) {
-            for (var squad of this.offensiveSquads) {
+            for (let squad of this.offensiveSquads) {
                 squad.Move(retreatLocation.Center, retreatLocation.Radius);
             }
         }
@@ -216,6 +210,16 @@ export class TacticalSubcontroller extends MiraSubcontroller {
         }
 
         return weakestSquad;
+    }
+
+    private sendSquadToLocation(squad: MiraControllableSquad, location: SettlementLocation): void {
+        if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, location.Center)) {
+            let squadLocation = squad.GetLocation();
+
+            if (MiraUtils.ChebyshevDistance(squadLocation.Point, location.Center) > location.Radius) {
+                squad.Move(location.Center, location.Radius);
+            }
+        }
     }
 
     private findWeakestReinforceableSquad(
@@ -359,7 +363,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     private issueAttackCommand(): void {
         this.parentController.Log(MiraLogLevel.Debug, `Issuing attack command`);
 
-        for (var squad of this.offensiveSquads) {
+        for (let squad of this.offensiveSquads) {
             this.parentController.Log(MiraLogLevel.Debug, `Squad attacking`);
             squad.Attack(this.currentTarget.Cell);
         }
