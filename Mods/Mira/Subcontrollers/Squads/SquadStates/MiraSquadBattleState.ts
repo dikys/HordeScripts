@@ -97,18 +97,20 @@ export class MiraSquadBattleState extends MiraSquadState {
             return;
         }
 
-        this.updateThreats();
+        if (tickNumber % 50 == 0) {
+            this.updateThreats();
 
-        if (this.enemyUnits.length == 0) {
-            this.squad.Attack(this.squad.CurrentTargetCell);
-            this.squad.SetState(new MiraSquadAttackState(this.squad));
-            return;
+            if (this.enemyUnits.length == 0) {
+                this.squad.Attack(this.squad.CurrentTargetCell);
+                this.squad.SetState(new MiraSquadAttackState(this.squad));
+                return;
+            }
+
+            // Temporarily (?) disable proper micro because of it being slow as hell
+            //this.distributeTargets();
+            //this.distributeTargets_lite();
+            this.distributeTargets_liter();
         }
-
-        // Temporarily (?) disable proper micro because of it being slow as hell
-        //this.distributeTargets();
-        this.distributeTargets_lite();
-        //this.distributeTargets_liter();
     }
 
     private updateThreats(): void {
