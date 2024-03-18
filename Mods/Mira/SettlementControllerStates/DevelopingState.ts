@@ -31,7 +31,7 @@ export class DevelopingState extends ProductionState {
             let selectedCfgIds: Array<string>;
 
             if (absentProducers.length > 0 && absentTech.length > 0) {
-                let pick = MiraUtils.Random(100, 1);
+                let pick = MiraUtils.Random(this.settlementController.MasterMind, 100, 1);
                 
                 if (pick > this.PRODUCER_PRODUCTION_PROBABILITY) {
                     selectedCfgIds = absentTech;
@@ -47,7 +47,7 @@ export class DevelopingState extends ProductionState {
                 selectedCfgIds = absentTech;
             }
             
-            let index = MiraUtils.Random(selectedCfgIds.length - 1);
+            let index = MiraUtils.Random(this.settlementController.MasterMind, selectedCfgIds.length - 1);
             MiraUtils.IncrementMapItem(targetCompostion, selectedCfgIds[index]);
         }
 
@@ -59,7 +59,7 @@ export class DevelopingState extends ProductionState {
                 let producingCfgIds = this.settlementController.ProductionController.GetProducingCfgIds(key);
 
                 if (producingCfgIds.length > 0) {
-                    let index = MiraUtils.Random(producingCfgIds.length - 1);
+                    let index = MiraUtils.Random(this.settlementController.MasterMind, producingCfgIds.length - 1);
                     let producerCfgId = producingCfgIds[index];
 
                     if (!targetCompostion.has(producerCfgId)) {

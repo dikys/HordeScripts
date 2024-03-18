@@ -112,6 +112,7 @@ export class MiraSquadBattleState extends MiraSquadState {
         // Temporarily (?) disable proper micro because of it being slow as hell
         //this.distributeTargets();
         this.distributeTargets_lite();
+        //this.distributeTargets_liter();
     }
 
     private updateThreats(): void {
@@ -384,6 +385,14 @@ export class MiraSquadBattleState extends MiraSquadState {
             else {
                 MiraUtils.IssueMoveCommand(unit, this.squad.Controller.Player, unit.Cell);
             }
+        }
+    }
+
+    private distributeTargets_liter(): void {
+        let attackCell = MiraUtils.FindFreeCell(this.enemySquads[0].GetLocation().Point);
+
+        for (let unit of this.squad.Units) {
+            MiraUtils.IssueAttackCommand(unit, this.squad.Controller.Player, attackCell);
         }
     }
 

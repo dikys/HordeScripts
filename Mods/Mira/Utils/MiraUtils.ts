@@ -343,8 +343,8 @@ export class MiraUtils {
         VirtualInput.pointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
     }
 
-    static Random(max: number, min: number = 0) {
-        let rnd = DotnetHolder.RealScena.Context.Randomizer;
+    static Random(masterMind: any, max: number, min: number = 0) {
+        let rnd = masterMind.Randomizer;
         return rnd.RandomNumber(min, max);
     }
 

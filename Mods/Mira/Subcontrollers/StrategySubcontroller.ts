@@ -124,7 +124,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
         let undefeatedEnemies: any[] = this.EnemySettlements.filter((value) => {return !value.Existence.IsTotalDefeat});
         
         if (undefeatedEnemies.length > 0) {
-            let index = MiraUtils.Random(undefeatedEnemies.length - 1);
+            let index = MiraUtils.Random(this.parentController.MasterMind, undefeatedEnemies.length - 1);
             this.currentEnemy = undefeatedEnemies[index];
         }
 
@@ -221,7 +221,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
         let currentStrength = 0;
 
         while (currentStrength < requiredStrength) {
-            let index = MiraUtils.Random(allowedConfigs.length - 1);
+            let index = MiraUtils.Random(this.parentController.MasterMind, allowedConfigs.length - 1);
             let configId = allowedConfigs[index];
 
             MiraUtils.IncrementMapItem(unitComposition, configId);
