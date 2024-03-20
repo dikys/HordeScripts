@@ -152,25 +152,30 @@ export class MiraSettlementController {
     }
 
     GetSettlementLocation(): SettlementLocation | null {
-        let buildings: Array<any> = [];
-
-        let units = enumerate(this.Settlement.Units);
-        let unit;
+        const BUILDING_SEARCH_RADIUS = 5;
         
-        while ((unit = eNext(units)) !== undefined) {
-            if (unit.Cfg.BuildingConfig != null) {
-                buildings.push(unit);
-            }
-        }
+        let professionCenter = this.Settlement.Units.Professions;
+        let centralProductionBuilding = professionCenter.ProducingBuildings.First();
 
-        if (buildings.length == 0) {
+        if (centralProductionBuilding) {
+            let squads = MiraUtils.GetSettlementsSquadsFromUnits(
+                [centralProductionBuilding], 
+                [this.Settlement], 
+                BUILDING_SEARCH_RADIUS,
+                (unit) => {return unit.Cfg.BuildingConfig != null}
+            );
+            
+            if (!squads || squads.length == 0) {
+                return null;
+            }
+
+            let location = squads[0].GetLocation()
+            let radius = Math.round((location.Spread / 2)) + 10;
+
+            return new SettlementLocation(location.Point, radius);
+        }
+        else {
             return null;
         }
-
-        let squad = new MiraSquad(buildings);
-        let location = squad.GetLocation();
-        let radius = Math.round((location.Spread / 2)) + 10;
-        
-        return new SettlementLocation(location.Point, radius);
     }
 }
