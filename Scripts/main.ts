@@ -2,6 +2,7 @@ import "/library/dotnet/dotnet-utils.ts"
 import { log } from "library/common/logging";
 import { activePlugins } from "active-plugins";
 import { registerExamples } from "examples-runner";
+import { BattleController } from "library/game-logic/horde-types";
 
 
 /**
@@ -23,6 +24,7 @@ export function onInitialization() {
     // Setup globals
     DataStorage.reloadCounter = ++DataStorage.reloadCounter || 1;
     DataStorage.scriptWorkTicks = 0;
+    DataStorage.gameTickNum = BattleController.GameTimer.GameFramesCounter;
 
     // Установка дебаг-параметров
     ScriptMachineDebugApi.SetHotReloadOnFileChanging(false);  // автоматическая перезагрузка скрипта при изменении файла
