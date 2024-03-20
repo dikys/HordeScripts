@@ -111,8 +111,8 @@ export class MiraSquadBattleState extends MiraSquadState {
 
         // Temporarily (?) disable proper micro because of it being slow as hell
         //this.distributeTargets();
-        this.distributeTargets_lite();
-        //this.distributeTargets_liter();
+        // this.distributeTargets_lite();
+        this.distributeTargets_liter();
     }
 
     private updateThreats(): void {
