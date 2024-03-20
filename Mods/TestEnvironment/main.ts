@@ -1,10 +1,18 @@
 import { activePlugins } from "active-plugins";
-import { TestEnvironmentPlugin } from "./test-environment-plugin";
 
 /**
+ * Место для регистрации отладочных плагинов
+ * 
  * Вызывается до вызова "onFirstRun()" при первом запуске скрипт-машины, а так же при hot-reload
  */
 export function onInitialization() {
-    // Место для регистрации отладочных плагинов
+    // Общие тесты
     activePlugins.register(new TestEnvironmentPlugin());
+
+    // // Тест Mastermind
+    activePlugins.register(new TestMastermindPlugin());
 }
+
+// Плагины
+import { TestEnvironmentPlugin } from "./test-environment-plugin";
+import { TestMastermindPlugin } from "./test-mastermind-plugin";

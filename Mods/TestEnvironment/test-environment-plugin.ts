@@ -5,12 +5,14 @@ import HordePluginBase from "plugins/base-plugin";
  * Плагин для тестов и отладочных действий.
  */
 export class TestEnvironmentPlugin extends HordePluginBase {
+    startTick: number;
 
     /**
      * Конструктор.
      */
     public constructor() {
         super("Test environment");
+        this.startTick = DataStorage.gameTickNum;
     }
 
     /**
