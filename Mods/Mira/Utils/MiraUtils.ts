@@ -19,6 +19,8 @@ export class MiraSettlementData {
     }
 }
 
+const DEFAULT_UNIT_SEARCH_RADIUS = 3;
+
 class DotnetHolder {
     private static realScena;
     
@@ -78,7 +80,12 @@ let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
 export type UnitComposition = Map<string, number>;
 
 export class MiraUtils {
-    static GetSettlementsSquadsFromUnits(units: Array<any>, settlements: Array<any>): Array<MiraSquad> {
+    static GetSettlementsSquadsFromUnits(
+        units: Array<any>, 
+        settlements: Array<any>,
+        radius: number = DEFAULT_UNIT_SEARCH_RADIUS,
+        unitFilter?: (unit: any) => boolean
+    ): Array<MiraSquad> {
         let processedUnitIds = new Set<number>();
         let result: Array<MiraSquad> = [];
         
@@ -87,16 +94,20 @@ export class MiraUtils {
                 continue;
             }
 
-            let squad = MiraUtils.constructMiraSquad(unit, processedUnitIds, settlements);
+            let squad = MiraUtils.constructMiraSquad(unit, processedUnitIds, settlements, radius, unitFilter);
             result.push(squad);
         }
 
         return result;
     }
     
-    private static constructMiraSquad(unit: any, processedUnitIds: Set<number>, settlements: Array<any>): MiraSquad {
-        const UNIT_SEARCH_RADIUS = 3;
-        
+    private static constructMiraSquad(
+        unit: any,
+        processedUnitIds: Set<number>, 
+        settlements: Array<any>,
+        radius: number = DEFAULT_UNIT_SEARCH_RADIUS,
+        unitFilter?: (unit: any) => boolean
+    ): MiraSquad {
         let unitSettlement = unit.Owner;
         
         let newUnits: any[] = [unit];
@@ -117,7 +128,8 @@ export class MiraUtils {
 
                 processedUnitIds.add(curUnit.Id);
 
-                let friends = MiraUtils.GetSettlementUnitsInArea(curUnit.Cell, UNIT_SEARCH_RADIUS, settlements);
+                let friends = MiraUtils.GetSettlementUnitsInArea(curUnit.CellCenter, radius, settlements, unitFilter);
+
                 friends = friends.filter((unit) => {
                     return  unit.Owner === unitSettlement && 
                         !processedUnitIds.has(unit.Id) &&
@@ -137,10 +149,15 @@ export class MiraUtils {
         return new MiraSquad(units);
     }
     
-    static GetSettlementUnitsInArea(cell: any, radius: number, enemySettelemnts: Array<any>, includePassive: boolean = false): Array<any> {
-        let units = MiraUtils.GetUnitsInArea(cell, radius);
+    static GetSettlementUnitsInArea(
+        cell: any, 
+        radius: number, 
+        enemySettelements: Array<any>,
+        unitFilter?: (unit: any) => boolean
+    ): Array<any> {
+        let units = MiraUtils.GetUnitsInArea(cell, radius, unitFilter);
         let enemies = units.filter((unit) => {
-            return enemySettelemnts.indexOf(unit.Owner) > -1 && unit.IsAlive && (unit.Cfg.HasNotFlags(UnitFlags.Passive) || includePassive)
+            return enemySettelements.indexOf(unit.Owner) > -1 && unit.IsAlive && unit.Cfg.HasNotFlags(UnitFlags.Passive)
         });
 
         return enemies;
@@ -183,7 +200,7 @@ export class MiraUtils {
         }
     }
     
-    static GetUnitsInArea(cell: any, radius: number): Array<any> {
+    static GetUnitsInArea(cell: any, radius: number, unitFilter?: (unit: any) => boolean): Array<any> {
         let box = createBox(cell.X - radius, cell.Y - radius, 0, cell.X + radius, cell.Y + radius, 2);
         let unitsInBox = ScriptUtils.Invoke(DotnetHolder.RealScena.UnitsMap.UnitsTree, "GetUnitsInBox", box);
         let count = ScriptUtils.GetValue(unitsInBox, "Count");
@@ -200,6 +217,10 @@ export class MiraUtils {
             }
 
             if (unitsIds.has(unit.Id)) {
+                continue;
+            }
+
+            if (unitFilter && !unitFilter(unit)) {
                 continue;
             }
 

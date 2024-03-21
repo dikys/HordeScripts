@@ -24,7 +24,7 @@ export abstract class ProductionState extends MiraSettlementControllerState {
             return;
         }
 
-        if (tickNumber % 50 != 0) {
+        if (tickNumber % 50 == 0) {
             if (this.settlementController.StrategyController.IsUnderAttack()) {
                 this.settlementController.State = new DefendingState(this.settlementController);
                 return;

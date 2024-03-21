@@ -17,7 +17,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
     }
     
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 > 0) {
+        if (tickNumber % 10 != 0) {
             return;
         }
 

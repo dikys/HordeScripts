@@ -15,6 +15,7 @@ export class MiraSquadMoveState extends MiraSquadState {
     Tick(tickNumber: number): void {
         if (this.squad.MovementTargetCell != null) {
             this.initiateMovement();
+            return;
         }
 
         if (this.squad.AttackTargetCell != null) {
