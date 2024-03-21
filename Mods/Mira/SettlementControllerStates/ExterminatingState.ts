@@ -6,17 +6,21 @@ import { DevelopingState } from "./DevelopingState";
 
 export class ExterminatingState extends MiraSettlementControllerState {
     private readonly COMBATIVITY_THRESHOLD = 0.33;
+    private readonly EXTERMINATING_TIMEOUT = 5 * 60 * 50; //5 min
     private currentTarget: any; //but actually Unit
     private reinforcementsCfgIds: Array<string>;
+    private timeoutTick: number | null;    
     
     OnEntry(): void {
-        this.settlementController.ProductionController.CancelAllProduction();
-        this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
-        
         if (!this.selectAndAttackEnemy()) {
             this.celebrateVictory();
             return;
         }
+
+        this.settlementController.ProductionController.CancelAllProduction();
+        this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
+
+        this.timeoutTick = null;
     }
 
     OnExit(): void {
@@ -24,6 +28,15 @@ export class ExterminatingState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
+        if (this.timeoutTick == null) {
+            this.timeoutTick = tickNumber + this.EXTERMINATING_TIMEOUT;
+        }
+        else if (tickNumber > this.timeoutTick) {
+            this.settlementController.Log(MiraLogLevel.Debug, `Attack is too long-drawn, discontinuing`);
+            this.settlementController.State = new DevelopingState(this.settlementController);
+            return;
+        }
+        
         if (tickNumber % 10 != 0) {
             return;
         }
