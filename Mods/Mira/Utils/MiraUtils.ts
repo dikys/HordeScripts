@@ -467,6 +467,10 @@ export class MiraUtils {
         }
     }
 
+    static IsSettlementDefeated(settlement: any): boolean {
+        return settlement.Existence.IsTotalDefeat || settlement.Existence.IsAlmostDefeat;
+    }
+
     static IsCombatConfig(unitConfig: any): boolean {
         let mainArmament = unitConfig.MainArmament;
         let isHarvester = MiraUtils.ConfigHasProfession(unitConfig, UnitProfession.Harvester);

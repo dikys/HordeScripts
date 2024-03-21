@@ -33,7 +33,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
             return;
         }
 
-        if (this.currentEnemy.Existence.IsTotalDefeat) {
+        if (MiraUtils.IsSettlementDefeated(this.currentEnemy)) {
             this.parentController.Log(MiraLogLevel.Debug, "Enemy defeated");
             this.ResetEnemy();
             return;
@@ -121,7 +121,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
     SelectEnemy(): any { //but actually Settlement
         this.currentEnemy = null;
 
-        let undefeatedEnemies: any[] = this.EnemySettlements.filter((value) => {return !value.Existence.IsTotalDefeat});
+        let undefeatedEnemies: any[] = this.EnemySettlements.filter((value) => {return !MiraUtils.IsSettlementDefeated(value)});
         
         if (undefeatedEnemies.length > 0) {
             let index = MiraUtils.Random(this.parentController.MasterMind, undefeatedEnemies.length - 1);
@@ -140,7 +140,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
     GetOffensiveTarget(
         enemySettlement: any //but actually Settlement
     ): any { //but actually Point2D
-        if (!enemySettlement.Existence.IsTotalDefeat) {
+        if (!MiraUtils.IsSettlementDefeated(enemySettlement)) {
             let professionCenter = enemySettlement.Units.Professions;
             let productionBuilding = professionCenter.ProducingBuildings.First();
             
