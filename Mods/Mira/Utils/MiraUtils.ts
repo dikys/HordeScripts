@@ -449,6 +449,24 @@ export class MiraUtils {
         }
     }
 
+    static GetUnitPathLength(unit: any): number | null {
+        let action = unit.OrdersMind.ActiveAct;
+
+        if (!action) {
+            return null;
+        }
+        
+        if (
+            action.GetType() == 
+                ScriptUtils.GetTypeByName("HordeClassLibrary.UnitComponents.OrdersSystem.Acts.ActMoveTo", "HordeClassLibrary")
+        ) {
+            return action.Solution?.Count;
+        }
+        else {
+            return null;
+        }
+    }
+
     static IsCombatConfig(unitConfig: any): boolean {
         let mainArmament = unitConfig.MainArmament;
         let isHarvester = MiraUtils.ConfigHasProfession(unitConfig, UnitProfession.Harvester);
