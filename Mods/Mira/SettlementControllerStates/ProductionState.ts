@@ -1,18 +1,23 @@
 import { MiraUtils, UnitComposition } from "Mira/Utils/MiraUtils";
 import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
 import { DefendingState } from "./DefendingState";
+import { MiraLogLevel } from "../Mira";
 
 export abstract class ProductionState extends MiraSettlementControllerState {
     private targetUnitsComposition: UnitComposition = new Map<string, number>();
 
     protected abstract getTargetUnitsComposition(): UnitComposition;
     protected abstract onTargetCompositionReached(): void;
+    protected readonly PRODUCTION_TIMEOUT: number | null = null;
+
+    private timeoutTick: number | null;
     
     OnEntry(): void {
         this.settlementController.ProductionController.CancelAllProduction();
         this.targetUnitsComposition = this.getTargetUnitsComposition();
 
         this.refreshTargetProductionLists();
+        this.timeoutTick = null;
     }
 
     OnExit(): void {
@@ -20,6 +25,17 @@ export abstract class ProductionState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
+        if (this.PRODUCTION_TIMEOUT != null) {
+            if (this.timeoutTick == null) {
+                this.timeoutTick = tickNumber + this.PRODUCTION_TIMEOUT;
+            }
+            else if (tickNumber > this.timeoutTick) {
+                this.settlementController.Log(MiraLogLevel.Debug, `Production is too long-drawn, discontinuing`);
+                this.onTargetCompositionReached();
+                return;
+            }
+        }
+        
         if (tickNumber % 10 != 0) {
             return;
         }
@@ -37,6 +53,7 @@ export abstract class ProductionState extends MiraSettlementControllerState {
 
         if (MiraUtils.SetContains(composition, this.targetUnitsComposition)) {
             this.onTargetCompositionReached();
+            return;
         }
     }
 

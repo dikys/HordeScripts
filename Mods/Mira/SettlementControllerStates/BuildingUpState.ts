@@ -4,6 +4,8 @@ import { MiraLogLevel } from "Mira/Mira";
 import { ExterminatingState } from "./ExterminatingState";
 
 export class BuildingUpState extends ProductionState {
+    protected readonly PRODUCTION_TIMEOUT: number | null = 3 * 60 * 50; //3 min
+    
     protected getTargetUnitsComposition(): UnitComposition {
         let enemy = this.settlementController.StrategyController.CurrentEnemy
         
