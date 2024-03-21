@@ -10,7 +10,7 @@ export class TestMastermindPlugin extends HordePluginBase {
 
     productionDepartament: any;
     settlement: any;
-    farmsRequestedFlag: boolean = false;
+    buildingsRequestedFlag: boolean = false;
 
     public constructor() {
         super("Mastermind Test");
@@ -39,9 +39,9 @@ export class TestMastermindPlugin extends HordePluginBase {
             this.requestWorkers(5);
         }
 
-        if (!this.farmsRequestedFlag && (gameTickNum % 10 == 0) &&  this.settlement.Units.Professions.Workers.Count > 1) {
-            this.requestFarms(5);
-            this.farmsRequestedFlag = true;
+        if (!this.buildingsRequestedFlag && (gameTickNum % 10 == 0) &&  this.settlement.Units.Professions.Workers.Count >= 1) {
+            this.requestBuildings(3);
+            this.buildingsRequestedFlag = true;
         }
     }
 
@@ -54,15 +54,29 @@ export class TestMastermindPlugin extends HordePluginBase {
         for (let i = 0; i < num; i++) {
             this._addRequest(workerCfg);
         }
-        this.log.info("Workers request for", this.settlement);
+        this.log.info("Created workers request for", this.settlement);
     }
 
-    private requestFarms(num: number) {
+    private requestBuildings(num: number) {
         const farmCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Farm");
+        const barrakCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Barrack");
+        const millCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Mill");
+        const stablesCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Stables");
+
         for (let i = 0; i < num; i++) {
             this._addRequest(farmCfg);
         }
-        this.log.info("Farms request for", this.settlement);
+        for (let i = 0; i < num; i++) {
+            this._addRequest(barrakCfg);
+        }
+        for (let i = 0; i < num; i++) {
+            this._addRequest(millCfg);
+        }
+        for (let i = 0; i < num; i++) {
+            this._addRequest(stablesCfg);
+        }
+
+        this.log.info("Created buildings request for", this.settlement);
     }
 
     private _addRequest(uCfg) {

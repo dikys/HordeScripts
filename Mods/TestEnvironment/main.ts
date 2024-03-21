@@ -6,11 +6,11 @@ import { activePlugins } from "active-plugins";
  * Вызывается до вызова "onFirstRun()" при первом запуске скрипт-машины, а так же при hot-reload
  */
 export function onInitialization() {
-    // Общие тесты
+    // // Общие тесты
     activePlugins.register(new TestEnvironmentPlugin());
 
     // // Тест Mastermind
-    activePlugins.register(new TestMastermindPlugin());
+    // activePlugins.register(new TestMastermindPlugin());
 }
 
 // Плагины
