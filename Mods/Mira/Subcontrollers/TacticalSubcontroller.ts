@@ -48,6 +48,14 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     Tick(tickNumber: number): void {
+        for (let squad of this.parentController.HostileAttackingSquads) {
+            squad.Tick(tickNumber);
+        }
+
+        for (let squad of this.AllSquads) {
+            squad.Tick(tickNumber);
+        }
+        
         if (tickNumber % 10 == 0) {
             this.updateSquads();
 
@@ -82,14 +90,6 @@ export class TacticalSubcontroller extends MiraSubcontroller {
                     }
                 }
             }
-        }
-
-        for (let squad of this.parentController.HostileAttackingSquads) {
-            squad.Tick(tickNumber);
-        }
-
-        for (let squad of this.AllSquads) {
-            squad.Tick(tickNumber);
         }
     }
 
@@ -409,6 +409,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private updateDefenseTargets(): void {
+        if (this.parentController.HostileAttackingSquads.length == 0) {
+            return;
+        }
+        
         let attackers = this.parentController.StrategyController.OrderAttackersByDangerLevel();
         
         let attackerIndex = 0;
