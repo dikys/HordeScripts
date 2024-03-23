@@ -212,6 +212,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private sendSquadToLocation(squad: MiraControllableSquad, location: SettlementLocation): void {
+        if (!location) {
+            return;
+        }
+        
         if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, location.Center)) {
             let squadLocation = squad.GetLocation();
 
