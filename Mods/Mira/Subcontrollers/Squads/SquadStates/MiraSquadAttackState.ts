@@ -40,9 +40,11 @@ export class MiraSquadAttackState extends MiraSquadState {
             return;
         }
 
-        if (location.Spread > this.squad.MinSpread * MAX_SPREAD_THRESHOLD_MULTIPLIER) {
-            this.squad.SetState(new MiraSquadAttackGatheringUpState(this.squad));
-            return;
+        if (tickNumber % (5 * 50) == 0) { //5 sec
+            if (location.Spread > this.squad.MinSpread * MAX_SPREAD_THRESHOLD_MULTIPLIER) {
+                this.squad.SetState(new MiraSquadAttackGatheringUpState(this.squad));
+                return;
+            }
         }
     }
 }

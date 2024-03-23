@@ -1,7 +1,6 @@
 
 //TODO: probably reorganize build list to a queue
 
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementController } from "Mira/MiraSettlementController";
 import { eNext, enumerate } from "Mira/Utils/Common";
 import { MiraUtils, UnitComposition } from "Mira/Utils/MiraUtils";
@@ -32,14 +31,14 @@ export class ProductionSubcontroller extends MiraSubcontroller {
             //!! most probably doesn't work as expected since producer is always free on this tick
             if (freeProducer) {
                 if (MiraUtils.RequestMasterMindProduction(unitConfig, mmProductionDepartament)) {
-                    this.parentController.Log(MiraLogLevel.Debug, "Added " + unitConfig + " to the production list");
+                    this.parentController.Debug(`Added ${unitConfig} to the production list`);
                     orderedUnits.push(unitConfig);
                 }
             }
         }
 
         if (orderedUnits.length > 0) {
-            this.parentController.Log(MiraLogLevel.Debug, `Removed ${orderedUnits.length} units from target production list`);
+            this.parentController.Debug(`Removed ${orderedUnits.length} units from target production list`);
 
             for (let cfg of orderedUnits) {
                 let index = this.productionList.indexOf(cfg);
@@ -69,7 +68,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
 
     RequestProduction(unitConfig: string): void {
         this.productionList.push(unitConfig);
-        this.parentController.Log(MiraLogLevel.Debug, "Added " + unitConfig + " to target production list");
+        this.parentController.Debug(`Added ${unitConfig} to target production list`);
     }
 
     RequestSingleProduction(unitConfig: string): void {
@@ -80,7 +79,7 @@ export class ProductionSubcontroller extends MiraSubcontroller {
 
     CancelAllProduction(): void {
         this.productionList = [];
-        this.parentController.Log(MiraLogLevel.Debug, "Cleared target production list");
+        this.parentController.Debug(`Cleared target production list`);
     }
 
     GetProduceableCfgIds(): Array<string> {

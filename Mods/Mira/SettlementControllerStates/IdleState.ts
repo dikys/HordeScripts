@@ -1,9 +1,8 @@
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
 
 export class IdleState extends MiraSettlementControllerState {
     OnEntry(): void {
-        this.settlementController.Log(MiraLogLevel.Info, "Chilling...")
+        this.settlementController.Info(`Chilling...`);
     }
 
     OnExit(): void {

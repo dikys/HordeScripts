@@ -9,7 +9,7 @@ export abstract class MiraSquadGatheringUpState extends MiraSquadState {
             let minDistance = Infinity;
 
             for (let unit of this.squad.Units) {
-                let unitDistance = MiraUtils.ChebyshevDistance(unit.Cell, this.squad.CurrentTargetCell);
+                let unitDistance = this.distanceToTargetCell(unit);
                 
                 if (unitDistance < minDistance) {
                     minDistance = unitDistance;
@@ -47,4 +47,10 @@ export abstract class MiraSquadGatheringUpState extends MiraSquadState {
     }
 
     protected abstract onGatheredUp(): void;
+
+    private distanceToTargetCell(unit: any): number {
+        let pathLength = MiraUtils.GetUnitPathLength(unit);
+
+        return pathLength ?? MiraUtils.ChebyshevDistance(unit.Cell, this.squad.CurrentTargetCell);
+    }
 }

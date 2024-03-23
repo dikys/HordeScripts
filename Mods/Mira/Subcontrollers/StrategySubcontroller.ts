@@ -1,6 +1,5 @@
 //TODO: add unit types analysis and listing from game configs
 
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementController } from "Mira/MiraSettlementController";
 import { eNext, enumerate } from "Mira/Utils/Common";
 import { UnitComposition, MiraUtils } from "Mira/Utils/MiraUtils";
@@ -33,8 +32,8 @@ export class StrategySubcontroller extends MiraSubcontroller {
             return;
         }
 
-        if (this.currentEnemy.Existence.IsTotalDefeat) {
-            this.parentController.Log(MiraLogLevel.Debug, "Enemy defeated");
+        if (MiraUtils.IsSettlementDefeated(this.currentEnemy)) {
+            this.parentController.Debug(`Enemy defeated`);
             this.ResetEnemy();
             return;
         }
@@ -48,14 +47,14 @@ export class StrategySubcontroller extends MiraSubcontroller {
         let requiredOffensiveStrength = this.calcSettlementStrength(this.currentEnemy, true);
         requiredOffensiveStrength = 1.5 * requiredOffensiveStrength;
         requiredOffensiveStrength = Math.ceil(Math.max(requiredOffensiveStrength / 100, 1)) * 100;
-        this.parentController.Log(MiraLogLevel.Debug, `Calculated required offensive strength: ${requiredOffensiveStrength}`);
+        this.parentController.Debug(`Calculated required offensive strength: ${requiredOffensiveStrength}`);
 
         let currentStrength = this.calcSettlementStrength(this.parentController.Settlement, false);
-        this.parentController.Log(MiraLogLevel.Debug, `Current offensive strength: ${currentStrength}`);
+        this.parentController.Debug(`Current offensive strength: ${currentStrength}`);
 
         requiredOffensiveStrength -= currentStrength;
         requiredOffensiveStrength = Math.max(requiredOffensiveStrength, 0);
-        this.parentController.Log(MiraLogLevel.Debug, `Offensive strength to produce: ${requiredOffensiveStrength}`);
+        this.parentController.Debug(`Offensive strength to produce: ${requiredOffensiveStrength}`);
 
         let produceableCfgIds = this.parentController.ProductionController.GetProduceableCfgIds();
         
@@ -67,14 +66,14 @@ export class StrategySubcontroller extends MiraSubcontroller {
                     config.BuildingConfig == null;
             }
         );
-        this.parentController.Log(MiraLogLevel.Debug, `Offensive Cfg IDs: ${offensiveCfgIds}`);
+        this.parentController.Debug(`Offensive Cfg IDs: ${offensiveCfgIds}`);
 
         let unitList = this.makeCombatUnitComposition(offensiveCfgIds, requiredOffensiveStrength);
-        this.parentController.Log(MiraLogLevel.Debug, `Offensive unit composition:`);
+        this.parentController.Debug(`Offensive unit composition:`);
         MiraUtils.PrintMap(unitList);
 
         let requiredDefensiveStrength = 0.15 * requiredOffensiveStrength; //add a bit more for defense purposes
-        this.parentController.Log(MiraLogLevel.Debug, `Calculated required defensive strength: ${requiredDefensiveStrength}`);
+        this.parentController.Debug(`Calculated required defensive strength: ${requiredDefensiveStrength}`);
         
         let defensiveCfgIds = produceableCfgIds.filter(
             (value, index, array) => {
@@ -83,10 +82,10 @@ export class StrategySubcontroller extends MiraSubcontroller {
                 return MiraUtils.IsCombatConfig(config);
             }
         );
-        this.parentController.Log(MiraLogLevel.Debug, `Defensive Cfg IDs: ${defensiveCfgIds}`);
+        this.parentController.Debug(`Defensive Cfg IDs: ${defensiveCfgIds}`);
         
         let defensiveUnitList = this.makeCombatUnitComposition(defensiveCfgIds, requiredDefensiveStrength);
-        this.parentController.Log(MiraLogLevel.Debug, `Defensive unit composition:`);
+        this.parentController.Debug(`Defensive unit composition:`);
         MiraUtils.PrintMap(defensiveUnitList);
 
         defensiveUnitList.forEach((value, key, map) => MiraUtils.AddToMapItem(unitList, key, value));
@@ -121,7 +120,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
     SelectEnemy(): any { //but actually Settlement
         this.currentEnemy = null;
 
-        let undefeatedEnemies: any[] = this.EnemySettlements.filter((value) => {return !value.Existence.IsTotalDefeat});
+        let undefeatedEnemies: any[] = this.EnemySettlements.filter((value) => {return !MiraUtils.IsSettlementDefeated(value)});
         
         if (undefeatedEnemies.length > 0) {
             let index = MiraUtils.Random(this.parentController.MasterMind, undefeatedEnemies.length - 1);
@@ -140,7 +139,7 @@ export class StrategySubcontroller extends MiraSubcontroller {
     GetOffensiveTarget(
         enemySettlement: any //but actually Settlement
     ): any { //but actually Point2D
-        if (!enemySettlement.Existence.IsTotalDefeat) {
+        if (!MiraUtils.IsSettlementDefeated(enemySettlement)) {
             let professionCenter = enemySettlement.Units.Professions;
             let productionBuilding = professionCenter.ProducingBuildings.First();
             

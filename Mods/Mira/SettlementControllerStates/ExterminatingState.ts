@@ -1,4 +1,3 @@
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
 import { IdleState } from "./IdleState";
 import { DefendingState } from "./DefendingState";
@@ -6,17 +5,21 @@ import { DevelopingState } from "./DevelopingState";
 
 export class ExterminatingState extends MiraSettlementControllerState {
     private readonly COMBATIVITY_THRESHOLD = 0.33;
+    private readonly EXTERMINATING_TIMEOUT = 5 * 60 * 50; //5 min
     private currentTarget: any; //but actually Unit
     private reinforcementsCfgIds: Array<string>;
+    private timeoutTick: number | null;    
     
     OnEntry(): void {
-        this.settlementController.ProductionController.CancelAllProduction();
-        this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
-        
         if (!this.selectAndAttackEnemy()) {
             this.celebrateVictory();
             return;
         }
+
+        this.settlementController.ProductionController.CancelAllProduction();
+        this.reinforcementsCfgIds = this.settlementController.StrategyController.GetReinforcementCfgIds();
+
+        this.timeoutTick = null;
     }
 
     OnExit(): void {
@@ -24,6 +27,15 @@ export class ExterminatingState extends MiraSettlementControllerState {
     }
 
     Tick(tickNumber: number): void {
+        if (this.timeoutTick == null) {
+            this.timeoutTick = tickNumber + this.EXTERMINATING_TIMEOUT;
+        }
+        else if (tickNumber > this.timeoutTick) {
+            this.settlementController.Debug(`Attack is too long-drawn, discontinuing`);
+            this.settlementController.State = new DevelopingState(this.settlementController);
+            return;
+        }
+        
         if (tickNumber % 10 != 0) {
             return;
         }
@@ -56,7 +68,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
             }
         }
         else {
-            this.settlementController.Log(MiraLogLevel.Debug, `Current combativity index '${combativityIndex}' is too low. Retreating...`);
+            this.settlementController.Debug(`Current combativity index '${combativityIndex}' is too low. Retreating...`);
             this.settlementController.TacticalController.Retreat();
             this.settlementController.State = new DevelopingState(this.settlementController);
             return;
@@ -64,7 +76,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
     }
 
     private celebrateVictory(): void {
-        this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
+        this.settlementController.Info(`No enemies left. We are victorious!`);
         this.settlementController.State = new IdleState(this.settlementController);
     }
 
@@ -76,7 +88,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
         }
         
         if (enemy) {
-            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. Proceeding to attack`);
+            this.settlementController.Debug(`Selected '${enemy.TownName}' as an enemy. Proceeding to attack`);
             this.settlementController.TacticalController.ComposeSquads();
             this.selectTarget(enemy);
             return true;

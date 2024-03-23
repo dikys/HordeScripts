@@ -1,4 +1,3 @@
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementController, SettlementLocation } from "Mira/MiraSettlementController";
 import { eNext, enumerate } from "Mira/Utils/Common";
 import { MiraUtils } from "Mira/Utils/MiraUtils";
@@ -48,6 +47,14 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     Tick(tickNumber: number): void {
+        for (let squad of this.parentController.HostileAttackingSquads) {
+            squad.Tick(tickNumber);
+        }
+
+        for (let squad of this.AllSquads) {
+            squad.Tick(tickNumber);
+        }
+        
         if (tickNumber % 10 == 0) {
             this.updateSquads();
 
@@ -83,24 +90,16 @@ export class TacticalSubcontroller extends MiraSubcontroller {
                 }
             }
         }
-
-        for (let squad of this.parentController.HostileAttackingSquads) {
-            squad.Tick(tickNumber);
-        }
-
-        for (let squad of this.AllSquads) {
-            squad.Tick(tickNumber);
-        }
     }
 
     Attack(target): void {
         this.currentTarget = target;
-        this.parentController.Log(MiraLogLevel.Debug, `Selected '${this.currentTarget.Name}' as attack target`);
+        this.parentController.Debug(`Selected '${this.currentTarget.Name}' as attack target`);
         this.issueAttackCommand();
     }
 
     Defend(): void {
-        this.parentController.Log(MiraLogLevel.Debug, `Proceeding to defend`);
+        this.parentController.Debug(`Proceeding to defend`);
         this.currentTarget = null;
 
         if (
@@ -116,7 +115,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
         this.parentController.HostileAttackingSquads.forEach((squad) => {enemyStrength += squad.Strength});
 
         if (defensiveStrength < enemyStrength) {
-            this.parentController.Log(MiraLogLevel.Debug, `Current defense strength ${defensiveStrength} is not enough to counter attack srength ${enemyStrength}`);
+            this.parentController.Debug(`Current defense strength ${defensiveStrength} is not enough to counter attack srength ${enemyStrength}`);
             this.Retreat();
         }
 
@@ -124,7 +123,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     Retreat(): void {
-        this.parentController.Log(MiraLogLevel.Debug, `Retreating`);
+        this.parentController.Debug(`Retreating`);
         let retreatLocation = this.getRetreatLocation();
 
         if (retreatLocation) {
@@ -135,7 +134,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     ComposeSquads(): void {
-        this.parentController.Log(MiraLogLevel.Debug, `Composing squads`);
+        this.parentController.Debug(`Composing squads`);
         
         this.offensiveSquads = [];
         this.defensiveSquads = [];
@@ -177,14 +176,14 @@ export class TacticalSubcontroller extends MiraSubcontroller {
         }
 
         this.defensiveSquads = this.createSquadsFromUnits(defensiveUnits);
-        this.parentController.Log(MiraLogLevel.Debug, `${this.defensiveSquads.length} defensive squads composed`);
+        this.parentController.Debug(`${this.defensiveSquads.length} defensive squads composed`);
         
         combatUnits.splice(0, unitIndex);
         combatUnits = combatUnits.filter((value, index, array) => {return !this.isBuilding(value)});
         this.offensiveSquads = this.createSquadsFromUnits(combatUnits);
         this.initialOffensiveSquadCount = this.offensiveSquads.length;
 
-        this.parentController.Log(MiraLogLevel.Debug, `${this.initialOffensiveSquadCount} offensive squads composed`);
+        this.parentController.Debug(`${this.initialOffensiveSquadCount} offensive squads composed`);
     }
 
     ReinforceSquads(): void {
@@ -213,11 +212,18 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private sendSquadToLocation(squad: MiraControllableSquad, location: SettlementLocation): void {
+        if (!location) {
+            return;
+        }
+        
         if (!MiraUtils.IsPointsEqual(squad.CurrentTargetCell, location.Center)) {
             let squadLocation = squad.GetLocation();
 
             if (MiraUtils.ChebyshevDistance(squadLocation.Point, location.Center) > location.Radius) {
-                squad.Move(location.Center, location.Radius);
+                let spread = squad.MinSpread * 3;
+                let precision = Math.max(location.Radius - spread, 0)
+                
+                squad.Move(location.Center, precision);
             }
         }
     }
@@ -264,7 +270,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
                 unit.IsAlive
             ) {
                 freeUnits.push(unit);
-                this.parentController.Log(MiraLogLevel.Debug, `Unit ${unit.ToString()} is marked for reinforcements`);
+                this.parentController.Debug(`Unit ${unit.ToString()} is marked for reinforcements`);
             }
         }
 
@@ -331,7 +337,7 @@ export class TacticalSubcontroller extends MiraSubcontroller {
         for (let unit of units) {
             currentSquadStrength += MiraUtils.GetUnitStrength(unit);
             squadUnits.push(unit);
-            this.parentController.Log(MiraLogLevel.Debug, `Added unit ${unit.ToString()} into squad`);
+            this.parentController.Debug(`Added unit ${unit.ToString()} into squad`);
 
             if (currentSquadStrength >= this.SQUAD_STRENGTH_THRESHOLD) {
                 let squad = this.createSquad(squadUnits);
@@ -361,10 +367,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private issueAttackCommand(): void {
-        this.parentController.Log(MiraLogLevel.Debug, `Issuing attack command`);
+        this.parentController.Debug(`Issuing attack command`);
 
         for (let squad of this.offensiveSquads) {
-            this.parentController.Log(MiraLogLevel.Debug, `Squad attacking`);
+            this.parentController.Debug(`Squad attacking`);
             squad.Attack(this.currentTarget.Cell);
         }
     }
@@ -409,6 +415,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
     }
 
     private updateDefenseTargets(): void {
+        if (this.parentController.HostileAttackingSquads.length == 0) {
+            return;
+        }
+        
         let attackers = this.parentController.StrategyController.OrderAttackersByDangerLevel();
         
         let attackerIndex = 0;

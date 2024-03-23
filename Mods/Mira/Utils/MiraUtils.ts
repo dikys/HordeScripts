@@ -380,13 +380,9 @@ export class MiraUtils {
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {
-        let profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
-        if (!unitConfig.ProfessionParams.TryGetValue(profession, profParams.out)) {
-            return false;
-        }
-        else {
-            return true;
-        }
+        let professionParams = unitConfig.GetProfessionParams(profession, true);
+
+        return (professionParams != null);
     }
 
     static ChebyshevDistance(cell1: any, cell2: any): number {
@@ -449,6 +445,28 @@ export class MiraUtils {
         }
     }
 
+    static GetUnitPathLength(unit: any): number | null {
+        let action = unit.OrdersMind.ActiveAct;
+
+        if (!action) {
+            return null;
+        }
+        
+        if (
+            action.GetType() == 
+                ScriptUtils.GetTypeByName("HordeClassLibrary.UnitComponents.OrdersSystem.Acts.ActMoveTo", "HordeClassLibrary")
+        ) {
+            return action.Solution?.Count;
+        }
+        else {
+            return null;
+        }
+    }
+
+    static IsSettlementDefeated(settlement: any): boolean {
+        return settlement.Existence.IsTotalDefeat || settlement.Existence.IsAlmostDefeat;
+    }
+
     static IsCombatConfig(unitConfig: any): boolean {
         let mainArmament = unitConfig.MainArmament;
         let isHarvester = MiraUtils.ConfigHasProfession(unitConfig, UnitProfession.Harvester);
@@ -502,5 +520,15 @@ export class MiraUtils {
 
     static IsPointsEqual(point1: any, point2: any): boolean {
         return point1.X == point2.X && point1.Y == point2.Y;
+    }
+
+    static IsNetworkMode(): boolean {
+        let NetworkController = HordeEngine.HordeResurrection.Engine.Logic.Main.NetworkController;
+        
+        return NetworkController.NetWorker != null;
+    }
+
+    static SetValue(object: any, propertyName: string, newValue: any): void {
+        ScriptUtils.SetValue(object, propertyName, newValue);
     }
 }
