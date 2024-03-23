@@ -380,13 +380,9 @@ export class MiraUtils {
     }
 
     static ConfigHasProfession(unitConfig: any, profession: any): boolean {
-        let profParams = host.newVar(HCL.HordeClassLibrary.HordeContent.Configs.Units.ProfessionParams.AUnitProfessionParams);
-        if (!unitConfig.ProfessionParams.TryGetValue(profession, profParams.out)) {
-            return false;
-        }
-        else {
-            return true;
-        }
+        let professionParams = unitConfig.GetProfessionParams(profession, true);
+
+        return (professionParams != null);
     }
 
     static ChebyshevDistance(cell1: any, cell2: any): number {
