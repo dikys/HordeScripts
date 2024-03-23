@@ -54,7 +54,7 @@ export class TestMastermindPlugin extends HordePluginBase {
         for (let i = 0; i < num; i++) {
             this._addRequest(workerCfg);
         }
-        this.log.info("Created workers request for", this.settlement);
+        this.log.info(`Created (${num}) workers request for`, this.settlement);
     }
 
     private requestBuildings(num: number) {
@@ -62,6 +62,7 @@ export class TestMastermindPlugin extends HordePluginBase {
         const barrakCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Barrack");
         const millCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Mill");
         const stablesCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Stables");
+        const mineCfg = HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Mine");
 
         for (let i = 0; i < num; i++) {
             this._addRequest(farmCfg);
@@ -75,8 +76,11 @@ export class TestMastermindPlugin extends HordePluginBase {
         for (let i = 0; i < num; i++) {
             this._addRequest(stablesCfg);
         }
+        for (let i = 0; i < num; i++) {
+            this._addRequest(mineCfg);
+        }
 
-        this.log.info("Created buildings request for", this.settlement);
+        this.log.info(`Created (${num}) buildings request for`, this.settlement);
     }
 
     private _addRequest(uCfg) {
