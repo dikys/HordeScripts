@@ -1,7 +1,6 @@
 import { MiraUtils, UnitComposition } from "Mira/Utils/MiraUtils";
 import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
 import { DefendingState } from "./DefendingState";
-import { MiraLogLevel } from "../Mira";
 
 export abstract class ProductionState extends MiraSettlementControllerState {
     private targetUnitsComposition: UnitComposition = new Map<string, number>();
@@ -30,7 +29,7 @@ export abstract class ProductionState extends MiraSettlementControllerState {
                 this.timeoutTick = tickNumber + this.PRODUCTION_TIMEOUT;
             }
             else if (tickNumber > this.timeoutTick) {
-                this.settlementController.Log(MiraLogLevel.Debug, `Production is too long-drawn, discontinuing`);
+                this.settlementController.Debug(`Production is too long-drawn, discontinuing`);
                 this.onTargetCompositionReached();
                 return;
             }

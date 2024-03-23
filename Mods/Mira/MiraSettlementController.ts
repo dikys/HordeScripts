@@ -55,7 +55,7 @@ export class MiraSettlementController {
         this.MasterMind = settlementMM;
 
         if (!this.MasterMind.IsWorkMode) {
-            this.Log(MiraLogLevel.Debug, "Engaging MasterMind");
+            this.Debug("Engaging MasterMind");
             this.MasterMind.IsWorkMode = true;
         }
 
@@ -99,13 +99,13 @@ export class MiraSettlementController {
         
         if (this.nextState) {
             if (this.state) {
-                this.Log(MiraLogLevel.Debug, "Leaving state " + this.state.constructor.name);
+                this.Debug("Leaving state " + this.state.constructor.name);
                 this.state.OnExit();
             }
             
             this.state = this.nextState;
             this.nextState = null;
-            this.Log(MiraLogLevel.Debug, "Entering state " + this.state.constructor.name);
+            this.Debug("Entering state " + this.state.constructor.name);
             this.state.OnEntry();
         }
 
@@ -115,6 +115,22 @@ export class MiraSettlementController {
     Log(level: MiraLogLevel, message: string): void {
         let logMessage = `[${this.Player.Nickname}] ${message}`;
         Mira.Log(level, logMessage);
+    }
+
+    Debug(message: string): void {
+        this.Log(MiraLogLevel.Debug, message);
+    }
+
+    Info(message: string): void {
+        this.Log(MiraLogLevel.Info, message);
+    }
+
+    Warning(message: string): void {
+        this.Log(MiraLogLevel.Warning, message);
+    }
+
+    Error(message: string): void {
+        this.Log(MiraLogLevel.Error, message);
     }
 
     GetCurrentEconomyComposition(): UnitComposition {

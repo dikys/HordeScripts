@@ -1,4 +1,3 @@
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
 import { IdleState } from "./IdleState";
 import { DefendingState } from "./DefendingState";
@@ -32,7 +31,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
             this.timeoutTick = tickNumber + this.EXTERMINATING_TIMEOUT;
         }
         else if (tickNumber > this.timeoutTick) {
-            this.settlementController.Log(MiraLogLevel.Debug, `Attack is too long-drawn, discontinuing`);
+            this.settlementController.Debug(`Attack is too long-drawn, discontinuing`);
             this.settlementController.State = new DevelopingState(this.settlementController);
             return;
         }
@@ -69,7 +68,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
             }
         }
         else {
-            this.settlementController.Log(MiraLogLevel.Debug, `Current combativity index '${combativityIndex}' is too low. Retreating...`);
+            this.settlementController.Debug(`Current combativity index '${combativityIndex}' is too low. Retreating...`);
             this.settlementController.TacticalController.Retreat();
             this.settlementController.State = new DevelopingState(this.settlementController);
             return;
@@ -77,7 +76,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
     }
 
     private celebrateVictory(): void {
-        this.settlementController.Log(MiraLogLevel.Info, "No enemies left. We are victorious!")
+        this.settlementController.Info(`No enemies left. We are victorious!`);
         this.settlementController.State = new IdleState(this.settlementController);
     }
 
@@ -89,7 +88,7 @@ export class ExterminatingState extends MiraSettlementControllerState {
         }
         
         if (enemy) {
-            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy. Proceeding to attack`);
+            this.settlementController.Debug(`Selected '${enemy.TownName}' as an enemy. Proceeding to attack`);
             this.settlementController.TacticalController.ComposeSquads();
             this.selectTarget(enemy);
             return true;

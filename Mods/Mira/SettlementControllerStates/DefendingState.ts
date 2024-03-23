@@ -1,4 +1,3 @@
-import { MiraLogLevel } from "Mira/Mira";
 import { MiraSettlementControllerState } from "./MiraSettlementControllerState";
 import { RebuildState } from "./RebuildState";
 import { MiraUtils } from "Mira/Utils/MiraUtils";
@@ -21,7 +20,7 @@ export class DefendingState extends MiraSettlementControllerState {
     Tick(tickNumber: number): void {
         if (tickNumber % 50 == 0) {
             if (!this.settlementController.StrategyController.IsUnderAttack()) {
-                this.settlementController.Log(MiraLogLevel.Debug, `Attack countered`);
+                this.settlementController.Debug(`Attack countered`);
                 this.settlementController.State = new RebuildState(this.settlementController);
                 return;
             }

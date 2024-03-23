@@ -1,6 +1,5 @@
 import { UnitComposition } from "Mira/Utils/MiraUtils";
 import { ProductionState } from "./ProductionState";
-import { MiraLogLevel } from "Mira/Mira";
 import { ExterminatingState } from "./ExterminatingState";
 
 export class BuildingUpState extends ProductionState {
@@ -11,11 +10,11 @@ export class BuildingUpState extends ProductionState {
         
         if (!enemy) {
             enemy = this.settlementController.StrategyController.SelectEnemy();
-            this.settlementController.Log(MiraLogLevel.Debug, `Selected '${enemy.TownName}' as an enemy.`);
+            this.settlementController.Debug(`Selected '${enemy.TownName}' as an enemy.`);
         }
 
         if (enemy) {
-            this.settlementController.Log(MiraLogLevel.Debug, `Proceeding to build-up against '${enemy.TownName}'.`);
+            this.settlementController.Debug(`Proceeding to build-up against '${enemy.TownName}'.`);
             return this.settlementController.StrategyController.GetArmyComposition();
         }
         else {
