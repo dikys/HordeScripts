@@ -19,6 +19,7 @@ export enum MiraLogLevel {
 export class Mira {
     static LogLevel: MiraLogLevel = MiraLogLevel.Debug;
     static CanRun = true;
+    static IsNetworkMode = true;
     
     private static controllers: Array<MiraSettlementController> = [];
     
@@ -53,8 +54,9 @@ export class Mira {
         Mira.Info(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
         Mira.Info(`Empathy subsystem is not responding`);
 
-        try {
+        try {            
             Mira.CanRun = true;
+            Mira.IsNetworkMode = MiraUtils.IsNetworkMode();
             Mira.controllers = [];
 
             let tickOffset = 0;
@@ -90,6 +92,8 @@ export class Mira {
             Mira.Info(`Unable to attach to player ${playerId}: player is not controlled by MasterMind`);
             return;
         }
+
+        MiraUtils.SetValue(settlementData.Player, "Nickname", settlementData.Settlement.TownName);
 
         let controller = new MiraSettlementController(
             settlementData.Settlement, 

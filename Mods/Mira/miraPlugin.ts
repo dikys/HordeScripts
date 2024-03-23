@@ -1,6 +1,7 @@
 import { Mira } from "Mira/Mira";
 import HordePluginBase from "../plugins/base-plugin";
 import { createResourcesAmount } from "library/common/primitives";
+import { isReplayMode } from "library/game-logic/game-tools";
 
 export class MiraPlugin extends HordePluginBase {
     public constructor() {
@@ -8,12 +9,17 @@ export class MiraPlugin extends HordePluginBase {
     }
 
     public onFirstRun() {
-        Mira.FirstRun();
+        if (!isReplayMode()) {
+            Mira.FirstRun();
+        }
     }
 
     public onEveryTick(gameTickNum: number) {
         this.mineResources(gameTickNum);
-        Mira.Tick(gameTickNum);
+        
+        if (!isReplayMode()) {
+            Mira.Tick(gameTickNum);
+        }
     }
 
     private mineResources(gameTickNum: number): void {

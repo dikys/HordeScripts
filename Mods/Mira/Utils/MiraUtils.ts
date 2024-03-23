@@ -521,4 +521,14 @@ export class MiraUtils {
     static IsPointsEqual(point1: any, point2: any): boolean {
         return point1.X == point2.X && point1.Y == point2.Y;
     }
+
+    static IsNetworkMode(): boolean {
+        let NetworkController = HordeEngine.HordeResurrection.Engine.Logic.Main.NetworkController;
+        
+        return NetworkController.NetWorker != null;
+    }
+
+    static SetValue(object: any, propertyName: string, newValue: any): void {
+        ScriptUtils.SetValue(object, propertyName, newValue);
+    }
 }
