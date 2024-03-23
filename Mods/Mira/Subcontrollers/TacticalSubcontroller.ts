@@ -216,7 +216,10 @@ export class TacticalSubcontroller extends MiraSubcontroller {
             let squadLocation = squad.GetLocation();
 
             if (MiraUtils.ChebyshevDistance(squadLocation.Point, location.Center) > location.Radius) {
-                squad.Move(location.Center, location.Radius);
+                let spread = squad.MinSpread * 3;
+                let precision = Math.max(location.Radius - spread, 0)
+                
+                squad.Move(location.Center, precision);
             }
         }
     }
