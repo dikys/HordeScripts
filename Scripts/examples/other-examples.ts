@@ -1,4 +1,5 @@
 import { inspect, inspectEnum, inspectFlagEnum } from "library/common/introspection";
+import { isNetworkGame, isReplayMode } from "library/game-logic/game-tools";
 import { UnitAnimState, UnitLifeState } from "library/game-logic/horde-types";
 import HordeExampleBase from "./base-example";
 
@@ -19,15 +20,27 @@ export class Example_GameWorks extends HordeExampleBase {
         this.log.info('Текущий такт:', BattleController.GameTimer.GameFramesCounter);
         this.log.info('Текущий FPS:', BattleController.GameTimer.CurrentFpsLimit);
 
+        // Режим игры
+        if (isNetworkGame()) {
+            this.log.info('В данный момент идет сетевое сражение');
+        } else {
+            this.log.info('В данный момент идет одиночное сражение');
+        }
+
+        // Реплей?
+        if (isReplayMode()) {
+            this.log.info('В данный момент идет воспроизведение реплея (проверка 1)');
+        }
+
         // Инфо по реплею (недоступно при инициализации сцены, т.е. в onFirstRun)
         let BattleControllerT = ScriptUtils.GetTypeByName("HordeResurrection.Engine.Logic.Battle.BattleController, HordeResurrection.Engine")
         let repl = ScriptUtils.GetValue(ReflectionUtils.GetStaticProperty(BattleControllerT, "ReplayModule").GetValue(BattleControllerT), "_mode");
         if (repl.ToString() == "Play") {
-            this.log.info('В данный момент запущено воспроизведение реплея');
+            this.log.info('В данный момент идет воспроизведение реплея (проверка 2)');
         } else if (repl.ToString() == "Record") {
             this.log.info('В данный момент запущена запись реплея');
         } else {
-            this.log.info('В данный момент невозможно определить статус реплея:', repl);
+            this.log.info('В данный момент невозможно определить статус реплея:', '"' + repl + '"', '(Недоступно в момент инициализации сражения)');
         }
     }
 }

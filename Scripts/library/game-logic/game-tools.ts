@@ -10,3 +10,11 @@ export function isReplayMode() {
     let repl = ScriptUtils.GetValue(ReflectionUtils.GetStaticProperty(BattleControllerT, "ReplayModule").GetValue(BattleControllerT), "_mode");
     return repl.ToString() == "Play";
 }
+
+/**
+ * Возвращает True, если в данный момент идет сетевое сражение.
+ */
+export function isNetworkGame() {
+    return NetworkControllerT.NetWorker != null;
+}
+const NetworkControllerT = HordeEngine.HordeResurrection.Engine.Logic.Main.NetworkController;
