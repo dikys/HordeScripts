@@ -34,7 +34,7 @@ export class DefendingState extends MiraSettlementControllerState {
 
     private requestReinforcementsProduction() {
         for (let cfgId of this.reinforcementsCfgIds) {
-            this.settlementController.ProductionController.RequestSingleProduction(cfgId);
+            this.settlementController.ProductionController.ForceRequestSingleProduction(cfgId);
         }
     }
 

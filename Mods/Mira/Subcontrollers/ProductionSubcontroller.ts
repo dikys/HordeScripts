@@ -77,6 +77,23 @@ export class ProductionSubcontroller extends MiraSubcontroller {
         }
     }
 
+    ForceRequestSingleProduction(unitConfig: string): void {
+        let masterMind = this.parentController.MasterMind;
+        let requests = enumerate(masterMind.Requests);
+        let request;
+
+        while ((request = eNext(requests)) !== undefined) {
+            if (request.RequestedCfg) {
+                if (request.RequestedCfg.Uid == unitConfig)  {
+                    return;
+                }
+            }
+        }
+        
+        let mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
+        MiraUtils.RequestMasterMindProduction(unitConfig, mmProductionDepartament);
+    }
+
     CancelAllProduction(): void {
         this.productionList = [];
         this.parentController.Debug(`Cleared target production list`);
