@@ -66,32 +66,32 @@ export class ProductionSubcontroller extends MiraSubcontroller {
         return list;
     }
 
-    RequestProduction(unitConfig: string): void {
-        this.productionList.push(unitConfig);
-        this.parentController.Debug(`Added ${unitConfig} to target production list`);
+    RequestProduction(configId: string): void {
+        this.productionList.push(configId);
+        this.parentController.Debug(`Added ${configId} to target production list`);
     }
 
-    RequestSingleProduction(unitConfig: string): void {
-        if (this.ProductionList.indexOf(unitConfig) < 0) {
-            this.RequestProduction(unitConfig);
+    RequestSingleProduction(configId: string): void {
+        if (this.ProductionList.indexOf(configId) < 0) {
+            this.RequestProduction(configId);
         }
     }
 
-    ForceRequestSingleProduction(unitConfig: string): void {
+    ForceRequestSingleProduction(configId: string): void {
         let masterMind = this.parentController.MasterMind;
         let requests = enumerate(masterMind.Requests);
         let request;
 
         while ((request = eNext(requests)) !== undefined) {
             if (request.RequestedCfg) {
-                if (request.RequestedCfg.Uid == unitConfig)  {
+                if (request.RequestedCfg.Uid == configId)  {
                     return;
                 }
             }
         }
         
         let mmProductionDepartament = this.parentController.MasterMind.ProductionDepartment;
-        MiraUtils.RequestMasterMindProduction(unitConfig, mmProductionDepartament);
+        MiraUtils.RequestMasterMindProduction(configId, mmProductionDepartament);
     }
 
     CancelAllProduction(): void {
