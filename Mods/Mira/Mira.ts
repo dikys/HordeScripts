@@ -93,7 +93,9 @@ export class Mira {
             return;
         }
 
-        MiraUtils.SetValue(settlementData.Player, "Nickname", settlementData.Settlement.TownName);
+        if (ScriptUtils.GameVersionLesserThan("v0.68pre")) {  // TODO: remove on release
+            MiraUtils.SetValue(settlementData.Player, "Nickname", settlementData.Settlement.TownName);
+        }
 
         let controller = new MiraSettlementController(
             settlementData.Settlement, 
