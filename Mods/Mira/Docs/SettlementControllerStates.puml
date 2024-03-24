@@ -15,7 +15,7 @@ state EXPLOIT {
     Develop --> BuildUp: Economy\nfunctioning
     Develop --> Defend: Attacked
 
-    BuildUp -down-> Exploit_ArmyGathered <<outputPin>>: Army gathered
+    BuildUp -down-> Exploit_ArmyGathered <<outputPin>>: Army gathered\nOR\nTimeout Exceeded
     BuildUp --> Defend: Attacked
     BuildUp --> Develop: Impossible to produce\nany combat unit
 
@@ -37,7 +37,7 @@ state Exterminate: Attack the enemy
 Exploit_ArmyGathered -right-> Exterminate: Army gathered
 
 Exterminate --> [*]: Enemy defeated
-Exterminate --> Exploit_Entry: Army slain
+Exterminate --> Exploit_Entry: Army slain\nOR\nTimeout exceeded
 Exterminate --> Defend: Main or expand attacked
 
 
