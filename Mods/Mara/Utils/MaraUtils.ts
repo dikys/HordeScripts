@@ -3,7 +3,7 @@ import { MaraSquad } from "Mara/Subcontrollers/Squads/MaraSquad";
 import { createBox, createPoint } from "library/common/primitives";
 import { UnitFlags, UnitCommand, AllContent } from "library/game-logic/horde-types";
 import { UnitProfession } from "library/game-logic/unit-professions";
-import { AssignOrderMode, VirtualInput, VirtualSelectUnitsMode } from "library/mastermind/virtual-input";
+import { AssignOrderMode, PlayerVirtualInput, VirtualSelectUnitsMode } from "library/mastermind/virtual-input";
 import { enumerate, eNext } from "./Common";
 import { generateCellInSpiral } from "library/common/position-tools";
 
@@ -360,9 +360,17 @@ export class MaraUtils {
 
     private static issueCommand(unit: any, player: any, location: any, command: any, isReplaceMode: boolean = true) {
         let mode = isReplaceMode ? AssignOrderMode.Replace : AssignOrderMode.Queue;
-        VirtualInput.selectUnitsById(player, [unit.Id], VirtualSelectUnitsMode.Select);
-        VirtualInput.pointBasedCommand(player, createPoint(location.X, location.Y), command, mode);
+        
+        if (!(player in MaraUtils.playersInput)) {
+            MaraUtils.playersInput[player] = new PlayerVirtualInput(player);
+        }
+
+        let virtualInput = MaraUtils.playersInput[player];
+        virtualInput.selectUnitsById([unit.Id], VirtualSelectUnitsMode.Select);
+        virtualInput.pointBasedCommand(createPoint(location.X, location.Y), command, mode);
+        virtualInput.commit();
     }
+    static playersInput = {};
 
     static Random(masterMind: any, max: number, min: number = 0) {
         let rnd = masterMind.Randomizer;

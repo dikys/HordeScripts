@@ -1,13 +1,15 @@
 import { createPoint } from "library/common/primitives";
 import { inspectEnum } from "library/common/introspection";
 import { UnitCommand } from "library/game-logic/horde-types";
-import { AssignOrderMode, VirtualInput, VirtualSelectUnitsMode } from "library/mastermind/virtual-input";
+import { AssignOrderMode, PlayerVirtualInput, VirtualSelectUnitsMode } from "library/mastermind/virtual-input";
 import HordeExampleBase from "./base-example";
 
 /**
  * Пример имитации ввода игрока
  */
 export class Example_InputLowLevel extends HordeExampleBase {
+    player: any;
+    playerVirtualInput: any;
 
     public constructor() {
         super("Input low-level");
@@ -16,65 +18,112 @@ export class Example_InputLowLevel extends HordeExampleBase {
     public onFirstRun() {
         this.logMessageOnRun();
             
-        let oleg = Players["0"].GetRealPlayer();
+        this.player = Players["0"].GetRealPlayer();
+        this.playerVirtualInput = new PlayerVirtualInput(this.player);
         
         this.log.info('Список всех команд юнитов');
         inspectEnum(UnitCommand);
 
-        this.log.info('Выделить юнитов в области');
-        VirtualInput.selectUnits(oleg, createPoint(0, 0), createPoint(15, 15));
+        // Запуск различных примеров ввода
+        this.basicInputExample();
+        this.basicInputExample2();
+        this.trainWorker();
+        this.buildBuilding();
 
-        this.log.info('Добавить к выделению юнитов в области (shift)');
-        VirtualInput.selectUnits(oleg, createPoint(18, 18), createPoint(20, 20), VirtualSelectUnitsMode.Include);
+        // Прочее
+        this.showSelectedUnits();
+    }
 
-        this.log.info('Убрать из текущего выделения юнитов из области (ctrl)');
-        VirtualInput.selectUnits(oleg, createPoint(18, 18), createPoint(18, 18), VirtualSelectUnitsMode.Exclude);
+    private basicInputExample() {
+        this.log.info('Пример имитации ввода');
+        this.log.info('- Выделение юнитов в области');
+        this.playerVirtualInput.selectUnits(createPoint(0, 0), createPoint(15, 15));
 
-        this.log.info('Клик правой кнопкой');
-        VirtualInput.smartClick(oleg, createPoint(9, 9));
+        this.log.info('- Добавление к выделению юнитов в области (shift)');
+        this.playerVirtualInput.selectUnits(createPoint(18, 18), createPoint(20, 20), VirtualSelectUnitsMode.Include);
 
-        this.log.info('Команда атаки (в очередь)');
-        VirtualInput.pointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack, AssignOrderMode.Queue);
+        this.log.info('- Убрать из текущего выделения юнитов из области (ctrl)');
+        this.playerVirtualInput.selectUnits(createPoint(18, 18), createPoint(18, 18), VirtualSelectUnitsMode.Exclude);
 
-        this.log.info('Выбор по id');
-        VirtualInput.selectUnitsById(oleg, [42]);
+        this.log.info('- Клик правой кнопкой');
+        this.playerVirtualInput.smartClick(createPoint(9, 9));
 
-        this.log.info('Команда атаки');
-        VirtualInput.pointBasedCommand(oleg, createPoint(19, 19), UnitCommand.Attack);
+        this.log.info('- Команда атаки (в очередь)');
+        this.playerVirtualInput.pointBasedCommand(createPoint(19, 19), UnitCommand.Attack, AssignOrderMode.Queue);
 
-        this.log.info('Команда держать позицию');
-        VirtualInput.oneClickCommand(oleg, UnitCommand.HoldPosition);
+        this.log.info('- Имитация нажатия созданных элементов ввода');
+        this.playerVirtualInput.commit();
+    }
 
+    private basicInputExample2() {
+        this.log.info('Второй пример имитации ввода');
+        this.log.info('- Выбор по id');
+        this.playerVirtualInput.selectUnitsById([42]);
+
+        this.log.info('- Команда атаки');
+        this.playerVirtualInput.pointBasedCommand(createPoint(19, 19), UnitCommand.Attack);
+
+        this.log.info('- Команда держать позицию');
+        this.playerVirtualInput.oneClickCommand(UnitCommand.HoldPosition);
+
+        this.log.info('- Имитация нажатия созданных элементов ввода');
+        this.playerVirtualInput.commit();
+    }
+
+    /**
+     * Заказать тренировку рабочего в замке
+     */
+    private trainWorker() {
         this.log.info('Выделить замок и заказать производство рабочего');
-        let castle = oleg.GetRealSettlement().Units.GetCastleOrAnyUnit();
-        VirtualInput.selectUnitsById(oleg, [castle.Id]);
-        VirtualInput.produceUnitCommand(oleg, "#UnitConfig_Slavyane_Worker1", 1);
+        let castle = this.player.GetRealSettlement().Units.GetCastleOrAnyUnit();
 
-        // Отправить свободного рабочего строить здание
-        let someFreeWorker = oleg.GetRealSettlement().Units.Professions.FreeWorkers.First();
-        if (someFreeWorker) {
-            this.log.info('Выделить свободного рабочего');
-            VirtualInput.selectUnitsById(oleg, [someFreeWorker.Id]);
+        this.log.info('- Выбор замка по id');
+        this.playerVirtualInput.selectUnitsById([castle.Id]);
 
-            this.log.info('Построить забор');
-            VirtualInput.produceBuildingCommand(oleg, "#UnitConfig_Slavyane_Fence", createPoint(1, 5), createPoint(7, 7));
+        this.log.info('- Команда тренировки');
+        this.playerVirtualInput.produceUnitCommand("#UnitConfig_Slavyane_Worker1", 1);
+        
+        this.log.info('- Имитация нажатия созданных элементов ввода');
+        this.playerVirtualInput.commit();
+    }
 
-            this.log.info('Построить ферму (в очередь)');
-            VirtualInput.produceBuildingCommand(oleg, "#UnitConfig_Slavyane_Farm", createPoint(1, 8), null, AssignOrderMode.Queue);
-        } else {
-            this.log.info('Свободный рабочий не найден');
+    /**
+     * Отправить свободного рабочего строить здание
+     */
+    private buildBuilding() {
+        this.log.info('Отправка рабочего для строительства здания');
+        let someFreeWorker = this.player.GetRealSettlement().Units.Professions.FreeWorkers.First();
+        if (!someFreeWorker) {
+            this.log.info('- Свободный рабочий не найден');
+            return;
         }
 
-        // Показать выделенных в предыдущем такте юнитов
-        // Внимание! Здесь не учитываются команды выданные в этом такте! Т.е. это выделение с прошлого такта.
-        let selectedSquad = oleg.SelectedSquadVirtual;
+        this.log.info('- Выделение свободного рабочего');
+        this.playerVirtualInput.selectUnitsById([someFreeWorker.Id]);
+
+        this.log.info('- Построить забор');
+        this.playerVirtualInput.produceBuildingCommand("#UnitConfig_Slavyane_Fence", createPoint(1, 5), createPoint(7, 7));
+
+        this.log.info('- Построить ферму (в очередь)');
+        this.playerVirtualInput.produceBuildingCommand("#UnitConfig_Slavyane_Farm", createPoint(1, 8), null, AssignOrderMode.Queue);
+
+        this.log.info('- Имитация нажатия созданных элементов ввода');
+        this.playerVirtualInput.commit();
+    }
+
+    /**
+     * Показать выделенных в предыдущем такте юнитов
+     * Внимание! Здесь не учитываются команды выданные в этом такте! Т.е. это выделение с прошлого такта.
+     */
+    private showSelectedUnits() {
+        let selectedSquad = this.player.SelectedSquadVirtual;
         if (selectedSquad.Count > 0) {
-            this.log.info('У', oleg.Nickname, 'выделены следующие юниты:');
+            this.log.info('У', this.player.Nickname, 'выделены следующие юниты:');
             ForEach(selectedSquad, u => {
                 this.log.info('- ', u);
             });
         } else {
-            this.log.info('У', oleg.Nickname, 'нет выделенных юнитов в данный момент');
+            this.log.info('У', this.player.Nickname, 'нет выделенных юнитов в данный момент');
         }
     }
 }

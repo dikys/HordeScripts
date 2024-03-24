@@ -1,91 +1,101 @@
+import { ListT } from "library/dotnet/dotnet-types";
 
 export const VirtualSelectUnitsMode = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.Enums.VirtualSelectUnitsMode;
 export const AssignOrderMode = HCL.HordeClassLibrary.UnitComponents.OrdersSystem.AssignOrderMode;
+const UnitIdLabel = HCL.HordeClassLibrary.World.Objects.Units.UnitIdLabel;
+
+const AVirtualInputItem = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.AVirtualInputItem;
+const VirtualSelectUnits = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSelectUnits;
+const VirtualSelectUnitsById = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSelectUnitsById;
+const VirtualSmartMouseClick = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSmartMouseClick;
+const VirtualPointBasedCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualPointBasedCommand;
+const VirtualOneClickCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualOneClickCommand;
+const VirtualProduceBuildingCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualProduceBuildingCommand;
+const VirtualProduceUnitCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualProduceUnitCommand;
 
 
-export class VirtualInput {
-	public static selectUnits(player, cellStart, cellEnd, selectMode = VirtualSelectUnitsMode.Select) {
-		if(!this._checkPlayerIsLocal(player))
+export class PlayerVirtualInput {
+	player: any;
+	inputsList: any;
+	private isEnabled: boolean;
+
+	public constructor(player) {
+		this.player = player;
+		this.isEnabled = this.player.IsLocal;
+		this.inputsList = host.newObj(ListT(AVirtualInputItem));;
+	}
+
+	public selectUnits(cellStart, cellEnd, selectMode = VirtualSelectUnitsMode.Select) {
+		if (!this.isEnabled)
 			return;
 	
-		let VirtualSelectUnits = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSelectUnits;
-		let vii = host.newObj(VirtualSelectUnits, player, selectMode, cellStart, cellEnd);
-		this._inputPush(vii);
+		let vii = host.newObj(VirtualSelectUnits, this.player, selectMode, cellStart, cellEnd);
+		this.inputsList.Add(vii);
 	}
 	
-	public static selectUnitsById(player, ids, selectMode = VirtualSelectUnitsMode.Select) {
-		if(!this._checkPlayerIsLocal(player))
+	public selectUnitsById(ids, selectMode = VirtualSelectUnitsMode.Select) {
+		if (!this.isEnabled)
 			return;
 	
-		let UnitIdLabel = HCL.HordeClassLibrary.World.Objects.Units.UnitIdLabel;
 		let csIds = host.newArr(UnitIdLabel, ids.length);
 		for(let i = 0; i < ids.length; i++) {
-			csIds[i] = host.newObj(UnitIdLabel, ids[i], player.GetRealSettlement().Uid);
+			csIds[i] = host.newObj(UnitIdLabel, ids[i], this.player.GetRealSettlement().Uid);
 		}
 	
-		let VirtualSelectUnitsById = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSelectUnitsById;
-		let vii = host.newObj(VirtualSelectUnitsById, player, selectMode, csIds);
-		this._inputPush(vii);
+		let vii = host.newObj(VirtualSelectUnitsById, this.player, selectMode, csIds);
+		this.inputsList.Add(vii);
 	}
 	
-	public static smartClick(player, cell, assignMode = AssignOrderMode.Replace) {
-		if(!this._checkPlayerIsLocal(player))
+	public smartClick(cell, assignMode = AssignOrderMode.Replace) {
+		if (!this.isEnabled)
 			return;
 	
-		let VirtualSmartMouseClick = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualSmartMouseClick;
-		let vii = host.newObj(VirtualSmartMouseClick, player, cell, assignMode);
-		this._inputPush(vii);
+		let vii = host.newObj(VirtualSmartMouseClick, this.player, cell, assignMode);
+		this.inputsList.Add(vii);
 	}
 	
-	public static pointBasedCommand(player, cell, cmd, assignMode = AssignOrderMode.Replace) {
-		if(!this._checkPlayerIsLocal(player))
+	public pointBasedCommand(cell, cmd, assignMode = AssignOrderMode.Replace) {
+		if (!this.isEnabled)
 			return;
 	
-		let VirtualPointBasedCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualPointBasedCommand;
-		let vii = host.newObj(VirtualPointBasedCommand, player, cell, cmd, assignMode);
-		this._inputPush(vii);
+		let vii = host.newObj(VirtualPointBasedCommand, this.player, cell, cmd, assignMode);
+		this.inputsList.Add(vii);
 	}
 	
-	public static oneClickCommand(player, cmd, assignMode = AssignOrderMode.Replace) {
-		if(!this._checkPlayerIsLocal(player))
+	public oneClickCommand(cmd, assignMode = AssignOrderMode.Replace) {
+		if (!this.isEnabled)
 			return;
 	
-		let VirtualOneClickCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualOneClickCommand;
-		let vii = host.newObj(VirtualOneClickCommand, player, cmd, assignMode);
-		this._inputPush(vii);
+		let vii = host.newObj(VirtualOneClickCommand, this.player, cmd, assignMode);
+		this.inputsList.Add(vii);
 	}
 	
-	public static produceBuildingCommand(player, productCfg, cellStart, cellEnd, assignMode = AssignOrderMode.Replace) {
-		if(!this._checkPlayerIsLocal(player))
+	public produceBuildingCommand(productCfg, cellStart, cellEnd, assignMode = AssignOrderMode.Replace) {
+		if (!this.isEnabled)
 			return;
 	
-		let VirtualProduceBuildingCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualProduceBuildingCommand;
-		let vii = host.newObj(VirtualProduceBuildingCommand, player);
+		let vii = host.newObj(VirtualProduceBuildingCommand, this.player);
 		vii.CellStart = cellStart;
 		vii.CellEnd = cellEnd;
 		vii.ProductUnitConfigUid = productCfg;
 		vii.AssignOrderMode = assignMode;
 		if (cellEnd) {vii.CompoundStopOnNumber = 100;}
-		this._inputPush(vii);
+		this.inputsList.Add(vii);
 	}
 	
-	public static produceUnitCommand(player, productCfg, count, assignMode= AssignOrderMode.Replace) {
-		if(!this._checkPlayerIsLocal(player))
+	public produceUnitCommand(productCfg, count, assignMode= AssignOrderMode.Replace) {
+		if (!this.isEnabled)
 			return;
 	
-		let VirtualProduceUnitCommand = HordeEngine.HordeResurrection.Engine.Logic.Battle.InputSystem.InputItems.VirtualProduceUnitCommand;
-		let vii = host.newObj(VirtualProduceUnitCommand, player);
+		let vii = host.newObj(VirtualProduceUnitCommand, this.player);
 		vii.ProductUnitConfigUid = productCfg;
 		vii.Count = count;
 		vii.AssignOrderMode = assignMode;
-		this._inputPush(vii);
+		this.inputsList.Add(vii);
 	}
 	
-	private static _checkPlayerIsLocal(player) {
-		return player.IsLocal;
-	}
-
-	private static _inputPush(vii) {
-		ScriptUtils.Invoke(vii.InitiatorPlayer.VirtualInput, "AddLocalInput", vii);
+	public commit() {
+		ScriptUtils.Invoke(this.player.VirtualInput, "AddLocalInputs", this.inputsList);
+		this.inputsList.Clear();
 	}
 }
