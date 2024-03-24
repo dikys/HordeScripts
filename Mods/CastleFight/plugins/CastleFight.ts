@@ -2239,8 +2239,6 @@ const PeopleIncomeLevelT = HCL.HordeClassLibrary.World.Settlements.Modules.Misc.
                     }
                     world.settlements[other_settlementId].Diplomacy.DeclareAlliance(world.settlements[_settlementId]);
                     world.settlements[_settlementId].Diplomacy.DeclareAlliance(world.settlements[other_settlementId]);
-                    var settlementFogOfWar = world.settlements[other_settlementId].Vision.FogOfWar;
-                    settlementFogOfWar.InitializeFogArrays(settlementFogOfWar.DefaultFog, settlementFogOfWar.DerivativeFog);
                 }
 
                 // убиваем всех юнитов
