@@ -76,8 +76,11 @@ export class MaraProfiler {
     }
 }
 
-let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
+const TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
+const AlmostDefeatCondition = HCL.HordeClassLibrary.World.Settlements.Existence.AlmostDefeatCondition;
+
 export type UnitComposition = Map<string, number>;
+export { AlmostDefeatCondition }
 
 export class MaraUtils {
     static GetSettlementsSquadsFromUnits(
