@@ -57,6 +57,7 @@ export class MaraProfiler {
     private message: string;
     private callCount: number;
     private executionTime: number;
+    private startTime: number;
 
     constructor(message: string) {
         this.message = message;
@@ -69,9 +70,21 @@ export class MaraProfiler {
     }
 
     public Profile(call: () => void): void {
-        let startTime = Date.now();
-        call();
-        this.executionTime += Date.now() - startTime;
+        this.Start();
+        try {
+            call();
+        }
+        finally {
+            this.Stop();
+        }
+    }
+
+    public Start(): void {
+        this.startTime = Date.now();
+    }
+
+    public Stop() {
+        this.executionTime += Date.now() - this.startTime;
         this.callCount++;
     }
 }
