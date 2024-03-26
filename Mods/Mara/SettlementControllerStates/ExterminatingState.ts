@@ -52,7 +52,7 @@ export class ExterminatingState extends MaraSettlementControllerState {
 
         let combativityIndex = this.settlementController.TacticalController.OffenseCombativityIndex;
 
-        if (combativityIndex >= this.COMBATIVITY_THRESHOLD) {   
+        if (combativityIndex >= this.COMBATIVITY_THRESHOLD) {
             let enemy = this.settlementController.StrategyController.CurrentEnemy;
             
             if (!enemy) {
@@ -62,7 +62,7 @@ export class ExterminatingState extends MaraSettlementControllerState {
                 }
             }
             else {
-                if (!this.currentTarget || this.currentTarget.IsDead) {
+                if (!this.currentTarget || this.currentTarget.IsNearDeath) {
                     this.selectTarget(enemy);
                 }
             }
