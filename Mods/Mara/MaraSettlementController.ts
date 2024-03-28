@@ -183,8 +183,8 @@ export class MaraSettlementController {
             let squads = MaraUtils.GetSettlementsSquadsFromUnits(
                 [centralProductionBuilding], 
                 [this.Settlement], 
-                BUILDING_SEARCH_RADIUS,
-                (unit) => {return unit.Cfg.BuildingConfig != null}
+                (unit) => {return unit.Cfg.BuildingConfig != null},
+                BUILDING_SEARCH_RADIUS
             );
             
             if (!squads || squads.length == 0) {

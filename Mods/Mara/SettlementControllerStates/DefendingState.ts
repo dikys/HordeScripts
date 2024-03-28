@@ -49,7 +49,13 @@ export class DefendingState extends MaraSettlementControllerState {
         }
 
         let attackers = this.settlementController.StrategyController.GetEnemiesInArea(settlementLocation.Center, settlementLocation.Radius);
-        let attackingSquads = MaraUtils.GetSettlementsSquadsFromUnits(attackers, this.settlementController.StrategyController.EnemySettlements);
+        
+        let attackingSquads = MaraUtils.GetSettlementsSquadsFromUnits(
+            attackers, 
+            this.settlementController.StrategyController.EnemySettlements,
+            (unit) => {return MaraUtils.ChebyshevDistance(unit.Cell, settlementLocation!.Center) <= settlementLocation!.Radius}
+        );
+
         this.settlementController.HostileAttackingSquads.push(...attackingSquads);
     }
 }

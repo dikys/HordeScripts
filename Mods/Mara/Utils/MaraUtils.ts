@@ -99,8 +99,8 @@ export class MaraUtils {
     static GetSettlementsSquadsFromUnits(
         units: Array<any>, 
         settlements: Array<any>,
+        unitFilter?: (unit: any) => boolean,
         radius: number = DEFAULT_UNIT_SEARCH_RADIUS,
-        unitFilter?: (unit: any) => boolean
     ): Array<MaraSquad> {
         let processedUnitIds = new Set<number>();
         let result: Array<MaraSquad> = [];

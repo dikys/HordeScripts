@@ -185,15 +185,18 @@ export class StrategySubcontroller extends MaraSubcontroller {
         let settlementCenter = settlementLocation?.Center;
 
         if (settlementCenter) {
-            return this.parentController.HostileAttackingSquads.sort(
-                (a, b) => {
-                    let aLoc = a.GetLocation();
-                    let bLoc = b.GetLocation();
+            let threatData: any[] = [];
 
-                    return MaraUtils.ChebyshevDistance(settlementCenter, aLoc.Point) - 
-                        MaraUtils.ChebyshevDistance(settlementCenter, bLoc.Point);
-                }
+            for (let squad of this.parentController.HostileAttackingSquads) {
+                let distanceToCenter = MaraUtils.ChebyshevDistance(settlementCenter, squad.GetLocation().Point);
+                threatData.push({squad: squad, distance: distanceToCenter});
+            }
+            
+            threatData = threatData.sort(
+                (a, b) => {return a.distance - b.distance;}
             );
+
+            return threatData.map(v => v.squad);
         }
         else {
             return this.parentController.HostileAttackingSquads;
