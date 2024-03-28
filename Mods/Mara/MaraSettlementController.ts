@@ -46,6 +46,7 @@ export class MaraSettlementController {
     private nextState: MaraSettlementControllerState | null;
     private currentUnitComposition: UnitComposition | null;
     private currentDevelopedUnitComposition: UnitComposition | null;
+    private settlementLocation: SettlementLocation | null;
 
     constructor (settlement, settlementMM, player, tickOffset) {
         this.TickOffset = tickOffset;
@@ -92,6 +93,7 @@ export class MaraSettlementController {
     Tick(tickNumber: number): void {
         this.currentUnitComposition = null;
         this.currentDevelopedUnitComposition = null;
+        this.settlementLocation = null;
 
         for (let subcontroller of this.subcontrollers) {
             subcontroller.Tick(tickNumber);
@@ -168,6 +170,10 @@ export class MaraSettlementController {
     }
 
     GetSettlementLocation(): SettlementLocation | null {
+        if (this.settlementLocation) {
+            return this.settlementLocation;
+        }
+
         const BUILDING_SEARCH_RADIUS = 5;
         
         let professionCenter = this.Settlement.Units.Professions;
@@ -185,10 +191,11 @@ export class MaraSettlementController {
                 return null;
             }
 
-            let location = squads[0].GetLocation()
+            let location = squads[0].GetLocation();
             let radius = Math.round((location.Spread / 2)) + 10;
+            this.settlementLocation = new SettlementLocation(location.Point, radius);
 
-            return new SettlementLocation(location.Point, radius);
+            return this.settlementLocation;
         }
         else {
             return null;
