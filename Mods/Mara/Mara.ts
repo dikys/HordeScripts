@@ -93,10 +93,6 @@ export class Mara {
             return;
         }
 
-        if (ScriptUtils.GameVersionLesserThan("v0.68pre")) {  // TODO: remove on release
-            MaraUtils.SetValue(settlementData.Player, "Nickname", settlementData.Settlement.TownName);
-        }
-
         let controller = new MaraSettlementController(
             settlementData.Settlement, 
             settlementData.MasterMind, 
