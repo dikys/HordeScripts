@@ -57,6 +57,7 @@ export class MaraProfiler {
     private message: string;
     private callCount: number;
     private executionTime: number;
+    private startTime: number;
 
     constructor(message: string) {
         this.message = message;
@@ -69,22 +70,37 @@ export class MaraProfiler {
     }
 
     public Profile(call: () => void): void {
-        let startTime = Date.now();
-        call();
-        this.executionTime += Date.now() - startTime;
+        this.Start();
+        try {
+            call();
+        }
+        finally {
+            this.Stop();
+        }
+    }
+
+    public Start(): void {
+        this.startTime = Date.now();
+    }
+
+    public Stop() {
+        this.executionTime += Date.now() - this.startTime;
         this.callCount++;
     }
 }
 
-let TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
+const TileType = HCL.HordeClassLibrary.HordeContent.Configs.Tiles.Stuff.TileType;
+const AlmostDefeatCondition = HCL.HordeClassLibrary.World.Settlements.Existence.AlmostDefeatCondition;
+
 export type UnitComposition = Map<string, number>;
+export { AlmostDefeatCondition }
 
 export class MaraUtils {
     static GetSettlementsSquadsFromUnits(
         units: Array<any>, 
         settlements: Array<any>,
+        unitFilter?: (unit: any) => boolean,
         radius: number = DEFAULT_UNIT_SEARCH_RADIUS,
-        unitFilter?: (unit: any) => boolean
     ): Array<MaraSquad> {
         let processedUnitIds = new Set<number>();
         let result: Array<MaraSquad> = [];
@@ -506,6 +522,12 @@ export class MaraUtils {
         }
         
         return false;
+    }
+
+    static IsBuildingConfig(cfgId: string): boolean {
+        let cfg = MaraUtils.GetUnitConfig(cfgId);
+
+        return cfg.BuildingConfig != null && cfg.HasNotFlags(UnitFlags.Passive);
     }
 
     static GetUnitStrength(unit: any): number {

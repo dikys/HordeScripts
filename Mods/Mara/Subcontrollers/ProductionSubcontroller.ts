@@ -107,7 +107,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         return Array.from(this.productionIndex!.keys());
     }
 
-    EstimateProductionTime(unitComposition: UnitComposition): Map<string, number> {
+    EstimateProductionTime(unitComposition: UnitComposition, searchProducers: boolean = false): Map<string, number> {
         let estimation = new Map<string, number>();
         
         if (!this.productionIndex) {
@@ -118,7 +118,13 @@ export class ProductionSubcontroller extends MaraSubcontroller {
             let producers = this.productionIndex!.get(key);
 
             if (!producers) {
-                estimation.set(key, Infinity);
+                if (searchProducers) {
+                    estimation.set(key, Infinity);
+                }
+                else {
+                    let config = MaraUtils.GetUnitConfig(key);
+                    estimation.set(key, config.ProductionTime * value);
+                }
             }
             else {
                 let producersCount = Math.min(producers.length, value);

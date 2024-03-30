@@ -2,7 +2,7 @@
 
 import { MaraSettlementController } from "Mara/MaraSettlementController";
 import { eNext, enumerate } from "Mara/Utils/Common";
-import { UnitComposition, MaraUtils } from "Mara/Utils/MaraUtils";
+import { UnitComposition, MaraUtils, AlmostDefeatCondition } from "Mara/Utils/MaraUtils";
 import { MaraSubcontroller } from "./MaraSubcontroller";
 import { MaraSquad } from "./Squads/MaraSquad";
 
@@ -134,16 +134,47 @@ export class StrategySubcontroller extends MaraSubcontroller {
         this.currentEnemy = null;
     }
 
-    // Returns one of enemy's production buildings
-    //TODO: rework target selection based on current map rules
     GetOffensiveTarget(
         enemySettlement: any //but actually Settlement
     ): any { //but actually Point2D
         if (!MaraUtils.IsSettlementDefeated(enemySettlement)) {
-            let professionCenter = enemySettlement.Units.Professions;
-            let productionBuilding = professionCenter.ProducingBuildings.First();
-            
-            return productionBuilding;
+            let defeatCondition = enemySettlement.RulesOverseer.GetExistenceRule().AlmostDefeatCondition;
+
+            if (defeatCondition == AlmostDefeatCondition.LossProducingBuildings) {
+                let professionCenter = enemySettlement.Units.Professions;
+                let productionBuilding = professionCenter.ProducingBuildings.First();
+                
+                return productionBuilding;
+            }
+            else if (defeatCondition == AlmostDefeatCondition.LossProducingUnits) {
+                let professionCenter = enemySettlement.Units.Professions;
+                let productionBuilding = professionCenter.ProducingBuildings.First();
+
+                if (productionBuilding) {
+                    return productionBuilding;
+                }
+                else {
+                    return professionCenter.ProducingUnits.First();
+                }
+            }
+            else { //loss of all units or custom conditions
+                let professionCenter = enemySettlement.Units.Professions;
+                let productionBuilding = professionCenter.ProducingBuildings.First();
+
+                if (productionBuilding) {
+                    return productionBuilding;
+                }
+                else {
+                    let producingUnit = professionCenter.ProducingUnits.First();
+                    
+                    if (producingUnit) {
+                        return producingUnit;
+                    }
+                    else {
+                        return professionCenter.AllUnitsExceptPassive.First();
+                    }
+                }
+            }
         }
 
         return null;
@@ -154,15 +185,18 @@ export class StrategySubcontroller extends MaraSubcontroller {
         let settlementCenter = settlementLocation?.Center;
 
         if (settlementCenter) {
-            return this.parentController.HostileAttackingSquads.sort(
-                (a, b) => {
-                    let aLoc = a.GetLocation();
-                    let bLoc = b.GetLocation();
+            let threatData: any[] = [];
 
-                    return MaraUtils.ChebyshevDistance(settlementCenter, aLoc.Point) - 
-                        MaraUtils.ChebyshevDistance(settlementCenter, bLoc.Point);
-                }
+            for (let squad of this.parentController.HostileAttackingSquads) {
+                let distanceToCenter = MaraUtils.ChebyshevDistance(settlementCenter, squad.GetLocation().Point);
+                threatData.push({squad: squad, distance: distanceToCenter});
+            }
+            
+            threatData = threatData.sort(
+                (a, b) => {return a.distance - b.distance;}
             );
+
+            return threatData.map(v => v.squad);
         }
         else {
             return this.parentController.HostileAttackingSquads;

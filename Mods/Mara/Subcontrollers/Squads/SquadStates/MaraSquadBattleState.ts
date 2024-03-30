@@ -124,7 +124,8 @@ export class MaraSquadBattleState extends MaraSquadState {
 
         this.enemySquads = MaraUtils.GetSettlementsSquadsFromUnits(
             enemies, 
-            this.squad.Controller.EnemySettlements
+            this.squad.Controller.EnemySettlements,
+            (unit) => {return MaraUtils.ChebyshevDistance(unit.Cell, location.Point) <= ENEMY_SEARCH_RADIUS}
         );
 
         this.enemyUnits = [];
