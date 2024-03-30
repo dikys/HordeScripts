@@ -516,6 +516,12 @@ export class MaraUtils {
         return false;
     }
 
+    static IsBuildingConfig(cfgId: string): boolean {
+        let cfg = MaraUtils.GetUnitConfig(cfgId);
+
+        return cfg.BuildingConfig != null && cfg.HasNotFlags(UnitFlags.Passive);
+    }
+
     static GetUnitStrength(unit: any): number {
         if (this.IsCombatConfig(unit.Cfg) && unit.IsAlive) {
             return Math.max(unit.Health, 0);

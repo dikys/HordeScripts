@@ -4,7 +4,8 @@
 */
 
 import { Mara, MaraLogLevel } from "./Mara";
-import { RebuildState } from "./SettlementControllerStates/RebuildState";
+import { DefendingState } from "./SettlementControllerStates/DefendingState";
+//import { RebuildState } from "./SettlementControllerStates/RebuildState";
 import { DevelopingState } from "./SettlementControllerStates/DevelopingState";
 import { MaraSettlementControllerState } from "./SettlementControllerStates/MaraSettlementControllerState";
 import { MiningSubcontroller } from "./Subcontrollers/MiningSubontroller";
@@ -77,7 +78,7 @@ export class MaraSettlementController {
         //!! temporary solution
         //!! black magic that fixes mysterious import errors which are not even logged
         //!! TODO: DEAL WITH THIS SHIT SOMEHOW!
-        new RebuildState(this);
+        new DefendingState(this);
 
         this.State = new DevelopingState(this);
     }

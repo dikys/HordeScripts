@@ -10,7 +10,8 @@ state EXPLOIT {
 
     Exploit_Entry --> Develop
 
-    Defend --> Rebuild: Attack countered
+    Defend --> Rebuild: Attack countered\nDamage is not severe
+    Defend --> Develop: Attack countered\nDamage is too severe
     
     Develop --> BuildUp: Economy\nfunctioning
     Develop --> Defend: Attacked

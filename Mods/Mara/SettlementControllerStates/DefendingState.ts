@@ -1,3 +1,4 @@
+import { DevelopingState } from "./DevelopingState";
 import { MaraSettlementControllerState } from "./MaraSettlementControllerState";
 import { RebuildState } from "./RebuildState";
 import { MaraUtils } from "Mara/Utils/MaraUtils";
@@ -21,7 +22,16 @@ export class DefendingState extends MaraSettlementControllerState {
         if (tickNumber % 50 == 0) {
             if (!this.settlementController.StrategyController.IsUnderAttack()) {
                 this.settlementController.Debug(`Attack countered`);
-                this.settlementController.State = new RebuildState(this.settlementController);
+                
+                if (this.canRebuild()) {
+                    this.settlementController.Debug(`Damage is acceptable, rebuilding`);
+                    this.settlementController.State = new RebuildState(this.settlementController);
+                }
+                else {
+                    this.settlementController.Debug(`Damage is too severe, starting to build up from lower tier`);
+                    this.settlementController.State = new DevelopingState(this.settlementController);
+                }
+
                 return;
             }
             else {
@@ -57,5 +67,44 @@ export class DefendingState extends MaraSettlementControllerState {
         );
 
         this.settlementController.HostileAttackingSquads.push(...attackingSquads);
+    }
+
+    private canRebuild(): boolean {
+        const REBUILD_THRESHOLD = 2 * 60 * 50 / 2; //3 min
+
+        let requiredEconomy = this.settlementController.TargetUnitsComposition;
+
+        if (!requiredEconomy) {
+            return true;
+        }
+
+        let currentEconomy = this.settlementController.GetCurrentDevelopedEconomyComposition();
+        let currentBuildings = new Map<string, number>();
+
+        currentEconomy.forEach((value, key) => {
+            if (MaraUtils.IsBuildingConfig(key)) {
+                currentBuildings.set(key, value);
+            }
+        });
+
+        let requiredBuildings = new Map<string, number>();
+
+        requiredEconomy.forEach((value, key) => {
+            if (MaraUtils.IsBuildingConfig(key)) {
+                requiredBuildings.set(key, value);
+            }
+        });
+
+        let unbuiltBuildings = MaraUtils.SubstractCompositionLists(requiredBuildings, currentBuildings);
+        let productionEstimation = this.settlementController.ProductionController.EstimateProductionTime(unbuiltBuildings, false);
+        let productionTime = 0;
+
+        productionEstimation.forEach((value) => {
+            productionTime += value;
+        });
+
+        this.settlementController.Debug(`Estimated rebuild time: ${productionTime}`);
+
+        return productionTime <= REBUILD_THRESHOLD;
     }
 }
