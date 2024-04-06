@@ -8,7 +8,7 @@ import { unitCanBePlacedByRealMap } from "library/game-logic/unit-and-map";
 import { spawnUnits } from "library/game-logic/unit-spawn";
 import { AssignOrderMode } from "library/mastermind/virtual-input";
 import { COMPONENT_TYPE, UnitComponent, BuffableComponent, BUFF_TYPE, SettlementComponent, IncomeIncreaseEvent, IncomeIncreaseComponent, IncomeEvent, IncomeLimitedPeriodicalComponent, Entity, AttackingAlongPathComponent, SpawnBuildingComponent, ReviveComponent, UpgradableBuildingComponent, UpgradableBuildingEvent, BuffEvent, BuffComponent, UnitProducedEvent } from "./ESC_components";
-import { Point, distanceBetweenPoints, UnitGiveOrder, UnitDisallowCommands } from "./Utils";
+import { Point, distanceBetweenPoints, UnitGiveOrder, UnitDisallowCommands, MakeBitmaskFromArray, BitmaskTestFlags } from "./Utils";
 import { World } from "./World";
 import { log } from "library/common/logging";
 
@@ -718,8 +718,11 @@ export function BuffSystem(world: World, gameTickNum: number) {
             if (!targetBaseEntity.components.has(COMPONENT_TYPE.BUFFABLE_COMPONENT)) {
                 continue;
             }
-            var targetBuffComponent = targetBaseEntity.components.get(COMPONENT_TYPE.BUFFABLE_COMPONENT) as BuffComponent;
-            if (targetBuffComponent.buffType != BUFF_TYPE.EMPTY) {
+            var targetBuffableComponent = targetBaseEntity.components.get(COMPONENT_TYPE.BUFFABLE_COMPONENT) as BuffableComponent;
+            if (targetBuffableComponent.buffType != BUFF_TYPE.EMPTY) {
+                continue;
+            }
+            if (!targetBuffableComponent.buffMask[buffComponent.buffType]) {
                 continue;
             }
 
