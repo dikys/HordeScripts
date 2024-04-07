@@ -3,38 +3,77 @@ import { generateCellInSpiral } from "library/common/position-tools";
 import { createHordeColor, createResourcesAmount, createPoint } from "library/common/primitives";
 import { mergeFlags } from "library/dotnet/dotnet-utils";
 import { spawnDecoration } from "library/game-logic/decoration-spawn";
-import { UnitDeathType, UnitCommand, UnitDirection, UnitFlags } from "library/game-logic/horde-types";
+import { UnitDeathType, UnitCommand, UnitDirection, UnitFlags, DiplomacyStatus } from "library/game-logic/horde-types";
 import { unitCanBePlacedByRealMap } from "library/game-logic/unit-and-map";
 import { spawnUnits } from "library/game-logic/unit-spawn";
 import { AssignOrderMode } from "library/mastermind/virtual-input";
 import { COMPONENT_TYPE, UnitComponent, BuffableComponent, BUFF_TYPE, SettlementComponent, IncomeIncreaseEvent, IncomeIncreaseComponent, IncomeEvent, IncomeLimitedPeriodicalComponent, Entity, AttackingAlongPathComponent, SpawnBuildingComponent, ReviveComponent, UpgradableBuildingComponent, UpgradableBuildingEvent, BuffEvent, BuffComponent, UnitProducedEvent } from "./ESC_components";
 import { Point, distanceBetweenPoints, UnitGiveOrder, UnitDisallowCommands, MakeBitmaskFromArray, BitmaskTestFlags } from "./Utils";
-import { World } from "./World";
+import { GameState, World } from "./World";
 import { log } from "library/common/logging";
+import { printObjectItems } from "library/common/introspection";
 
 const ReplaceUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.ReplaceUnitParameters;
 
-export function CheckGameEndSystem(world: World, gameTickNum: number) {
-    // присуждаем поражение альянсам
+export function DiplomacySystem(world: World, gameTickNum: number) {
+    // проверяем, что игра закончилась
+
+    var isGameEnd = true;
     for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
-        // проверка, что замок есть и поселение в игре
+        if (!world.settlements[settlementId]) {
+            continue;
+        }
+        if (!world.settlements[settlementId].Existence.IsTotalDefeat && !world.settlements[settlementId].Existence.IsVictory) {
+            isGameEnd = false;
+            break;
+        }
+    }
+    if (isGameEnd) {
+        world.state = GameState.CLEAR;
+        return;
+    }
+
+    // при уничтожении замка объявляем альянс всем врагам для видимости
+
+    for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
         if (!world.settlements[settlementId] ||
-            !world.settlements_castleUnit[settlementId]) {
+            world.settlements[settlementId].Existence.IsTotalDefeat ||
+            world.settlements[settlementId].Existence.IsVictory ||
+            !world.settlements_castleUnit[settlementId].IsDead) {
+            continue;
+        }
+
+        // объявляем альянс всем врагам для видимости
+        for (var enemySettlementId = 0; enemySettlementId < world.settlementsCount; enemySettlementId++) {
+            if (!world.settlements[enemySettlementId] || 
+                !world.settlements_settlements_warFlag[settlementId][enemySettlementId]) {
+                continue;
+            }
+            if (world.settlements[settlementId].Diplomacy.DeclareAlliance(world.settlements[enemySettlementId])
+                 != DiplomacyStatus.Alliance) {
+                world.settlements[settlementId].Diplomacy.DeclareAlliance(world.settlements[enemySettlementId]);
+                world.settlements[enemySettlementId].Diplomacy.DeclareAlliance(world.settlements[settlementId]);
+            }
+        }
+    }
+
+    // присуждаем поражение альянсам
+
+    for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
+        if (!world.settlements[settlementId] ||
+            world.settlements[settlementId].Existence.IsTotalDefeat ||
+            world.settlements[settlementId].Existence.IsVictory) {
             continue;
         }
 
         // проверяем, что у всего альянса замки уничтожены
+
         var isDefeat = true;
-        for (var other_settlementId = 0; other_settlementId < world.settlementsCount; other_settlementId++) {
-            // проверка, что есть мир
-            if (world.settlements_settlements_warFlag[settlementId][other_settlementId]) {
-                continue;
-            }
-            
-            // проверка, что замок стоит
-            if (!world.settlements[other_settlementId] ||
-                !world.settlements_castleUnit[other_settlementId] ||
-                world.settlements_castleUnit[other_settlementId].IsDead) {
+        for (var allySettlementId = 0; allySettlementId < world.settlementsCount; allySettlementId++) {
+            // проверка, что есть мир и замок стоит
+            if (!world.settlements[allySettlementId] ||
+                world.settlements_settlements_warFlag[settlementId][allySettlementId] ||
+                world.settlements_castleUnit[allySettlementId].IsDead) {
                 continue;
             }
 
@@ -42,118 +81,80 @@ export function CheckGameEndSystem(world: World, gameTickNum: number) {
             isDefeat = false;
             break;
         }
-
         if (!isDefeat) {
             continue;
         }
 
         // присуждаем поражение всему альянсу
-        for (var other_settlementId = 0; other_settlementId < world.settlementsCount; other_settlementId++) {
-            // проверка, что есть мир
-            if (world.settlements_settlements_warFlag[settlementId][other_settlementId]) {
+        for (var allySettlementId = 0; allySettlementId < world.settlementsCount; allySettlementId++) {
+            // проверка, что поселение в игре и есть мир
+            if (!world.settlements[allySettlementId] ||
+                world.settlements_settlements_warFlag[settlementId][allySettlementId]) {
                 continue;
-            }
-            // проверка, что поселение в игре
-            if (!world.settlements[other_settlementId]) {
-                continue;
-            }
-
-            // объявляем альянс всем врагам для видимости
-            for (var _settlementId = 0; _settlementId < world.settlementsCount; _settlementId++) {
-                if (!world.settlements[_settlementId] || 
-                    !world.settlements_settlements_warFlag[other_settlementId][_settlementId]) {
-                    continue;
-                }
-                world.settlements[other_settlementId].Diplomacy.DeclareAlliance(world.settlements[_settlementId]);
-                world.settlements[_settlementId].Diplomacy.DeclareAlliance(world.settlements[other_settlementId]);
-                //var settlementFogOfWar = world.settlements[other_settlementId].Vision.FogOfWar;
-                //settlementFogOfWar.InitializeFogArrays(settlementFogOfWar.DefaultFog, settlementFogOfWar.DerivativeFog);
             }
 
             // присуждаем поражение
-            world.settlements[other_settlementId].Existence.ForceTotalDefeat();
-
-            // если был уничтожен замок, то убиваем всех юнитов
-            for (var i = 0; i < world.settlements_entities[other_settlementId].length; i++) {
-                var entity = world.settlements_entities[other_settlementId][i];
-                if (!entity.components.has(COMPONENT_TYPE.UNIT_COMPONENT)) {
-                    continue;
-                }
-                var unitComponent = entity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
-
-                if (!unitComponent.unit || unitComponent.unit.IsDead) {
-                    continue;
-                }
-
-                var battleMind = unitComponent.unit.BattleMind;
-                battleMind.InstantDeath(null, UnitDeathType.Mele);
-            }
-            world.settlements_castleUnit[other_settlementId] = null;
+            world.settlements[allySettlementId].Existence.ForceTotalDefeat();
         }
     }
 
     // присуждаем победу последнему альянсу
+
     for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
-        // проверка, что замок есть и поселение в игре
         if (!world.settlements[settlementId] ||
-            !world.settlements_castleUnit[settlementId]) {
+            world.settlements[settlementId].Existence.IsTotalDefeat ||
+            world.settlements[settlementId].Existence.IsVictory) {
             continue;
         }
 
+        // проверяем, что у всех врагов поражение
+
         var isVictory = true;
-        for (var other_settlementId = 0; other_settlementId < world.settlementsCount; other_settlementId++) {
-            // проверка, что есть война
-            if (!world.settlements_settlements_warFlag[settlementId][other_settlementId]) {
-                continue;
-            }
-            // проверка, что замок стоит
-            if (!world.settlements[other_settlementId] ||
-                !world.settlements_castleUnit[other_settlementId] ||
-                world.settlements_castleUnit[other_settlementId].IsDead) {
+        for (var enemySettlementId = 0; enemySettlementId < world.settlementsCount; enemySettlementId++) {
+            // проверка, что поселение в игре, есть война, поселение проиграло
+            if (!world.settlements[enemySettlementId] ||
+                !world.settlements_settlements_warFlag[settlementId][enemySettlementId] ||
+                world.settlements[enemySettlementId].Existence.IsTotalDefeat
+            ) {
                 continue;
             }
 
-            // нашелся враг с целым замком
             isVictory = false;
-            break;
         }
-
         if (!isVictory) {
             continue;
         }
 
         // присуждаем победу всему альянсу
-        for (var other_settlementId = 0; other_settlementId < world.settlementsCount; other_settlementId++) {
-            // проверка, что есть мир
-            if (world.settlements_settlements_warFlag[settlementId][other_settlementId]) {
+
+        for (var allySettlementId = 0; allySettlementId < world.settlementsCount; allySettlementId++) {
+            // проверка, что поселение в игре и есть мир
+            if (!world.settlements[allySettlementId] ||
+                world.settlements_settlements_warFlag[settlementId][allySettlementId]) {
                 continue;
             }
-            // проверка, что поселение в игре
-            if (!world.settlements[other_settlementId]) {
-                continue;
-            }
-            
-            // удаляем замок
-            world.settlements_castleUnit[other_settlementId] = null;
+
             // присуждаем победу
-            world.settlements[other_settlementId].Existence.ForceVictory();
+            if (!world.settlements[allySettlementId].Existence.IsVictory) {
+                world.settlements[allySettlementId].Existence.ForceVictory();
+            }
         }
 
-        world.gameEnd = true;
         break;
     }
-
-    // если игра закончилась, то удаляем все конфиги
-    if (world.gameEnd) {
-        for (var cfgId in world.configs) {
-            HordeContentApi.RemoveConfig(world.configs[cfgId]);
-        }
-    }
-
-    return world.gameEnd;
 }
 
 export function WordClearSystem(world: World, gameTickNum: number) {
+    // если сейчас идет очистка мира, то удаляем кастомные конфиги
+    if (world.state == GameState.CLEAR) {
+        for (var cfgId in world.configs) {
+            HordeContentApi.RemoveConfig(world.configs[cfgId]);
+            delete world.configs[cfgId];
+        }
+    }
+
+    var killUnitsCount = 0;
+
     for (var settlementId = 0; settlementId < world.settlementsCount; settlementId++) {
         if (!world.settlements[settlementId]) {
             continue;
@@ -187,6 +188,40 @@ export function WordClearSystem(world: World, gameTickNum: number) {
                 world.settlements_entities[settlementId].splice(i--, 1);
             }
         }
+
+        // если замок уничтожен или очистка игры, то удаляем всех юнитов
+        if (world.state == GameState.CLEAR ||
+            (world.settlements_castleUnit[settlementId] &&
+             world.settlements_castleUnit[settlementId].IsDead)) {
+            // уничтожаем замок если жив
+
+            if (!world.settlements_castleUnit[settlementId].IsDead) {
+                world.settlements_castleUnit[settlementId].BattleMind.InstantDeath(null, UnitDeathType.Mele);
+                killUnitsCount++;
+            }
+
+            // убиваем всех юнитов, чтобы их почистила система очистки
+            
+            for (var i = 0; i < world.settlements_entities[settlementId].length; i++) {
+                var entity = world.settlements_entities[settlementId][i];
+                if (!entity.components.has(COMPONENT_TYPE.UNIT_COMPONENT)) {
+                    continue;
+                }
+                var unitComponent = entity.components.get(COMPONENT_TYPE.UNIT_COMPONENT) as UnitComponent;
+
+                if (unitComponent.unit.IsDead) {
+                    continue;
+                }
+
+                unitComponent.unit.BattleMind.InstantDeath(null, UnitDeathType.Mele);
+                killUnitsCount++;
+            }
+        }
+    }
+
+    // если сейчас идет очистка и ни один юнит не убит, то объявляем конец игры
+    if (killUnitsCount == 0 && world.state == GameState.CLEAR) {
+        world.state = GameState.END;
     }
 }
 

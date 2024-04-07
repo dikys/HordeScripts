@@ -11,6 +11,13 @@ import { printObjectItems } from "library/common/introspection";
 
 const PeopleIncomeLevelT = HCL.HordeClassLibrary.World.Settlements.Modules.Misc.PeopleIncomeLevel;
 
+export enum GameState {
+    INIT = 0,
+    PLAY,
+    CLEAR,
+    END
+}
+
 export class World {
     /** количество поселений */
     settlementsCount: number;
@@ -31,10 +38,8 @@ export class World {
     /** для каждого поселения хранится набор путей атаки */
     settlements_attack_paths: Array<Array<Array<Point>>>;
     
-    /** флаг, что игра проинициализирована */
-    gameInit: boolean;
-    /** флаг, что игра закончена */
-    gameEnd: boolean;
+    /** текущее состояние игры */
+    state: GameState;
 
     /** массив конфигов */
     configs: any;
@@ -59,8 +64,7 @@ export class World {
     
     public constructor ( )
     {
-        this.gameInit      = false;
-        this.gameEnd       = false;
+        this.state      = GameState.INIT;
 
         this.configs       = {};
         this.cfgUid_entity = new Map<string, Entity>();
@@ -119,7 +123,7 @@ export class World {
         // убираем ЗП
         ScriptUtils.SetValue(this.configs["castle"], "SalarySlots", 0);
         // здоровье
-        ScriptUtils.SetValue(this.configs["castle"], "MaxHealth", 300000*this.castle_health_coeff);
+        ScriptUtils.SetValue(this.configs["castle"], "MaxHealth", Math.round(300000*this.castle_health_coeff));
         // броня
         ScriptUtils.SetValue(this.configs["castle"], "Shield", 200);
 
@@ -915,9 +919,9 @@ export class World {
         // делаем урон = 0
         ScriptUtils.SetValue(this.configs["tower_1"].MainArmament.BulletCombatParams, "Damage", 600);
         // стоимость
-        ScriptUtils.SetValue(this.configs["tower_1"].CostResources, "Gold",   400);
+        ScriptUtils.SetValue(this.configs["tower_1"].CostResources, "Gold",   200);
         ScriptUtils.SetValue(this.configs["tower_1"].CostResources, "Metal",  0);
-        ScriptUtils.SetValue(this.configs["tower_1"].CostResources, "Lumber", 400);
+        ScriptUtils.SetValue(this.configs["tower_1"].CostResources, "Lumber", 200);
         ScriptUtils.SetValue(this.configs["tower_1"].CostResources, "People", 0);
         {
             var entity : Entity = new Entity();
@@ -1547,7 +1551,7 @@ export class World {
             }
         }
     }
-
+    
     public IsSettlementInGame (settlementId: number) {
         return this.settlements[settlementId] &&
             this.settlements_castleUnit[settlementId] &&
