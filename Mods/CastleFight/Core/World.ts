@@ -629,7 +629,7 @@ export class World {
         // броня
         ScriptUtils.SetValue(this.configs["unit_2_1_1"], "Shield", 300);
         // урон
-        ScriptUtils.SetValue(this.configs["unit_2_1_1"].MainArmament.BulletCombatParams, "Damage", 380);
+        ScriptUtils.SetValue(this.configs["unit_2_1_1"].MainArmament.BulletCombatParams, "Damage", 350);
         // убираем стоимость
         ScriptUtils.SetValue(this.configs["unit_2_1_1"].CostResources, "Gold",   0);
         ScriptUtils.SetValue(this.configs["unit_2_1_1"].CostResources, "Metal",  0);
@@ -911,7 +911,7 @@ export class World {
         // имя
         ScriptUtils.SetValue(this.configs["tower_1"], "Name", "Башня");
         // описание
-        ScriptUtils.SetValue(this.configs["tower_1"], "Description", "Просто бьет врагов.");
+        ScriptUtils.SetValue(this.configs["tower_1"], "Description", "Защитное строение. Не допускайте катапульты. Можно усилить духами (кроме духа клонирования).");
         // здоровье
         ScriptUtils.SetValue(this.configs["tower_1"], "MaxHealth", 60000);
         // броня
@@ -1074,7 +1074,7 @@ export class World {
         // имя
         ScriptUtils.SetValue(this.configs["church"], "Name", "Церковь");
         // описание
-        ScriptUtils.SetValue(this.configs["church"], "Description", "Святое место, позволяющее заполучить силу святого духа.");
+        ScriptUtils.SetValue(this.configs["church"], "Description", "Святое место, позволяющее заполучить силу святых духов. Для вызова духа требуется хотя бы 1 свободная клетка вокруг церкви.");
         // стоимость
         ScriptUtils.SetValue(this.configs["church"].CostResources, "Gold",   500);
         ScriptUtils.SetValue(this.configs["church"].CostResources, "Metal",  0);
@@ -1551,7 +1551,7 @@ export class World {
             }
         }
     }
-    
+
     public IsSettlementInGame (settlementId: number) {
         return this.settlements[settlementId] &&
             this.settlements_castleUnit[settlementId] &&
