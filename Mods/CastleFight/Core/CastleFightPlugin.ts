@@ -281,12 +281,12 @@ export class CastleFightPlugin extends HordePluginBase {
                             new Point(161, 164),
                             new Point(154, 164)];
                         settlements_attack_paths            = [
-                            [[new Point(162, 167)], [new Point(162, 162)]],
-                            [[new Point(156, 163)], [new Point(163, 156)]],
-                            [[new Point(156, 157)], [new Point(163, 162)]],
-                            [[new Point(157, 157)], [new Point(156, 162)]],
-                            [[new Point(156, 162)], [new Point(162, 156)]],
-                            [[new Point(156, 157)], [new Point(163, 162)]]
+                            [[new Point(159, 159), new Point(151, 160), new Point(154, 152), new Point(165, 152), new Point(168, 160), new Point(165, 167), new Point(154, 167)]],
+                            [[new Point(159, 159), new Point(151, 160), new Point(154, 152), new Point(165, 152), new Point(168, 160), new Point(165, 167), new Point(154, 167)]],
+                            [[new Point(159, 159), new Point(151, 160), new Point(154, 152), new Point(165, 152), new Point(168, 160), new Point(165, 167), new Point(154, 167)]],
+                            [[new Point(159, 159), new Point(151, 160), new Point(154, 152), new Point(165, 152), new Point(168, 160), new Point(165, 167), new Point(154, 167)]],
+                            [[new Point(159, 159), new Point(151, 160), new Point(154, 152), new Point(165, 152), new Point(168, 160), new Point(165, 167), new Point(154, 167)]],
+                            [[new Point(159, 159), new Point(151, 160), new Point(154, 152), new Point(165, 152), new Point(168, 160), new Point(165, 167), new Point(154, 167)]]
                         ];
 
                         world.castle_health_coeff = 2.0/3.0*5.0;

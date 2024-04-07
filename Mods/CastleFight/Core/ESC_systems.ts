@@ -844,19 +844,35 @@ export function BuffSystem(world: World, gameTickNum: number) {
             }
 
             // заменяем текущего юнита на баффнутого
-            let replaceParams = new ReplaceUnitParameters();
-            replaceParams.OldUnit = target_unitComponent.unit;
-            replaceParams.NewUnitConfig = cloneCFG;
-            replaceParams.Cell = null;                   // Можно задать клетку, в которой должен появиться новый юнит. Если null, то центр создаваемого юнита совпадет с предыдущим
-            replaceParams.PreserveHealthLevel = false;   // Нужно ли передать уровень здоровья? (в процентном соотношении)
-            replaceParams.PreserveOrders = true;        // Нужно ли передать приказы?
-            replaceParams.Silent = true;                 // Отключение вывода в лог возможных ошибок (при регистрации и создании модели)
-            target_unitComponent.unit = target_unitComponent.unit.Owner.Units.ReplaceUnit(replaceParams);
-            // записываем инфу о баффе (конфиг записывает только для 1-ого, чтобы корректно удалился он)
-            target_buffableComponent.buffCfg = cloneCFG;
-            target_buffableComponent.buffType = buffComponent.buffType;
-            // создаем эффект появления
-            spawnDecoration(world.realScena, HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), target_unitComponent.unit.Position);
+            if (target_unitComponent.unit.IsAlive) {
+                let replaceParams = new ReplaceUnitParameters();
+                replaceParams.OldUnit = target_unitComponent.unit;
+                replaceParams.NewUnitConfig = cloneCFG;
+                replaceParams.Cell = null;                   // Можно задать клетку, в которой должен появиться новый юнит. Если null, то центр создаваемого юнита совпадет с предыдущим
+                replaceParams.PreserveHealthLevel = false;   // Нужно ли передать уровень здоровья? (в процентном соотношении)
+                replaceParams.PreserveOrders = true;        // Нужно ли передать приказы?
+                replaceParams.Silent = true;                 // Отключение вывода в лог возможных ошибок (при регистрации и создании модели)
+                target_unitComponent.unit = target_unitComponent.unit.Owner.Units.ReplaceUnit(replaceParams);
+                // записываем инфу о баффе (конфиг записывает только для 1-ого, чтобы корректно удалился он)
+                target_buffableComponent.buffType = buffComponent.buffType;
+                target_buffableComponent.buffCfg  = cloneCFG;
+                // создаем эффект появления
+                spawnDecoration(world.realScena, HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), target_unitComponent.unit.Position);
+            } else {
+                var generator    = generateCellInSpiral(target_unitComponent.unit.Cell.X, target_unitComponent.unit.Cell.Y);
+                var spawnedUnits = spawnUnits(world.settlements[target_settlementId], cloneCFG, 1, UnitDirection.Down, generator);
+                for (var spawnedUnit of spawnedUnits) {
+                    var newEntity              = world.RegisterUnitEntity(spawnedUnit, target_entity);
+                    // устанавливаем информацию о баффе и о бафнутом конфиге
+                    var buffableComponent      = newEntity.components.get(COMPONENT_TYPE.BUFFABLE_COMPONENT) as BuffableComponent;
+                    buffableComponent.buffType = buffComponent.buffType;
+                    buffableComponent.buffCfg  = cloneCFG;
+                    // запрещаем команды
+                    UnitDisallowCommands(spawnedUnit);
+                    // создаем эффект появления
+                    spawnDecoration(world.realScena, HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), spawnedUnit.Position);
+                }
+            }
         }
     }
 }
