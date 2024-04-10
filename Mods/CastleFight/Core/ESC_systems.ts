@@ -856,6 +856,8 @@ export function BuffSystem(world: World, gameTickNum: number) {
                 // записываем инфу о баффе (конфиг записывает только для 1-ого, чтобы корректно удалился он)
                 target_buffableComponent.buffType = buffComponent.buffType;
                 target_buffableComponent.buffCfg  = cloneCFG;
+                // запрещаем команды
+                UnitDisallowCommands(target_unitComponent.unit);
                 // создаем эффект появления
                 spawnDecoration(world.realScena, HordeContentApi.GetVisualEffectConfig("#VisualEffectConfig_LittleDust"), target_unitComponent.unit.Position);
             } else {

@@ -292,7 +292,7 @@ export class World {
         // броня
         ScriptUtils.SetValue(this.configs["unit_1_1_1_1"], "Shield", 0);
         // урон
-        ScriptUtils.SetValue(this.configs["unit_1_1_1_1"].MainArmament.BulletCombatParams, "Damage", 1000);
+        ScriptUtils.SetValue(this.configs["unit_1_1_1_1"].MainArmament.BulletCombatParams, "Damage", 500);
         // убираем стоимость
         ScriptUtils.SetValue(this.configs["unit_1_1_1_1"].CostResources, "Gold",   100);
         ScriptUtils.SetValue(this.configs["unit_1_1_1_1"].CostResources, "Metal",  0);
@@ -484,7 +484,7 @@ export class World {
         // броня
         ScriptUtils.SetValue(this.configs["unit_1_2_1"], "Shield", 300);
         // урон
-        ScriptUtils.SetValue(this.configs["unit_1_2_1"].MainArmament.BulletCombatParams, "Damage", 700);
+        ScriptUtils.SetValue(this.configs["unit_1_2_1"].MainArmament.BulletCombatParams, "Damage", 500);
         // убираем стоимость
         ScriptUtils.SetValue(this.configs["unit_1_2_1"].CostResources, "Gold",   0);
         ScriptUtils.SetValue(this.configs["unit_1_2_1"].CostResources, "Metal",  0);
