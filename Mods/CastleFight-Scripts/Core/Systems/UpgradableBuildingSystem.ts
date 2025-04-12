@@ -6,7 +6,7 @@ import { UnitComponent } from "../Components/UnitComponent";
 import { UpgradableBuildingComponent } from "../Components/UpgradableBuildingComponent";
 import { Entity } from "../Entity";
 
-const ReplaceUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.ReplaceUnitParameters;
+const ReplaceUnitParameters = HordeClassLibrary.World.Objects.Units.ReplaceUnitParameters;
 
 export function UpgradableBuildingSystem(world: World, gameTickNum: number) {
     for (var settlementId = 0; settlementId < world.scena.settlementsCount; settlementId++) {

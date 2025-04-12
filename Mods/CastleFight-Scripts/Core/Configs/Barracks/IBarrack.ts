@@ -1,5 +1,5 @@
 import { IConfig, OpCfgUidToCfg } from "../IConfig";
-import { IAttackingUnit } from "../IAttacingUnit";
+import { IAttackingUnit } from "../IAttackingUnit";
 import { COMPONENT_TYPE } from "../../Components/IComponent";
 import { SpawnBuildingComponent } from "../../Components/SpawnBuildingComponent";
 import { UnitComponent } from "../../Components/UnitComponent";

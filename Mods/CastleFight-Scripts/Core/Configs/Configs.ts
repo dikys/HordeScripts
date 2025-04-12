@@ -15,7 +15,7 @@ import { Config_Barrack_2_2_1, Config_Unit_2_2_1 } from "./Barracks/Config_Barra
 import { Config_Barrack_2_3, Config_Unit_2_3 } from "./Barracks/Config_Barrack_2_3";
 import { Config_Barrack_2_3_1, Config_Unit_2_3_1 } from "./Barracks/Config_Barrack_2_3_1";
 import { IBarrack } from "./Barracks/IBarrack";
-import { IAttackingUnit } from "./IAttacingUnit";
+import { IAttackingUnit } from "./IAttackingUnit";
 import { Config_Church } from "./Church/Config_Church";
 import { Config_Holy_spirit_accuracy } from "./Church/Config_Holy_spirit_accuracy";
 import { Config_Holy_spirit_attack } from "./Church/Config_Holy_spirit_attack";

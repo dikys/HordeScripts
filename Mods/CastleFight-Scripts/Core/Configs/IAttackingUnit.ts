@@ -26,7 +26,7 @@ export class IAttackingUnit extends IConfig {
         IConfig.InitConfig.call(this);
 
         // устанавливаем скорость бега
-        var speedMap = new Map<typeof TileType, number>();
+        var speedMap = new Map<TileType, number>();
         if (!OpCfgUidToCfg[this.CfgUid].Flags.HasFlag(UnitFlags.Building)) {
             if (OpCfgUidToCfg[this.CfgUid].Specification.HasFlag(UnitSpecification.Rider)) {
                 speedMap.set(TileType.Grass,  Math.round(this.speedCoeff * 20));

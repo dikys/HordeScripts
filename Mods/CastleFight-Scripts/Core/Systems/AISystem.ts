@@ -1071,7 +1071,7 @@ export function AI_Init(world: World) {
         }
         var characterUid  = realPlayer.MasterMind.Character.Uid;
         var settlement    = realPlayer.GetRealSettlement();
-        var settlementId  = settlement.Uid;
+        var settlementId  = Number.parseInt(settlement.Uid);
         if (settlementId < world.scena.settlementsCount) {
             if (!settlements_bot[settlementId]) {
                 if (characterUid == "#CastleFight_MindCharacter_Random_WithChurch") {

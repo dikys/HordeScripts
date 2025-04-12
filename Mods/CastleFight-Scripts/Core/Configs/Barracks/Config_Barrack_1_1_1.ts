@@ -1,7 +1,7 @@
 import { createHordeColor } from "library/common/primitives";
 import { OpCfgUidToCfg } from "../IConfig";
 import { IBarrack } from "./IBarrack";
-import { IAttackingUnit } from "../IAttacingUnit";
+import { IAttackingUnit } from "../IAttackingUnit";
 import { Config_Barrack_1_1_1_1 } from "./Config_Barrack_1_1_1_1";
 import { Config_Barrack_1_1_1_2 } from "./Config_Barrack_1_1_1_2";
 

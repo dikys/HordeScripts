@@ -10,6 +10,7 @@ export function registerExamples() {
     // Например:
     //addExample(new Example_SpawnBulletsRain());
     //addExample(new Example_CustomUnit());
+    //addExample(new Example_MasterMindRequest());
 
     // Так же можно запустить сразу все примеры:
     //allExamples();
@@ -23,13 +24,13 @@ export function allExamples() {
     // - Примеры из файла 'other-examples.ts'
     addExample(new Example_GameWorks());
     addExample(new Example_Introspection());
-    addExample(new Example_ImportDotNetTypes());
 
     // - Примеры работы c данными игрока
     addExample(new Example_PlayerWorks());
+    addExample(new Example_PlayerSelectedSquad());
 
     // - Примеры работы с игровой логикой
-    addExample(new Example_IterateBullets());  // В этом примере выполняется перечисление новых снарядов на сцене
+    addExample(new Example_IterateBullets());  // В этом примере выполняется перечисление добавленных и удаленных снарядов на сцене
     addExample(new Example_SpawnOneBullet());
     addExample(new Example_SpawnBulletsRain());
     addExample(new Example_SpawnUnit());
@@ -38,6 +39,7 @@ export function allExamples() {
     addExample(new Example_UnitOrders());
     addExample(new Example_UnitCheckPath());
     addExample(new Example_UnitEnumerateEvents());  // В этом примере выполняется перечисление событий произошедших с тестовым юнитом
+    addExample(new Example_UnitHandleEvents());  // В этом примере выполняется обработка событий юнита
     addExample(new Example_ScenaWorks());
     addExample(new Example_SettlementWorks());
     addExample(new Example_SettlementResources());
@@ -46,6 +48,8 @@ export function allExamples() {
     addExample(new Example_SettlementPeopleIncome());
     addExample(new Example_SettlementProductionFactor());
     addExample(new Example_SettlementDiplomacy());
+    addExample(new Example_SettlementResourcesBonus());
+    addExample(new Example_PathFind());
 
     // - Примеры перечисления юнитов в области
     addExample(new Example_GetUnitsInArea_Bruteforce());
@@ -67,17 +71,22 @@ export function allExamples() {
     addExample(new Example_HookSentChatMessages());
     addExample(new Example_HookReceivedChatMessages());
 
+    // - Примеры работы с декорациями
+    addExample(new Example_StringDecoration());
+    addExample(new Example_GeometryDecoration());
+
     // - Примеры кастомных объектов
     addExample(new Example_CustomBullet());
     addExample(new Example_CustomUnit());
     addExample(new Example_CustomUnitCommand());
+    addExample(new Example_CustomUnitCanBePlaced());
 }
 
 
 /**
  * Регистрирует пример для запуска.
  */
-function addExample(example: HordeExampleBase){
+function addExample(example: HordeExampleBase) {
     activePlugins.register(example);
 }
 
@@ -91,11 +100,11 @@ import { Example_InputHiLevel } from "./examples/mastermind-input-hi-level";
 import { Example_InputLowLevel } from "./examples/mastermind-input-low-level";
 import { Example_MasterMindRequest } from "./examples/mastermind-request";
 import { Example_HookReceivedChatMessages, Example_HookSentChatMessages, Example_SendMessageToAll } from "./examples/message-examples";
-import { Example_GameWorks, Example_ImportDotNetTypes, Example_Introspection } from "./examples/other-examples";
+import { Example_GameWorks, Example_Introspection } from "./examples/other-examples";
 import { Example_PlayerWorks } from "./examples/player-examples";
 import { Example_ScenaWorks } from "./examples/scena-examples";
 import { Example_SettlementWorks, Example_SettlementResources, Example_SettlementUnitsInfo } from "./examples/settlement-examples";
-import { Example_UnitEnumerateEvents, Example_UnitOrders, Example_UnitWorks } from "./examples/unit-examples";
+import { Example_UnitOrders, Example_UnitWorks } from "./examples/unit-examples";
 import { Example_GetUnitsInArea_Bruteforce, Example_GetUnitsInArea_KdTree, Example_GetUnitsInArea_Squad } from "./examples/unit-get-in-area";
 import { Example_SpawnUnit } from "./examples/unit-spawn-example";
 import { Example_CustomBullet } from "./examples/custom-bullet-example";
@@ -107,4 +116,11 @@ import { Example_SettlementDiplomacy } from "examples/settlement-diplomacy";
 import { Example_SettlementProductionFactor } from "examples/settlement-production-factor";
 import { Example_ReplaceUnit } from "examples/unit-replace";
 import { Example_UnitCheckPath } from "examples/unit-path-example";
+import { Example_PlayerSelectedSquad } from "examples/player-selected-squad";
+import { Example_CustomUnitCanBePlaced } from "examples/custom-unit-can-be-placed";
+import { Example_PathFind } from "examples/path-find-example";
+import { Example_SettlementResourcesBonus } from "examples/settlement-resources-bonus";
+import { Example_UnitEnumerateEvents, Example_UnitHandleEvents } from "examples/unit-event-examples";
+import { Example_StringDecoration } from "examples/decoration-string";
+import { Example_GeometryDecoration } from "examples/decoration-geometry";
 

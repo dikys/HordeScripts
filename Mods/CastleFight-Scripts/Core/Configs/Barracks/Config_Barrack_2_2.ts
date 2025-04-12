@@ -1,7 +1,7 @@
 import { OpCfgUidToCfg } from "../IConfig";
 import { Config_Barrack_2_2_1 } from "./Config_Barrack_2_2_1";
 import { IBarrack } from "./IBarrack";
-import { IAttackingUnit } from "../IAttacingUnit";
+import { IAttackingUnit } from "../IAttackingUnit";
 
 export class Config_Unit_2_2 extends IAttackingUnit {
     public static CfgUid      : string = "#CastleFight_Unit_2_2";

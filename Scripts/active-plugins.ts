@@ -10,6 +10,8 @@ import { AttentionOnSurfacePlugin } from "plugins/attention-on-surface";
 function getDefaultPlugins() {
     return [
         new AttentionOnSurfacePlugin(),
+
+        // new PrintSelectedSquadOrdersPlugin(),
     ];
 }
 
@@ -28,7 +30,7 @@ export class HordePluginsCollection {
         this.plugins.push(plugin);
         log.info(`Plugin registered: "${plugin.displayName}"`);
     }
-    
+
     public registerScenaScript(scenaPlugin: ScenaScriptBase) {
         let scenaName = ActiveScena.GetRealScena().ScenaName;
         if (scenaPlugin.scenaName != scenaName) {
@@ -67,3 +69,6 @@ export class HordePluginsCollection {
  * Объект с активными плагинами.
  */
 export const activePlugins: HordePluginsCollection = new HordePluginsCollection();
+
+// Импорты для отключенных плагинов
+import { PrintSelectedSquadOrdersPlugin } from "plugins/print-selected-squad-orders";

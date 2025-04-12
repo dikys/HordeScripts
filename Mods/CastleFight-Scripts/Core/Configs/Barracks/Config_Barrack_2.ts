@@ -1,4 +1,4 @@
-import { IAttackingUnit } from "../IAttacingUnit";
+import { IAttackingUnit } from "../IAttackingUnit";
 import { OpCfgUidToCfg } from "../IConfig";
 import { Config_Barrack_2_1 } from "./Config_Barrack_2_1";
 import { Config_Barrack_2_2 } from "./Config_Barrack_2_2";

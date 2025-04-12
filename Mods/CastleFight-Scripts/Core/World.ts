@@ -19,8 +19,7 @@ import { UnitComponent } from "./Components/UnitComponent";
 import { UnitProducedEvent } from "./Components/UnitProducedEvent";
 import { Entity } from "./Entity";
 
-const PeopleIncomeLevelT = HCL.HordeClassLibrary.World.Settlements.Modules.Misc.PeopleIncomeLevel;
-const DeleteUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.DeleteUnitParameters;
+const PeopleIncomeLevelT = HordeClassLibrary.World.Settlements.Modules.Misc.PeopleIncomeLevel;
 
 export enum GameState {
     INIT = 0,
@@ -106,7 +105,7 @@ export class World {
         for (var playerId = 0; playerId < Players.length; playerId++) {
             var realPlayer    = Players[playerId].GetRealPlayer();
             var settlement    = realPlayer.GetRealSettlement();
-            var settlementId  = settlement.Uid;
+            var settlementId  = Number.parseInt(settlement.Uid);
 
             if (isReplayMode() && !realPlayer.IsReplay) {
                 continue;

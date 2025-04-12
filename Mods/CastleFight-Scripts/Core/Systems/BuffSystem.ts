@@ -13,7 +13,7 @@ import { COMPONENT_TYPE } from "../Components/IComponent";
 import { UnitComponent } from "../Components/UnitComponent";
 import { Entity } from "../Entity";
 
-const ReplaceUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.ReplaceUnitParameters;
+const ReplaceUnitParameters = HordeClassLibrary.World.Objects.Units.ReplaceUnitParameters;
 
 export function BuffSystem(world: World, gameTickNum: number) {
     for (var settlementId = 0; settlementId < world.scena.settlementsCount; settlementId++) {

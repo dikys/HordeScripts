@@ -1,6 +1,6 @@
 import { COMPONENT_TYPE } from "../../Components/IComponent";
 import { SpawnEvent } from "../../Components/SpawnEvent";
-import { IAttackingUnit } from "../IAttacingUnit";
+import { IAttackingUnit } from "../IAttackingUnit";
 import { OpCfgUidToCfg } from "../IConfig";
 
 export class Config_Mercenary_Raider extends IAttackingUnit {

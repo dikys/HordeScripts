@@ -1,9 +1,9 @@
 import { generateCellInSpiral } from "library/common/position-tools";
 import { createBox, createPoint } from "library/common/primitives";
-import { PointCommandArgs, TileType, UnitCommand } from "library/game-logic/horde-types";
+import { PointCommandArgs, TileType, UnitCommand, UnitConfig } from "library/game-logic/horde-types";
 import { getUnitProfessionParams, UnitProducerProfessionParams, UnitProfession } from "library/game-logic/unit-professions";
 
-const SpawnUnitParameters = HCL.HordeClassLibrary.World.Objects.Units.SpawnUnitParameters;
+const SpawnUnitParameters = HordeClassLibrary.World.Objects.Units.SpawnUnitParameters;
 
 /** метрика измерения расстояния */
 export enum MetricType {
@@ -42,7 +42,7 @@ export function CreateUnitConfig(baseConfigUid: string, newConfigUid: string) {
 export function CfgAddUnitProducer(Cfg: any) {
     // даем профессию найм войнов при отсутствии
     if (!getUnitProfessionParams(Cfg, UnitProfession.UnitProducer)) {
-        var donorCfg = HordeContentApi.CloneConfig(HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Barrack"));
+        var donorCfg = HordeContentApi.CloneConfig(HordeContentApi.GetUnitConfig("#UnitConfig_Slavyane_Barrack")) as UnitConfig;
         var prof_unitProducer = getUnitProfessionParams(donorCfg, UnitProfession.UnitProducer);
         Cfg.ProfessionParams.Item.set(UnitProfession.UnitProducer, prof_unitProducer);
         
@@ -64,7 +64,7 @@ export function CfgAddUnitProducer(Cfg: any) {
 }
 
 /** установить скорость */
-export function CfgSetSpeed(cfg: any, speeds: Map<typeof TileType, number>) {
+export function CfgSetSpeed(cfg: any, speeds: Map<TileType, number>) {
     var tileTypes = speeds.keys();
     for (var tileType = tileTypes.next(); !tileType.done; tileType = tileTypes.next()) {
         cfg.Speeds.Item.set(tileType.value, speeds.get(tileType.value));
@@ -194,7 +194,7 @@ export class Rectangle {
 
 export function GetUnitsInArea(rect: Rectangle): Array<any> {
     let box = createBox(rect.xs, rect.ys, 0, rect.xe, rect.ye, 2);
-    let unitsInBox = ScriptUtils.Invoke(ActiveScena.GetRealScena().UnitsMap.UnitsTree, "GetUnitsInBox", box);
+    let unitsInBox = ActiveScena.UnitsMap.UnitsTree.GetUnitsInBox(box);
     let count = ScriptUtils.GetValue(unitsInBox, "Count");
     let units = ScriptUtils.GetValue(unitsInBox, "Units");
 
